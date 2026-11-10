@@ -1,0 +1,6 @@
+[install]
+# Hoist dependencies to the root node_modules (npm-style).
+# Astro imports its built bundle from apps/web/dist, and Node must be able to
+# resolve transitive deps (e.g. `cookie`) from there. With the isolated linker
+# they are not reachable and Node falls back to parent directories.
+linker = "hoisted"
