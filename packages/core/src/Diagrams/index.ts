@@ -29,6 +29,8 @@ export type { Op, TableUpdatePatch } from "./domain/DiagramOperations";
 export { createManyToMany } from "./domain/DiagramManyToMany";
 export { mergeDiagram } from "./domain/DiagramMerge";
 export { diffDiagram } from "./domain/DiagramDiff";
+export { searchTables } from "./domain/DiagramSearch";
+export type { SearchMatch, SearchResult } from "./domain/DiagramSearch";
 export type { ChangeKind, DiagramChange } from "./domain/DiagramDiff";
 export type { MergeMode } from "./domain/DiagramMerge";
 export {
