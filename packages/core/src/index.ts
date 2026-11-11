@@ -1,2 +1,3 @@
 // Public API of @design-db/core.
-export {};
+export * from "./schema";
+export * from "./factories";
