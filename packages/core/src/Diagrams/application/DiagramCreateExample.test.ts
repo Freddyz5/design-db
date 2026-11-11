@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { getCardinality } from "../../Relations";
-import { parseDiagram } from "../domain/Diagram";
+import { findEnum, parseDiagram } from "../domain/Diagram";
 import { validate } from "../domain/DiagramValidation";
 import { createExampleDiagram } from "./DiagramCreateExample";
 
@@ -45,5 +45,32 @@ describe("createExampleDiagram", () => {
 
   test("returns new ids each time", () => {
     expect(createExampleDiagram().id).not.toBe(createExampleDiagram().id);
+  });
+});
+
+describe("createExampleDiagram groups and enums", () => {
+  test("has two groups and every table is in one", () => {
+    const doc = createExampleDiagram();
+    expect(doc.dialect).toBe("postgres");
+    expect(doc.groups.map((g) => g.name)).toEqual(["Accounts", "Content"]);
+    const groupOf = (name: string) =>
+      doc.groups.find(
+        (g) => g.id === doc.tables.find((t) => t.name === name)!.groupId,
+      )!.name;
+    expect(groupOf("users")).toBe("Accounts");
+    expect(["posts", "comments", "tags", "posts_tags"].map(groupOf)).toEqual([
+      "Content",
+      "Content",
+      "Content",
+      "Content",
+    ]);
+  });
+
+  test("posts.status uses the post_status enum", () => {
+    const doc = createExampleDiagram();
+    const status = doc.tables
+      .find((t) => t.name === "posts")!
+      .columns.find((c) => c.name === "status")!;
+    expect(findEnum(doc, status.type)?.values).toEqual(["draft", "published"]);
   });
 });

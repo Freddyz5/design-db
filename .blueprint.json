@@ -1,6 +1,14 @@
 {
   "preset": "ts-hexagonal",
   "variants": [{ "name": "core", "path": "packages/core" }],
-  "modules": ["Diagrams", "Tables", "Columns", "Relations"],
+  "modules": [
+    "Diagrams",
+    "Tables",
+    "Columns",
+    "Relations",
+    "Groups",
+    "Enums",
+    "Formats"
+  ],
   "layout": "monorepo"
 }
