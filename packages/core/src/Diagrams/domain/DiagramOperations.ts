@@ -1,4 +1,5 @@
 import type { Column, ColumnPatch } from "../../Columns";
+import { isEnumType, patchEnum, type Enum, type EnumPatch } from "../../Enums";
 import { patchGroup, type Group, type GroupPatch } from "../../Groups";
 import {
   patchRelation,
@@ -20,6 +21,7 @@ import {
   type TablePatch,
 } from "../../Tables";
 import {
+  getEnum,
   getGroup,
   getRelation,
   getTable,
@@ -45,7 +47,10 @@ export type Op =
   | { type: "relation.remove"; relationId: Id }
   | { type: "group.add"; group: Group }
   | { type: "group.update"; groupId: Id; patch: GroupPatch }
-  | { type: "group.remove"; groupId: Id };
+  | { type: "group.remove"; groupId: Id }
+  | { type: "enum.add"; enum: Enum }
+  | { type: "enum.update"; enumId: Id; patch: EnumPatch }
+  | { type: "enum.remove"; enumId: Id };
 
 /**
  * Applies one operation and returns a new diagram.
@@ -103,6 +108,16 @@ export function apply(doc: Diagram, op: Op): Diagram {
       };
     case "group.remove":
       return removeGroup(doc, op.groupId);
+    case "enum.add":
+      if (doc.enums.some((e) => e.id === op.enum.id)) {
+        throw new OperationError(`Enum ${op.enum.id} already exists`);
+      }
+      return { ...doc, enums: [...doc.enums, op.enum] };
+    case "enum.update":
+      return updateEnum(doc, op.enumId, op.patch);
+    case "enum.remove":
+      getEnum(doc, op.enumId);
+      return { ...doc, enums: doc.enums.filter((e) => e.id !== op.enumId) };
     default:
       return assertNever(op);
   }
@@ -212,6 +227,32 @@ function removeGroup(doc: Diagram, groupId: Id): Diagram {
     groups: doc.groups.filter((g) => g.id !== groupId),
     tables: doc.tables.map((t) =>
       t.groupId === groupId ? patchTable(t, { groupId: undefined }) : t,
+    ),
+  };
+}
+
+// --- Enums ----------------------------------------------------------------
+
+/** Renaming an enum also renames the type of the columns that use it. */
+function updateEnum(doc: Diagram, enumId: Id, patch: EnumPatch): Diagram {
+  const current = getEnum(doc, enumId);
+  const next = {
+    ...doc,
+    enums: doc.enums.map((e) => (e.id === enumId ? patchEnum(e, patch) : e)),
+  };
+  if (patch.name === undefined || patch.name === current.name) return next;
+  const name = patch.name;
+  return {
+    ...next,
+    tables: next.tables.map((t) =>
+      t.columns.some((c) => isEnumType(current, c.type))
+        ? {
+            ...t,
+            columns: t.columns.map((c) =>
+              isEnumType(current, c.type) ? { ...c, type: name } : c,
+            ),
+          }
+        : t,
     ),
   };
 }

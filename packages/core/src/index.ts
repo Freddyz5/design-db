@@ -4,4 +4,5 @@ export * from "./Columns";
 export * from "./Tables";
 export * from "./Relations";
 export * from "./Groups";
+export * from "./Enums";
 export * from "./Diagrams";

@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { createColumn } from "../../Columns";
+import { createEnum } from "../../Enums";
 import { createGroup } from "../../Groups";
 import { createRelation } from "../../Relations";
 import { createTable } from "../../Tables";
@@ -222,6 +223,58 @@ describe("group checks", () => {
         severity: "error",
         tableId: "users",
         groupId: "gone",
+      }),
+    ]);
+  });
+});
+
+describe("enum checks", () => {
+  const withEnums = (
+    ...items: Parameters<typeof createEnum>[0][]
+  ): Diagram => ({
+    ...blogDiagram(),
+    enums: items.map((item, i) => createEnum({ id: `e${i}`, ...item })),
+  });
+
+  test("a correct enum has no issues", () => {
+    expect(validate(withEnums({ name: "status", values: ["a", "b"] }))).toEqual(
+      [],
+    );
+  });
+
+  test("empty and duplicate enum names are errors", () => {
+    const issues = validate(
+      withEnums(
+        { name: "", values: ["a"] },
+        { name: "status", values: ["a"] },
+        { name: "STATUS", values: ["a"] },
+      ),
+    );
+    expect(codes(issues)).toEqual([
+      "empty-enum-name",
+      "duplicate-enum-name",
+      "duplicate-enum-name",
+    ]);
+  });
+
+  test("an enum without values is a warning", () => {
+    expect(validate(withEnums({ name: "status" }))).toEqual([
+      expect.objectContaining({
+        code: "enum-without-values",
+        severity: "warning",
+        enumId: "e0",
+      }),
+    ]);
+  });
+
+  test("a repeated value is an error, reported once", () => {
+    const issues = validate(
+      withEnums({ name: "status", values: ["a", "b", "a", "a"] }),
+    );
+    expect(issues).toEqual([
+      expect.objectContaining({
+        code: "duplicate-enum-value",
+        severity: "error",
       }),
     ]);
   });

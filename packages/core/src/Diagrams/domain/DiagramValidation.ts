@@ -20,7 +20,11 @@ export type IssueCode =
   | "relation-type-mismatch"
   | "empty-group-name"
   | "duplicate-group-name"
-  | "table-missing-group";
+  | "table-missing-group"
+  | "empty-enum-name"
+  | "duplicate-enum-name"
+  | "enum-without-values"
+  | "duplicate-enum-value";
 
 /**
  * A problem found in the diagram. `code` is stable so the editor can show
@@ -34,6 +38,7 @@ export type Issue = {
   columnId?: Id;
   relationId?: Id;
   groupId?: Id;
+  enumId?: Id;
 };
 
 /**
@@ -46,7 +51,58 @@ export function validate(doc: Diagram): Issue[] {
     ...doc.tables.flatMap(checkTable),
     ...doc.relations.flatMap((r) => checkRelation(doc, r)),
     ...checkGroups(doc),
+    ...checkEnums(doc),
   ];
+}
+
+function checkEnums(doc: Diagram): Issue[] {
+  const issues: Issue[] = [];
+  for (const item of doc.enums) {
+    const label = isBlank(item.name)
+      ? "An unnamed enum"
+      : `Enum "${item.name}"`;
+    if (isBlank(item.name)) {
+      issues.push({
+        code: "empty-enum-name",
+        severity: "error",
+        message: "An enum has no name",
+        enumId: item.id,
+      });
+    }
+    if (item.values.length === 0) {
+      issues.push({
+        code: "enum-without-values",
+        severity: "warning",
+        message: `${label} has no values`,
+        enumId: item.id,
+      });
+    }
+    const seen = new Set<string>();
+    const repeated = new Set<string>();
+    for (const value of item.values) {
+      if (seen.has(value)) repeated.add(value);
+      seen.add(value);
+    }
+    for (const value of repeated) {
+      issues.push({
+        code: "duplicate-enum-value",
+        severity: "error",
+        message: `${label} has the value "${value}" more than once`,
+        enumId: item.id,
+      });
+    }
+  }
+  for (const same of duplicates(doc.enums)) {
+    for (const item of same) {
+      issues.push({
+        code: "duplicate-enum-name",
+        severity: "error",
+        message: `${same.length} enums are named "${item.name.trim()}"`,
+        enumId: item.id,
+      });
+    }
+  }
+  return issues;
 }
 
 function checkGroups(doc: Diagram): Issue[] {

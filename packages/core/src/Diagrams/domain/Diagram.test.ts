@@ -1,6 +1,14 @@
 import { describe, expect, test } from "bun:test";
 import { OperationError } from "../../shared";
-import { createDiagram, getRelation, getTable, parseDiagram } from "./Diagram";
+import { createEnum } from "../../Enums";
+import {
+  createDiagram,
+  findEnum,
+  getEnum,
+  getRelation,
+  getTable,
+  parseDiagram,
+} from "./Diagram";
 import { blogDiagram } from "./DiagramFixtures";
 
 describe("parseDiagram", () => {
@@ -54,6 +62,7 @@ describe("createDiagram", () => {
     expect(diagram.tables).toEqual([]);
     expect(diagram.relations).toEqual([]);
     expect(diagram.groups).toEqual([]);
+    expect(diagram.enums).toEqual([]);
     expect(diagram.layout).toEqual({
       tables: {},
       viewport: { x: 0, y: 0, zoom: 1 },
@@ -75,5 +84,22 @@ describe("getTable / getRelation", () => {
   test("fail if the item does not exist", () => {
     expect(() => getTable(blogDiagram(), "nope")).toThrow(OperationError);
     expect(() => getRelation(blogDiagram(), "nope")).toThrow(OperationError);
+  });
+});
+
+describe("getEnum / findEnum", () => {
+  const doc = {
+    ...blogDiagram(),
+    enums: [createEnum({ id: "s", name: "post_status", values: ["draft"] })],
+  };
+
+  test("getEnum finds by id and fails if missing", () => {
+    expect(getEnum(doc, "s").name).toBe("post_status");
+    expect(() => getEnum(doc, "nope")).toThrow(OperationError);
+  });
+
+  test("findEnum finds the enum of a column type, ignoring case", () => {
+    expect(findEnum(doc, "Post_Status")?.id).toBe("s");
+    expect(findEnum(doc, "text")).toBeUndefined();
   });
 });

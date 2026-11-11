@@ -2,12 +2,13 @@
 export {
   DIAGRAM_VERSION,
   DiagramSchema,
-  DialectSchema,
   LayoutSchema,
   PositionSchema,
   TableLayoutSchema,
   ViewportSchema,
   createDiagram,
+  findEnum,
+  getEnum,
   getGroup,
   getRelation,
   getTable,
@@ -15,7 +16,6 @@ export {
 } from "./domain/Diagram";
 export type {
   Diagram,
-  Dialect,
   Layout,
   ParseResult,
   Position,
