@@ -50,13 +50,20 @@ history = undo(history); // back to { x: 0, y: 0 }
 
 Saving and loading: the diagram is plain JSON. Use `parseDiagram(JSON.parse(text))` to check a loaded file.
 
-## Code: SQL and DBML
+## Code: SQL, DBML and Drizzle
 
 ```ts
-import { importSchema, mergeDiagram, toDbml, toSql } from "@design-db/core";
+import {
+  importSchema,
+  mergeDiagram,
+  toDbml,
+  toDrizzle,
+  toSql,
+} from "@design-db/core";
 
 toSql(diagram, "postgres"); // also "mysql", "sqlite", "generic"
 toDbml(diagram);
+toDrizzle(diagram, "postgres"); // pgTable, mysqlTable or sqliteTable ("generic" uses PostgreSQL)
 
 // Read SQL, DBML or the project JSON (format detected automatically).
 const result = importSchema(text);
@@ -86,7 +93,7 @@ src/
 ├── Diagrams/       the aggregate
 │   ├── domain/       Diagram, apply (Op), validate, merge, diff, search, layout data
 │   └── application/  undo/redo history, example diagram
-└── Formats/        the diagram as text: toSql, toDbml, importSchema
+└── Formats/        the diagram as text: toSql, toDbml, toDrizzle, importSchema
 ```
 
 Dependencies go one way: `shared` ← `Columns` ← `Tables` ← `Relations` ← `Diagrams` ← `Formats`; `Groups` and `Enums` depend only on `shared`. Tables, columns and relations only exist inside a diagram, so the editor changes them through `Diagrams` (`apply`), which also keeps relations and the layout consistent.
@@ -100,7 +107,7 @@ Dependencies go one way: `shared` ← `Columns` ← `Tables` ← `Relations` ←
 | Edit        | `apply`, `applyAll`, `Op`, `createManyToMany`, `mergeDiagram`, `OperationError`                                                                                |
 | Read        | `getTable`, `getColumn`, `getRelation`, `getGroup`, `getEnum`, `findEnum`, `getCardinality`, `validate`, `diffDiagram`, `searchTables`, `suggestedColumnTypes` |
 | Layout      | `toLayoutGraph`, `layoutPositions`, `estimateTableSize`, `unplacedTableIds`, `placementOrigin`                                                                 |
-| Code        | `toSql`, `toDbml`, `importSchema`, `detectFormat`                                                                                                              |
+| Code        | `toSql`, `toDbml`, `toDrizzle`, `importSchema`, `detectFormat`                                                                                                 |
 | Undo / redo | `createHistory`, `push`, `pushOp`, `undo`, `redo`, `canUndo`, `canRedo`, `checkpoint`                                                                          |
 
 Each entity module also exports its own pure helpers (`patchTable`, `addColumn`, `usesColumn`, `planManyToMany`…). They work on a single entity and do not keep the diagram consistent; the editor should use `apply`.
