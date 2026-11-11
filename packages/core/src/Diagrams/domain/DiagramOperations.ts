@@ -50,7 +50,8 @@ export type Op =
   | { type: "group.remove"; groupId: Id }
   | { type: "enum.add"; enum: Enum }
   | { type: "enum.update"; enumId: Id; patch: EnumPatch }
-  | { type: "enum.remove"; enumId: Id };
+  | { type: "enum.remove"; enumId: Id }
+  | { type: "layout.place"; positions: Record<Id, Position> };
 
 /**
  * Applies one operation and returns a new diagram.
@@ -118,6 +119,8 @@ export function apply(doc: Diagram, op: Op): Diagram {
     case "enum.remove":
       getEnum(doc, op.enumId);
       return { ...doc, enums: doc.enums.filter((e) => e.id !== op.enumId) };
+    case "layout.place":
+      return placeTables(doc, op.positions);
     default:
       return assertNever(op);
   }
@@ -165,6 +168,16 @@ function moveTable(doc: Diagram, tableId: Id, position: Position): Diagram {
     x: position.x,
     y: position.y,
   });
+}
+
+/** Moves several tables at once, e.g. after an automatic layout. */
+function placeTables(doc: Diagram, positions: Record<Id, Position>): Diagram {
+  const tables = { ...doc.layout.tables };
+  for (const [tableId, position] of Object.entries(positions)) {
+    getTable(doc, tableId);
+    tables[tableId] = { ...tables[tableId], x: position.x, y: position.y };
+  }
+  return { ...doc, layout: { ...doc.layout, tables } };
 }
 
 /** Also removes the relations that use the table and its layout entry. */
