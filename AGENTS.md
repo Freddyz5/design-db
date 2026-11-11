@@ -27,4 +27,4 @@ Intentional differences from the blueprint:
 - No `DiagramRepository` port or `infrastructure/` folder until persistence is added (SQLite, phase 3).
 - A single `Id` in `shared` instead of one per entity, since all ids are the same kind.
 - `Tables`, `Columns`, `Relations`, `Groups` and `Enums` have no `application/` folder: they have no actions of their own.
-- `Formats` (SQL and DBML export and import) is not a business concept; it is a module by decision of the project, so formats stay out of `Diagrams`.
+- `Formats` (SQL, DBML and Drizzle export and import) is not a business concept; it is a module by decision of the project, so formats stay out of `Diagrams`.

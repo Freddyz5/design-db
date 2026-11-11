@@ -65,7 +65,7 @@ toSql(diagram, "postgres"); // also "mysql", "sqlite", "generic"
 toDbml(diagram);
 toDrizzle(diagram, "postgres"); // pgTable, mysqlTable or sqliteTable ("generic" uses PostgreSQL)
 
-// Read SQL, DBML or the project JSON (format detected automatically).
+// Read SQL, DBML, Drizzle or the project JSON (format detected automatically).
 const result = importSchema(text);
 if (result.ok) {
   // "replace" keeps ids, positions and groups of the tables that already existed.
@@ -74,6 +74,8 @@ if (result.ok) {
   result.errors; // [{ message, line }]
 }
 ```
+
+The Drizzle reader does not run the code: it reads the declarations (tables, columns, `references()`, keys, enums, `customType` with a fixed type, spreads of objects in the same file) and skips with a warning what only running the code would tell, such as own helper functions. `relations()` and indexes are ignored.
 
 Imported tables come without a position. `toLayoutGraph` builds the graph for elkjs (run by the editor in a Web Worker), `layoutPositions` reads its result and the `layout.place` operation applies it in one step.
 

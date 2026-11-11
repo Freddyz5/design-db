@@ -7,6 +7,7 @@ import {
   type Diagram,
 } from "../../Diagrams";
 import { toDbml } from "./DbmlExport";
+import { toDrizzle } from "./DrizzleExport";
 import { sampleDiagram } from "./FormatFixtures";
 import { detectFormat, importSchema } from "./SchemaImport";
 import { toSql } from "./SqlExport";
@@ -42,11 +43,15 @@ function shape(doc: Diagram) {
 }
 
 describe("detectFormat", () => {
-  test("tells SQL, DBML and JSON apart", () => {
+  test("tells SQL, DBML, Drizzle and JSON apart", () => {
     expect(detectFormat("CREATE TABLE t (id int);")).toBe("sql");
     expect(detectFormat("Table t {\n id int\n}")).toBe("dbml");
     expect(detectFormat("Ref: a.b > c.d")).toBe("dbml");
     expect(detectFormat('  {"version": 1}')).toBe("json");
+    expect(detectFormat('export const t = pgTable("t", {});')).toBe("drizzle");
+    expect(detectFormat('import { int } from "drizzle-orm/mysql-core";')).toBe(
+      "drizzle",
+    );
   });
 });
 
@@ -137,6 +142,27 @@ describe("editing the code of a diagram", () => {
     expect(next.tables.find((t) => t.name === "users")!.groupId).toBe(
       "accounts",
     );
+    expect(next.relations[0]!.id).toBe("posts_user");
+  });
+
+  test("the same works with the edited Drizzle code", () => {
+    const doc = applyAll(sampleDiagram(), [
+      { type: "table.move", tableId: "posts", position: { x: 400, y: 120 } },
+    ]);
+    const edited = toDrizzle(doc).replace("title: text()", "headline: text()");
+    const result = importSchema(edited);
+    if (!result.ok) throw new Error(JSON.stringify(result.errors));
+    expect(result.format).toBe("drizzle");
+
+    const next = mergeDiagram(doc, result.diagram, "replace");
+    const posts = next.tables.find((t) => t.name === "posts")!;
+    expect(posts.id).toBe("posts");
+    expect(posts.columns.map((c) => c.name)).toContain("headline");
+    expect(next.layout.tables.posts).toEqual({ x: 400, y: 120 });
+    expect(next.tables.find((t) => t.name === "users")!.groupId).toBe(
+      "accounts",
+    );
+    expect(next.enums.map((e) => e.id)).toEqual(doc.enums.map((e) => e.id));
     expect(next.relations[0]!.id).toBe("posts_user");
   });
 });

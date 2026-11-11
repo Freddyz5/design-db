@@ -1,9 +1,10 @@
 import { createDiagram, parseDiagram, type Diagram } from "../../Diagrams";
 import { readDbml } from "./DbmlImport";
+import { readDrizzle } from "./DrizzleImport";
 import { buildDiagram, type ImportIssue } from "./SchemaDraft";
 import { readSql } from "./SqlImport";
 
-export type SchemaFormat = "sql" | "dbml" | "json";
+export type SchemaFormat = "sql" | "dbml" | "drizzle" | "json";
 
 export type ImportResult =
   | {
@@ -19,6 +20,12 @@ export function detectFormat(text: string): SchemaFormat {
   const trimmed = text.trimStart();
   if (trimmed.startsWith("{")) return "json";
   if (
+    /\b(pg|mysql|sqlite)Table\s*[(<]/.test(text) ||
+    /\bfrom\s*["']drizzle-orm/.test(text)
+  ) {
+    return "drizzle";
+  }
+  if (
     /^\s*(Table|TableGroup|Enum|Project)\s+[^\n]*\{/im.test(text) ||
     /^\s*Ref\b[^\n]*[:{]/im.test(text)
   ) {
@@ -28,10 +35,10 @@ export function detectFormat(text: string): SchemaFormat {
 }
 
 /**
- * Reads a schema in SQL (PostgreSQL or MySQL), DBML or the project's JSON
- * and turns it into a diagram. SQL and DBML tables come without a
- * position, so the editor can lay them out. An empty text gives an empty
- * diagram.
+ * Reads a schema in SQL (PostgreSQL or MySQL), DBML, Drizzle or the
+ * project's JSON and turns it into a diagram. SQL, DBML and Drizzle tables
+ * come without a position, so the editor can lay them out. An empty text
+ * gives an empty diagram.
  */
 export function importSchema(
   text: string,
@@ -42,7 +49,12 @@ export function importSchema(
   }
   if (format === "json") return importJson(text);
 
-  const read = format === "sql" ? readSql(text) : readDbml(text);
+  const read =
+    format === "sql"
+      ? readSql(text)
+      : format === "dbml"
+        ? readDbml(text)
+        : readDrizzle(text);
   if (!read.draft || read.errors.length) {
     return { ok: false, format, errors: read.errors };
   }

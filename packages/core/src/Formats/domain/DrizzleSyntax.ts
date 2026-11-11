@@ -43,21 +43,21 @@ export type BuilderCall = {
 
 type Spec = {
   builder: string;
-  /** Options every column of this type gets. */
+  /** Options that tell this type apart, e.g. `{ withTimezone: true }`. */
   options?: [string, OptionValue][];
+  /** Options the export always writes but the import ignores. */
+  defaults?: [string, OptionValue][];
   /** Names of the numbers in parentheses, e.g. `numeric(10,2)`. */
   args?: string[];
   /** Options used when the type has no numbers in parentheses. */
   fallback?: [string, OptionValue][];
 };
 
-/** Builds a table from `[spec, ...type names]` entries. */
-function specs(...entries: [Spec, ...string[]][]): Record<string, Spec> {
-  const table: Record<string, Spec> = {};
-  for (const [spec, ...names] of entries) {
-    for (const name of names) table[name] = spec;
-  }
-  return table;
+/** `[spec, canonical type name, ...aliases]`. */
+type Entry = [Spec, string, ...string[]];
+
+function specs(...entries: Entry[]): Entry[] {
+  return entries;
 }
 
 const LENGTH = ["length"];
@@ -70,14 +70,14 @@ const NUMBER_MODE: [string, OptionValue][] = [["mode", "number"]];
  * The SQL types each dialect has a builder for. The first name of each
  * entry is the one the import gives back; the others are aliases.
  */
-const SPECS: Record<DrizzleDialect, Record<string, Spec>> = {
+const ENTRIES: Record<DrizzleDialect, Entry[]> = {
   postgres: specs(
     [{ builder: "integer" }, "integer", "int", "int4"],
     [{ builder: "smallint" }, "smallint", "int2"],
-    [{ builder: "bigint", options: NUMBER_MODE }, "bigint", "int8"],
+    [{ builder: "bigint", defaults: NUMBER_MODE }, "bigint", "int8"],
     [{ builder: "serial" }, "serial", "serial4"],
     [{ builder: "smallserial" }, "smallserial", "serial2"],
-    [{ builder: "bigserial", options: NUMBER_MODE }, "bigserial", "serial8"],
+    [{ builder: "bigserial", defaults: NUMBER_MODE }, "bigserial", "serial8"],
     [{ builder: "boolean" }, "boolean", "bool"],
     [{ builder: "text" }, "text"],
     [{ builder: "varchar", args: LENGTH }, "varchar", "character varying"],
@@ -119,7 +119,7 @@ const SPECS: Record<DrizzleDialect, Record<string, Spec>> = {
     [{ builder: "tinyint" }, "tinyint"],
     [{ builder: "smallint" }, "smallint"],
     [{ builder: "mediumint" }, "mediumint"],
-    [{ builder: "bigint", options: NUMBER_MODE }, "bigint"],
+    [{ builder: "bigint", defaults: NUMBER_MODE }, "bigint"],
     [{ builder: "serial" }, "serial"],
     [{ builder: "boolean" }, "boolean", "bool"],
     [{ builder: "text" }, "text"],
@@ -158,9 +158,19 @@ const SPECS: Record<DrizzleDialect, Record<string, Spec>> = {
   ),
 };
 
+/** The spec of each type name (canonical or alias), by dialect. */
+const SPECS = Object.fromEntries(
+  Object.entries(ENTRIES).map(([dialect, entries]) => [
+    dialect,
+    Object.fromEntries(
+      entries.flatMap(([spec, ...names]) => names.map((n) => [n, spec])),
+    ),
+  ]),
+) as Record<DrizzleDialect, Record<string, Spec>>;
+
 /** Every builder name of a dialect, so variables never hide one. */
 export function builderNames(dialect: DrizzleDialect): string[] {
-  return [...new Set(Object.values(SPECS[dialect]).map((s) => s.builder))];
+  return [...new Set(ENTRIES[dialect].map(([spec]) => spec.builder))];
 }
 
 /**
@@ -178,10 +188,43 @@ export function toBuilder(
   if (!spec) return undefined;
   const argNames = spec.args ?? [];
   if (parsed.args.length > argNames.length) return undefined;
-  const options: [string, OptionValue][] = [...(spec.options ?? [])];
+  const options: [string, OptionValue][] = [
+    ...(spec.options ?? []),
+    ...(spec.defaults ?? []),
+  ];
   parsed.args.forEach((value, i) => options.push([argNames[i]!, value]));
   if (!parsed.args.length && spec.fallback) options.push(...spec.fallback);
   return { builder: spec.builder, options, array: parsed.array };
+}
+
+/**
+ * The SQL type of a builder call, e.g. `varchar` with `{ length: 255 }` →
+ * `varchar(255)`. `undefined` when the dialect has no such builder.
+ */
+export function fromBuilder(
+  builder: string,
+  options: Record<string, OptionValue>,
+  dialect: DrizzleDialect,
+): string | undefined {
+  let best:
+    { name: string; spec: Spec; args: number[]; score: number } | undefined;
+  for (const [spec, name] of ENTRIES[dialect]) {
+    if (spec.builder !== builder) continue;
+    const required = spec.options ?? [];
+    if (!required.every(([key, value]) => options[key] === value)) continue;
+    const args: number[] = [];
+    for (const arg of spec.args ?? []) {
+      const value = options[arg];
+      if (typeof value !== "number") break;
+      args.push(value);
+    }
+    // The type that matches more of the options wins: `text` with a
+    // length is `varchar(n)` in SQLite, without it just `text`.
+    const score = required.length * 10 + args.length;
+    if (!best || score > best.score) best = { name, spec, args, score };
+  }
+  if (!best) return undefined;
+  return best.args.length ? `${best.name}(${best.args.join(",")})` : best.name;
 }
 
 type ParsedType = { base: string; args: number[]; array: boolean };
