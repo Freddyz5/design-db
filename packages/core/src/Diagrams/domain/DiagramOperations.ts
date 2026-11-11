@@ -51,7 +51,9 @@ export type Op =
   | { type: "enum.add"; enum: Enum }
   | { type: "enum.update"; enumId: Id; patch: EnumPatch }
   | { type: "enum.remove"; enumId: Id }
-  | { type: "layout.place"; positions: Record<Id, Position> };
+  | { type: "layout.place"; positions: Record<Id, Position> }
+  | { type: "base.set"; at: string }
+  | { type: "base.clear" };
 
 /**
  * Applies one operation and returns a new diagram.
@@ -121,6 +123,14 @@ export function apply(doc: Diagram, op: Op): Diagram {
       return { ...doc, enums: doc.enums.filter((e) => e.id !== op.enumId) };
     case "layout.place":
       return placeTables(doc, op.positions);
+    case "base.set": {
+      const { tables, relations, groups, enums } = doc;
+      return { ...doc, base: { at: op.at, tables, relations, groups, enums } };
+    }
+    case "base.clear": {
+      const { base: _removed, ...rest } = doc;
+      return rest;
+    }
     default:
       return assertNever(op);
   }

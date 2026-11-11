@@ -40,6 +40,17 @@ export const LayoutSchema = z.object({
 });
 export type Layout = z.infer<typeof LayoutSchema>;
 
+/** A copy of the schema at some moment, to see what changed since then. */
+export const BaseSchema = z.object({
+  /** ISO date of when the base was set. */
+  at: z.string(),
+  tables: z.array(TableSchema),
+  relations: z.array(RelationSchema),
+  groups: z.array(GroupSchema),
+  enums: z.array(EnumSchema),
+});
+export type Base = z.infer<typeof BaseSchema>;
+
 /** The aggregate: tables, columns and relations only exist inside a diagram. */
 export const DiagramSchema = z.object({
   version: z.literal(DIAGRAM_VERSION),
@@ -51,6 +62,7 @@ export const DiagramSchema = z.object({
   groups: z.array(GroupSchema),
   enums: z.array(EnumSchema),
   layout: LayoutSchema,
+  base: BaseSchema.optional(),
 });
 export type Diagram = z.infer<typeof DiagramSchema>;
 
