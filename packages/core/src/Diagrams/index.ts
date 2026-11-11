@@ -25,6 +25,8 @@ export type {
 export { apply, applyAll } from "./domain/DiagramOperations";
 export type { Op, TableUpdatePatch } from "./domain/DiagramOperations";
 export { createManyToMany } from "./domain/DiagramManyToMany";
+export { mergeDiagram } from "./domain/DiagramMerge";
+export type { MergeMode } from "./domain/DiagramMerge";
 export {
   DEFAULT_LAYOUT_OPTIONS,
   estimateTableSize,

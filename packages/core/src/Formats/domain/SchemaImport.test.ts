@@ -1,5 +1,11 @@
 import { describe, expect, test } from "bun:test";
-import { createExampleDiagram, validate, type Diagram } from "../../Diagrams";
+import {
+  applyAll,
+  createExampleDiagram,
+  mergeDiagram,
+  validate,
+  type Diagram,
+} from "../../Diagrams";
 import { toDbml } from "./DbmlExport";
 import { sampleDiagram } from "./FormatFixtures";
 import { detectFormat, importSchema } from "./SchemaImport";
@@ -107,5 +113,30 @@ describe("importSchema", () => {
       format: "sql",
       errors: [{ message: "Missing )", line: 2 }],
     });
+  });
+});
+
+describe("editing the code of a diagram", () => {
+  test("replacing with the edited SQL keeps positions, ids and groups", () => {
+    const doc = applyAll(sampleDiagram(), [
+      { type: "table.move", tableId: "posts", position: { x: 400, y: 120 } },
+    ]);
+    const edited = toSql(doc, "postgres").replace(
+      "title text",
+      "headline text",
+    );
+    const result = importSchema(edited);
+    if (!result.ok) throw new Error(JSON.stringify(result.errors));
+
+    const next = mergeDiagram(doc, result.diagram, "replace");
+    const posts = next.tables.find((t) => t.name === "posts")!;
+    expect(posts.id).toBe("posts");
+    expect(posts.columns.map((c) => c.name)).toContain("headline");
+    expect(next.layout.tables.posts).toEqual({ x: 400, y: 120 });
+    expect(next.groups).toEqual(doc.groups);
+    expect(next.tables.find((t) => t.name === "users")!.groupId).toBe(
+      "accounts",
+    );
+    expect(next.relations[0]!.id).toBe("posts_user");
   });
 });
