@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { createColumn } from "../../Columns";
+import { createGroup } from "../../Groups";
 import { createRelation } from "../../Relations";
 import { OperationError } from "../../shared";
 import { createTable } from "../../Tables";
@@ -307,6 +308,88 @@ describe("relation operations", () => {
     ).toThrow(OperationError);
     expect(() =>
       apply(blogDiagram(), { type: "relation.remove", relationId: "nope" }),
+    ).toThrow(OperationError);
+  });
+});
+
+describe("group operations", () => {
+  const withGroup = () =>
+    apply(blogDiagram(), {
+      type: "group.add",
+      group: createGroup({ id: "content", name: "Content", color: "teal" }),
+    });
+
+  test("group.add adds a group and fails on a repeated id", () => {
+    const doc = withGroup();
+    expect(doc.groups.map((g) => g.name)).toEqual(["Content"]);
+    expect(() =>
+      apply(doc, { type: "group.add", group: createGroup({ id: "content" }) }),
+    ).toThrow(OperationError);
+  });
+
+  test("group.update changes the group", () => {
+    const next = apply(deepFreeze(withGroup()), {
+      type: "group.update",
+      groupId: "content",
+      patch: { name: "Posts", color: undefined },
+    });
+    expect(next.groups).toEqual([{ id: "content", name: "Posts" }]);
+  });
+
+  test("table.update puts a table in a group and takes it out", () => {
+    const grouped = apply(withGroup(), {
+      type: "table.update",
+      tableId: "posts",
+      patch: { groupId: "content" },
+    });
+    expect(grouped.tables[1]!.groupId).toBe("content");
+
+    const ungrouped = apply(grouped, {
+      type: "table.update",
+      tableId: "posts",
+      patch: { groupId: undefined },
+    });
+    expect("groupId" in ungrouped.tables[1]!).toBe(false);
+  });
+
+  test("a table cannot point at a group that does not exist", () => {
+    expect(() =>
+      apply(blogDiagram(), {
+        type: "table.update",
+        tableId: "posts",
+        patch: { groupId: "nope" },
+      }),
+    ).toThrow(OperationError);
+    expect(() =>
+      apply(blogDiagram(), {
+        type: "table.add",
+        table: createTable({ groupId: "nope" }),
+      }),
+    ).toThrow(OperationError);
+  });
+
+  test("group.remove keeps its tables, without a group", () => {
+    const doc = apply(withGroup(), {
+      type: "table.update",
+      tableId: "posts",
+      patch: { groupId: "content" },
+    });
+    const next = apply(doc, { type: "group.remove", groupId: "content" });
+    expect(next.groups).toEqual([]);
+    expect(next.tables).toHaveLength(2);
+    expect("groupId" in next.tables[1]!).toBe(false);
+  });
+
+  test("update and remove fail if the group does not exist", () => {
+    expect(() =>
+      apply(blogDiagram(), {
+        type: "group.update",
+        groupId: "nope",
+        patch: { name: "x" },
+      }),
+    ).toThrow(OperationError);
+    expect(() =>
+      apply(blogDiagram(), { type: "group.remove", groupId: "nope" }),
     ).toThrow(OperationError);
   });
 });

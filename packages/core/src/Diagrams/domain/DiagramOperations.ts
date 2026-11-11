@@ -1,4 +1,5 @@
 import type { Column, ColumnPatch } from "../../Columns";
+import { patchGroup, type Group, type GroupPatch } from "../../Groups";
 import {
   patchRelation,
   usesColumn,
@@ -19,6 +20,7 @@ import {
   type TablePatch,
 } from "../../Tables";
 import {
+  getGroup,
   getRelation,
   getTable,
   type Diagram,
@@ -40,7 +42,10 @@ export type Op =
   | { type: "column.remove"; tableId: Id; columnId: Id }
   | { type: "relation.add"; relation: Relation }
   | { type: "relation.update"; relationId: Id; patch: RelationPatch }
-  | { type: "relation.remove"; relationId: Id };
+  | { type: "relation.remove"; relationId: Id }
+  | { type: "group.add"; group: Group }
+  | { type: "group.update"; groupId: Id; patch: GroupPatch }
+  | { type: "group.remove"; groupId: Id };
 
 /**
  * Applies one operation and returns a new diagram.
@@ -83,6 +88,21 @@ export function apply(doc: Diagram, op: Op): Diagram {
         ...doc,
         relations: doc.relations.filter((r) => r.id !== op.relationId),
       };
+    case "group.add":
+      if (doc.groups.some((g) => g.id === op.group.id)) {
+        throw new OperationError(`Group ${op.group.id} already exists`);
+      }
+      return { ...doc, groups: [...doc.groups, op.group] };
+    case "group.update":
+      getGroup(doc, op.groupId);
+      return {
+        ...doc,
+        groups: doc.groups.map((g) =>
+          g.id === op.groupId ? patchGroup(g, op.patch) : g,
+        ),
+      };
+    case "group.remove":
+      return removeGroup(doc, op.groupId);
     default:
       return assertNever(op);
   }
@@ -99,6 +119,7 @@ function addTable(doc: Diagram, table: Table, position: Position): Diagram {
   if (doc.tables.some((t) => t.id === table.id)) {
     throw new OperationError(`Table ${table.id} already exists`);
   }
+  if (table.groupId !== undefined) getGroup(doc, table.groupId);
   return setTableLayout({ ...doc, tables: [...doc.tables, table] }, table.id, {
     x: position.x,
     y: position.y,
@@ -111,6 +132,7 @@ function updateTable(
   patch: TableUpdatePatch,
 ): Diagram {
   const { color, ...fields } = patch;
+  if (fields.groupId !== undefined) getGroup(doc, fields.groupId);
   const next = mapTable(doc, tableId, (t) => patchTable(t, fields));
   if (!("color" in patch)) return next;
   const current = next.layout.tables[tableId] ?? { x: 0, y: 0 };
@@ -178,6 +200,20 @@ function checkRelationEnd(doc: Diagram, end: RelationEnd): void {
     throw new OperationError("A relation needs at least one column per end");
   }
   for (const columnId of end.columnIds) getColumn(table, columnId);
+}
+
+// --- Groups ---------------------------------------------------------------
+
+/** Its tables stay in the diagram, without a group. */
+function removeGroup(doc: Diagram, groupId: Id): Diagram {
+  getGroup(doc, groupId);
+  return {
+    ...doc,
+    groups: doc.groups.filter((g) => g.id !== groupId),
+    tables: doc.tables.map((t) =>
+      t.groupId === groupId ? patchTable(t, { groupId: undefined }) : t,
+    ),
+  };
 }
 
 // --- Helpers --------------------------------------------------------------

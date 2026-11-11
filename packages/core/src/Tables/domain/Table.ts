@@ -12,6 +12,8 @@ export const TableSchema = z.object({
   id: IdSchema,
   name: z.string(),
   comment: z.string().optional(),
+  /** The group the table belongs to, if any. */
+  groupId: IdSchema.optional(),
   /** Order matters: it is the order shown in the editor and in the SQL. */
   columns: z.array(ColumnSchema),
 });
@@ -21,6 +23,7 @@ export type Table = z.infer<typeof TableSchema>;
 export type TablePatch = {
   name?: string;
   comment?: string | undefined;
+  groupId?: Id | undefined;
 };
 
 export function createTable(init: Partial<Table> = {}): Table {
@@ -30,12 +33,13 @@ export function createTable(init: Partial<Table> = {}): Table {
     columns: init.columns ?? [],
   };
   if (init.comment !== undefined) table.comment = init.comment;
+  if (init.groupId !== undefined) table.groupId = init.groupId;
   return table;
 }
 
 /** Returns a copy of the table with the patch applied. */
 export function patchTable(table: Table, patch: TablePatch): Table {
-  return applyPatch(table, patch, ["comment"]);
+  return applyPatch(table, patch, ["comment", "groupId"]);
 }
 
 export function getColumn(table: Table, columnId: Id): Column {

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { GroupSchema, type Group } from "../../Groups";
 import { RelationSchema, type Relation } from "../../Relations";
 import { createId, IdSchema, OperationError, type Id } from "../../shared";
 import { TableSchema, type Table } from "../../Tables";
@@ -42,6 +43,7 @@ export const DiagramSchema = z.object({
   dialect: DialectSchema,
   tables: z.array(TableSchema),
   relations: z.array(RelationSchema),
+  groups: z.array(GroupSchema),
   layout: LayoutSchema,
 });
 export type Diagram = z.infer<typeof DiagramSchema>;
@@ -69,6 +71,7 @@ export function createDiagram(
     dialect: init.dialect ?? "generic",
     tables: [],
     relations: [],
+    groups: [],
     layout: { tables: {}, viewport: { x: 0, y: 0, zoom: 1 } },
   };
 }
@@ -83,4 +86,10 @@ export function getRelation(diagram: Diagram, relationId: Id): Relation {
   const relation = diagram.relations.find((r) => r.id === relationId);
   if (!relation) throw new OperationError(`Relation ${relationId} not found`);
   return relation;
+}
+
+export function getGroup(diagram: Diagram, groupId: Id): Group {
+  const group = diagram.groups.find((g) => g.id === groupId);
+  if (!group) throw new OperationError(`Group ${groupId} not found`);
+  return group;
 }

@@ -3,4 +3,5 @@ export * from "./shared";
 export * from "./Columns";
 export * from "./Tables";
 export * from "./Relations";
+export * from "./Groups";
 export * from "./Diagrams";

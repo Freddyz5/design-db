@@ -53,6 +53,7 @@ describe("createDiagram", () => {
     expect(diagram.dialect).toBe("generic");
     expect(diagram.tables).toEqual([]);
     expect(diagram.relations).toEqual([]);
+    expect(diagram.groups).toEqual([]);
     expect(diagram.layout).toEqual({
       tables: {},
       viewport: { x: 0, y: 0, zoom: 1 },

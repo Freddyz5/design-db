@@ -17,7 +17,10 @@ export type IssueCode =
   | "relation-missing-column"
   | "relation-column-count"
   | "relation-target-not-unique"
-  | "relation-type-mismatch";
+  | "relation-type-mismatch"
+  | "empty-group-name"
+  | "duplicate-group-name"
+  | "table-missing-group";
 
 /**
  * A problem found in the diagram. `code` is stable so the editor can show
@@ -30,6 +33,7 @@ export type Issue = {
   tableId?: Id;
   columnId?: Id;
   relationId?: Id;
+  groupId?: Id;
 };
 
 /**
@@ -41,7 +45,45 @@ export function validate(doc: Diagram): Issue[] {
     ...checkTableNames(doc.tables),
     ...doc.tables.flatMap(checkTable),
     ...doc.relations.flatMap((r) => checkRelation(doc, r)),
+    ...checkGroups(doc),
   ];
+}
+
+function checkGroups(doc: Diagram): Issue[] {
+  const issues: Issue[] = [];
+  for (const group of doc.groups) {
+    if (isBlank(group.name)) {
+      issues.push({
+        code: "empty-group-name",
+        severity: "error",
+        message: "A group has no name",
+        groupId: group.id,
+      });
+    }
+  }
+  for (const same of duplicates(doc.groups)) {
+    for (const group of same) {
+      issues.push({
+        code: "duplicate-group-name",
+        severity: "error",
+        message: `${same.length} groups are named "${group.name.trim()}"`,
+        groupId: group.id,
+      });
+    }
+  }
+  const groupIds = new Set(doc.groups.map((g) => g.id));
+  for (const table of doc.tables) {
+    if (table.groupId !== undefined && !groupIds.has(table.groupId)) {
+      issues.push({
+        code: "table-missing-group",
+        severity: "error",
+        message: `${capitalize(tableLabel(table))} is in a group that does not exist`,
+        tableId: table.id,
+        groupId: table.groupId,
+      });
+    }
+  }
+  return issues;
 }
 
 function checkTableNames(tables: Table[]): Issue[] {

@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { createColumn } from "../../Columns";
+import { createGroup } from "../../Groups";
 import { createRelation } from "../../Relations";
 import { createTable } from "../../Tables";
 import type { Diagram } from "./Diagram";
@@ -188,5 +189,40 @@ describe("relation checks", () => {
       },
     ]);
     expect(validate(doc)).toEqual([]);
+  });
+});
+
+describe("group checks", () => {
+  const withGroups = (...names: string[]): Diagram => ({
+    ...blogDiagram(),
+    groups: names.map((name, i) => createGroup({ id: `g${i}`, name })),
+  });
+
+  test("empty and duplicate group names are errors", () => {
+    const issues = validate(withGroups(" ", "Core", "core"));
+    expect(issues).toContainEqual(
+      expect.objectContaining({ code: "empty-group-name", groupId: "g0" }),
+    );
+    expect(
+      issues
+        .filter((i) => i.code === "duplicate-group-name")
+        .map((i) => i.groupId),
+    ).toEqual(["g1", "g2"]);
+  });
+
+  test("a table in a group that does not exist is an error", () => {
+    const doc = blogDiagram();
+    const broken: Diagram = {
+      ...doc,
+      tables: [{ ...doc.tables[0]!, groupId: "gone" }, doc.tables[1]!],
+    };
+    expect(validate(broken)).toEqual([
+      expect.objectContaining({
+        code: "table-missing-group",
+        severity: "error",
+        tableId: "users",
+        groupId: "gone",
+      }),
+    ]);
   });
 });

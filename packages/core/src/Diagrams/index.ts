@@ -8,6 +8,7 @@ export {
   TableLayoutSchema,
   ViewportSchema,
   createDiagram,
+  getGroup,
   getRelation,
   getTable,
   parseDiagram,
