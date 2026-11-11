@@ -1,12 +1,9 @@
-import {
-  createColumn,
-  createDiagram,
-  createRelation,
-  createTable,
-} from "./factories";
-import { createManyToMany } from "./many-to-many";
-import { applyAll } from "./operations";
-import type { Diagram } from "./schema";
+import { createColumn } from "../../Columns";
+import { createRelation } from "../../Relations";
+import { createTable } from "../../Tables";
+import { createDiagram, type Diagram } from "../domain/Diagram";
+import { createManyToMany } from "../domain/DiagramManyToMany";
+import { applyAll } from "../domain/DiagramOperations";
 
 /**
  * A small blog: users, posts, comments and tags (posts <-> tags is N:M).

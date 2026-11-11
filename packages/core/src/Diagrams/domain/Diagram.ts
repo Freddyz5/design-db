@@ -1,66 +1,13 @@
 import { z } from "zod";
+import { RelationSchema, type Relation } from "../../Relations";
+import { createId, IdSchema, OperationError, type Id } from "../../shared";
+import { TableSchema, type Table } from "../../Tables";
 
 /** Current version of the diagram format. Bump it when the shape changes. */
 export const DIAGRAM_VERSION = 1;
 
-/** Stable identifier. Names can change; ids never do. */
-export const IdSchema = z.string().min(1);
-export type Id = z.infer<typeof IdSchema>;
-
 export const DialectSchema = z.enum(["generic", "postgres", "mysql", "sqlite"]);
 export type Dialect = z.infer<typeof DialectSchema>;
-
-/** What the database does with the child rows when the parent changes. */
-export const RefActionSchema = z.enum([
-  "no action",
-  "cascade",
-  "set null",
-  "restrict",
-]);
-export type RefAction = z.infer<typeof RefActionSchema>;
-
-export const ColumnSchema = z.object({
-  id: IdSchema,
-  name: z.string(),
-  /** Free text, e.g. "varchar(255)" or "int". */
-  type: z.string(),
-  primaryKey: z.boolean(),
-  nullable: z.boolean(),
-  unique: z.boolean(),
-  autoIncrement: z.boolean(),
-  default: z.string().optional(),
-  comment: z.string().optional(),
-});
-export type Column = z.infer<typeof ColumnSchema>;
-
-export const TableSchema = z.object({
-  id: IdSchema,
-  name: z.string(),
-  comment: z.string().optional(),
-  /** Order matters: it is the order shown in the editor and in the SQL. */
-  columns: z.array(ColumnSchema),
-});
-export type Table = z.infer<typeof TableSchema>;
-
-export const RelationEndSchema = z.object({
-  tableId: IdSchema,
-  columnIds: z.array(IdSchema).min(1),
-});
-export type RelationEnd = z.infer<typeof RelationEndSchema>;
-
-/**
- * A relation is a foreign key: `from` is the child table that holds the
- * foreign key columns, `to` is the parent table they point at.
- */
-export const RelationSchema = z.object({
-  id: IdSchema,
-  name: z.string().optional(),
-  from: RelationEndSchema,
-  to: RelationEndSchema,
-  onDelete: RefActionSchema,
-  onUpdate: RefActionSchema,
-});
-export type Relation = z.infer<typeof RelationSchema>;
 
 export const PositionSchema = z.object({
   x: z.number(),
@@ -87,6 +34,7 @@ export const LayoutSchema = z.object({
 });
 export type Layout = z.infer<typeof LayoutSchema>;
 
+/** The aggregate: tables, columns and relations only exist inside a diagram. */
 export const DiagramSchema = z.object({
   version: z.literal(DIAGRAM_VERSION),
   id: IdSchema,
@@ -109,4 +57,30 @@ export function parseDiagram(input: unknown): ParseResult {
   const result = DiagramSchema.safeParse(input);
   if (result.success) return { ok: true, diagram: result.data };
   return { ok: false, error: z.prettifyError(result.error) };
+}
+
+export function createDiagram(
+  init: { id?: Id; name?: string; dialect?: Dialect } = {},
+): Diagram {
+  return {
+    version: DIAGRAM_VERSION,
+    id: init.id ?? createId(),
+    name: init.name ?? "Untitled diagram",
+    dialect: init.dialect ?? "generic",
+    tables: [],
+    relations: [],
+    layout: { tables: {}, viewport: { x: 0, y: 0, zoom: 1 } },
+  };
+}
+
+export function getTable(diagram: Diagram, tableId: Id): Table {
+  const table = diagram.tables.find((t) => t.id === tableId);
+  if (!table) throw new OperationError(`Table ${tableId} not found`);
+  return table;
+}
+
+export function getRelation(diagram: Diagram, relationId: Id): Relation {
+  const relation = diagram.relations.find((r) => r.id === relationId);
+  if (!relation) throw new OperationError(`Relation ${relationId} not found`);
+  return relation;
 }

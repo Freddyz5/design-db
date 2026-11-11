@@ -1,10 +1,8 @@
 import { describe, expect, test } from "bun:test";
-import {
-  createExampleDiagram,
-  getCardinality,
-  parseDiagram,
-  validate,
-} from "./index";
+import { getCardinality } from "../../Relations";
+import { parseDiagram } from "../domain/Diagram";
+import { validate } from "../domain/DiagramValidation";
+import { createExampleDiagram } from "./DiagramCreateExample";
 
 describe("createExampleDiagram", () => {
   test("has the expected tables", () => {

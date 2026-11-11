@@ -1,11 +1,8 @@
-// Helpers shared by the tests. Not part of the public API.
-import {
-  createColumn,
-  createDiagram,
-  createRelation,
-  createTable,
-} from "./factories";
-import type { Diagram } from "./schema";
+// Helpers for the tests of Diagrams. Not part of the public API.
+import { createColumn } from "../../Columns";
+import { createRelation } from "../../Relations";
+import { createTable } from "../../Tables";
+import { createDiagram, type Diagram } from "./Diagram";
 
 /** Freezes an object and everything inside it, so mutations throw. */
 export function deepFreeze<T>(value: T): T {

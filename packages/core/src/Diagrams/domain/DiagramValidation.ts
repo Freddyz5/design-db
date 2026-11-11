@@ -1,12 +1,8 @@
-import { isUniqueKey } from "./cardinality";
-import type {
-  Column,
-  Diagram,
-  Id,
-  Relation,
-  RelationEnd,
-  Table,
-} from "./schema";
+import type { Column } from "../../Columns";
+import type { Relation, RelationEnd } from "../../Relations";
+import type { Id } from "../../shared";
+import { isUniqueKey, type Table } from "../../Tables";
+import type { Diagram } from "./Diagram";
 
 export type Severity = "error" | "warning";
 

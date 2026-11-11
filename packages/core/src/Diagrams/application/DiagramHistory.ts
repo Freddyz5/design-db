@@ -1,5 +1,5 @@
-import { apply, type Op } from "./operations";
-import type { Diagram } from "./schema";
+import type { Diagram } from "../domain/Diagram";
+import { apply, type Op } from "../domain/DiagramOperations";
 
 /**
  * Undo/redo stack. Since operations never modify the previous diagram,

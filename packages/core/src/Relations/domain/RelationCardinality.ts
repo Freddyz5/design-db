@@ -1,4 +1,5 @@
-import type { Diagram, Id, Relation, Table } from "./schema";
+import { isUniqueKey, type Table } from "../../Tables";
+import type { Relation } from "./Relation";
 
 export type Cardinality = {
   /** One parent row for each child row ("1:1"), or for many ("1:N"). */
@@ -8,29 +9,16 @@ export type Cardinality = {
 };
 
 /**
- * True if no two rows can share the same values in these columns: they
- * include the whole primary key, or a column marked as unique.
- */
-export function isUniqueKey(table: Table, columnIds: readonly Id[]): boolean {
-  const ids = new Set(columnIds);
-  const primaryKey = table.columns.filter((c) => c.primaryKey);
-  if (primaryKey.length > 0 && primaryKey.every((c) => ids.has(c.id))) {
-    return true;
-  }
-  return table.columns.some((c) => c.unique && ids.has(c.id));
-}
-
-/**
  * Works out the cardinality from the foreign key columns, so it can never
  * contradict them. Returns null if the relation points at something that
- * does not exist.
+ * does not exist. Accepts a diagram or anything with its tables.
  */
 export function getCardinality(
-  doc: Diagram,
+  diagram: { tables: readonly Table[] },
   relation: Relation,
 ): Cardinality | null {
-  const child = doc.tables.find((t) => t.id === relation.from.tableId);
-  const parent = doc.tables.find((t) => t.id === relation.to.tableId);
+  const child = diagram.tables.find((t) => t.id === relation.from.tableId);
+  const parent = diagram.tables.find((t) => t.id === relation.to.tableId);
   if (!child || !parent) return null;
 
   const foreignKey = relation.from.columnIds.map((id) =>

@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import { createTable } from "./factories";
+import { createTable } from "../../Tables";
+import { blogDiagram } from "../domain/DiagramFixtures";
 import {
   canRedo,
   canUndo,
@@ -9,8 +10,7 @@ import {
   pushOp,
   redo,
   undo,
-} from "./history";
-import { blogDiagram } from "./test-utils";
+} from "./DiagramHistory";
 
 describe("history", () => {
   test("starts with nothing to undo or redo", () => {

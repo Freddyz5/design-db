@@ -1,9 +1,11 @@
 import { describe, expect, test } from "bun:test";
-import { createColumn, createRelation, createTable } from "./factories";
-import { apply, applyAll } from "./operations";
-import type { Diagram } from "./schema";
-import { blogDiagram, deepFreeze } from "./test-utils";
-import { validate, type Issue } from "./validate";
+import { createColumn } from "../../Columns";
+import { createRelation } from "../../Relations";
+import { createTable } from "../../Tables";
+import type { Diagram } from "./Diagram";
+import { blogDiagram, deepFreeze } from "./DiagramFixtures";
+import { apply, applyAll } from "./DiagramOperations";
+import { validate, type Issue } from "./DiagramValidation";
 
 const codes = (issues: Issue[]) => issues.map((i) => i.code);
 

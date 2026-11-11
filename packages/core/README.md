@@ -50,6 +50,24 @@ history = undo(history); // back to { x: 0, y: 0 }
 
 Saving and loading: the diagram is plain JSON. Use `parseDiagram(JSON.parse(text))` to check a loaded file.
 
+## Structure
+
+Organized with the repo-blueprints preset `ts-hexagonal`, variant `core` (see `.blueprint.json` at the repository root). One folder per concept; each exposes its public API in `index.ts`, and other modules import only from there.
+
+```
+src/
+├── index.ts        re-exports every module
+├── shared/         used by two or more modules: Id, DomainError/OperationError, applyPatch
+├── Columns/        Column: shape, createColumn, patchColumn
+├── Tables/         Table: shape, createTable, patchTable, column list changes, isUniqueKey
+├── Relations/      Relation (a foreign key), getCardinality, planManyToMany
+└── Diagrams/       the aggregate
+    ├── domain/       Diagram, apply (Op), createManyToMany, validate
+    └── application/  undo/redo history, example diagram
+```
+
+Dependencies go one way: `shared` ← `Columns` ← `Tables` ← `Relations` ← `Diagrams`. Tables, columns and relations only exist inside a diagram, so the editor changes them through `Diagrams` (`apply`), which also keeps relations and the layout consistent.
+
 ## API
 
 | Area        | Exports                                                                                  |
@@ -59,6 +77,8 @@ Saving and loading: the diagram is plain JSON. Use `parseDiagram(JSON.parse(text
 | Edit        | `apply`, `applyAll`, `Op`, `createManyToMany`, `OperationError`                          |
 | Read        | `getTable`, `getColumn`, `getRelation`, `getCardinality`, `isUniqueKey`, `validate`      |
 | Undo / redo | `createHistory`, `push`, `pushOp`, `undo`, `redo`, `canUndo`, `canRedo`, `checkpoint`    |
+
+Each entity module also exports its own pure helpers (`patchTable`, `addColumn`, `usesColumn`, `planManyToMany`…). They work on a single entity and do not keep the diagram consistent; the editor should use `apply`.
 
 Operations (`Op`):
 
