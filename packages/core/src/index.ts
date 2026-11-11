@@ -5,3 +5,4 @@ export * from "./operations";
 export * from "./cardinality";
 export * from "./many-to-many";
 export * from "./validate";
+export * from "./history";
