@@ -1,4 +1,13 @@
-import type { Column, Diagram, Id, Position, Table } from "./schema";
+import type {
+  Column,
+  Diagram,
+  Id,
+  Position,
+  RefAction,
+  Relation,
+  RelationEnd,
+  Table,
+} from "./schema";
 
 /**
  * Thrown when an operation cannot be applied, e.g. it points at a table
@@ -29,6 +38,13 @@ export type ColumnPatch = {
   comment?: string | undefined;
 };
 
+/** `undefined` on an optional field removes it. */
+export type RelationPatch = {
+  name?: string | undefined;
+  onDelete?: RefAction;
+  onUpdate?: RefAction;
+};
+
 export type Op =
   | { type: "table.add"; table: Table; position?: Position }
   | { type: "table.update"; tableId: Id; patch: TablePatch }
@@ -37,7 +53,10 @@ export type Op =
   | { type: "column.add"; tableId: Id; column: Column; index?: number }
   | { type: "column.update"; tableId: Id; columnId: Id; patch: ColumnPatch }
   | { type: "column.move"; tableId: Id; columnId: Id; index: number }
-  | { type: "column.remove"; tableId: Id; columnId: Id };
+  | { type: "column.remove"; tableId: Id; columnId: Id }
+  | { type: "relation.add"; relation: Relation }
+  | { type: "relation.update"; relationId: Id; patch: RelationPatch }
+  | { type: "relation.remove"; relationId: Id };
 
 /**
  * Applies one operation and returns a new diagram.
@@ -61,6 +80,12 @@ export function apply(doc: Diagram, op: Op): Diagram {
       return moveColumn(doc, op.tableId, op.columnId, op.index);
     case "column.remove":
       return removeColumn(doc, op.tableId, op.columnId);
+    case "relation.add":
+      return addRelation(doc, op.relation);
+    case "relation.update":
+      return updateRelation(doc, op.relationId, op.patch);
+    case "relation.remove":
+      return removeRelation(doc, op.relationId);
     default:
       return assertNever(op);
   }
@@ -201,7 +226,58 @@ function removeColumn(doc: Diagram, tableId: Id, columnId: Id): Diagram {
   };
 }
 
+// --- Relations ------------------------------------------------------------
+
+/**
+ * Both ends must point at existing tables and columns. Other problems,
+ * such as a different number of columns on each end, are left to `validate`.
+ */
+function addRelation(doc: Diagram, relation: Relation): Diagram {
+  if (doc.relations.some((r) => r.id === relation.id)) {
+    throw new OperationError(`Relation ${relation.id} already exists`);
+  }
+  checkRelationEnd(doc, relation.from);
+  checkRelationEnd(doc, relation.to);
+  return { ...doc, relations: [...doc.relations, relation] };
+}
+
+function updateRelation(
+  doc: Diagram,
+  relationId: Id,
+  patch: RelationPatch,
+): Diagram {
+  getRelation(doc, relationId);
+  return {
+    ...doc,
+    relations: doc.relations.map((r) =>
+      r.id === relationId ? applyPatch(r, patch, ["name"]) : r,
+    ),
+  };
+}
+
+function removeRelation(doc: Diagram, relationId: Id): Diagram {
+  getRelation(doc, relationId);
+  return {
+    ...doc,
+    relations: doc.relations.filter((r) => r.id !== relationId),
+  };
+}
+
+function checkRelationEnd(doc: Diagram, end: RelationEnd): void {
+  const table = getTable(doc, end.tableId);
+  if (end.columnIds.length === 0) {
+    throw new OperationError("A relation needs at least one column per end");
+  }
+  for (const columnId of end.columnIds) getColumn(table, columnId);
+}
+
 // --- Helpers --------------------------------------------------------------
+
+export function getRelation(doc: Diagram, relationId: Id): Relation {
+  const relation = doc.relations.find((r) => r.id === relationId);
+  if (!relation) throw new OperationError(`Relation ${relationId} not found`);
+  return relation;
+}
 
 export function getTable(doc: Diagram, tableId: Id): Table {
   const table = doc.tables.find((t) => t.id === tableId);
