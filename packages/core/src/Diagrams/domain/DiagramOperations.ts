@@ -1,4 +1,6 @@
 import type { Column, ColumnPatch } from "../../Columns";
+import { isEnumType, patchEnum, type Enum, type EnumPatch } from "../../Enums";
+import { patchGroup, type Group, type GroupPatch } from "../../Groups";
 import {
   patchRelation,
   usesColumn,
@@ -19,6 +21,8 @@ import {
   type TablePatch,
 } from "../../Tables";
 import {
+  getEnum,
+  getGroup,
   getRelation,
   getTable,
   type Diagram,
@@ -40,7 +44,16 @@ export type Op =
   | { type: "column.remove"; tableId: Id; columnId: Id }
   | { type: "relation.add"; relation: Relation }
   | { type: "relation.update"; relationId: Id; patch: RelationPatch }
-  | { type: "relation.remove"; relationId: Id };
+  | { type: "relation.remove"; relationId: Id }
+  | { type: "group.add"; group: Group }
+  | { type: "group.update"; groupId: Id; patch: GroupPatch }
+  | { type: "group.remove"; groupId: Id }
+  | { type: "enum.add"; enum: Enum }
+  | { type: "enum.update"; enumId: Id; patch: EnumPatch }
+  | { type: "enum.remove"; enumId: Id }
+  | { type: "layout.place"; positions: Record<Id, Position> }
+  | { type: "base.set"; at: string }
+  | { type: "base.clear" };
 
 /**
  * Applies one operation and returns a new diagram.
@@ -83,6 +96,41 @@ export function apply(doc: Diagram, op: Op): Diagram {
         ...doc,
         relations: doc.relations.filter((r) => r.id !== op.relationId),
       };
+    case "group.add":
+      if (doc.groups.some((g) => g.id === op.group.id)) {
+        throw new OperationError(`Group ${op.group.id} already exists`);
+      }
+      return { ...doc, groups: [...doc.groups, op.group] };
+    case "group.update":
+      getGroup(doc, op.groupId);
+      return {
+        ...doc,
+        groups: doc.groups.map((g) =>
+          g.id === op.groupId ? patchGroup(g, op.patch) : g,
+        ),
+      };
+    case "group.remove":
+      return removeGroup(doc, op.groupId);
+    case "enum.add":
+      if (doc.enums.some((e) => e.id === op.enum.id)) {
+        throw new OperationError(`Enum ${op.enum.id} already exists`);
+      }
+      return { ...doc, enums: [...doc.enums, op.enum] };
+    case "enum.update":
+      return updateEnum(doc, op.enumId, op.patch);
+    case "enum.remove":
+      getEnum(doc, op.enumId);
+      return { ...doc, enums: doc.enums.filter((e) => e.id !== op.enumId) };
+    case "layout.place":
+      return placeTables(doc, op.positions);
+    case "base.set": {
+      const { tables, relations, groups, enums } = doc;
+      return { ...doc, base: { at: op.at, tables, relations, groups, enums } };
+    }
+    case "base.clear": {
+      const { base: _removed, ...rest } = doc;
+      return rest;
+    }
     default:
       return assertNever(op);
   }
@@ -99,6 +147,7 @@ function addTable(doc: Diagram, table: Table, position: Position): Diagram {
   if (doc.tables.some((t) => t.id === table.id)) {
     throw new OperationError(`Table ${table.id} already exists`);
   }
+  if (table.groupId !== undefined) getGroup(doc, table.groupId);
   return setTableLayout({ ...doc, tables: [...doc.tables, table] }, table.id, {
     x: position.x,
     y: position.y,
@@ -111,6 +160,7 @@ function updateTable(
   patch: TableUpdatePatch,
 ): Diagram {
   const { color, ...fields } = patch;
+  if (fields.groupId !== undefined) getGroup(doc, fields.groupId);
   const next = mapTable(doc, tableId, (t) => patchTable(t, fields));
   if (!("color" in patch)) return next;
   const current = next.layout.tables[tableId] ?? { x: 0, y: 0 };
@@ -128,6 +178,16 @@ function moveTable(doc: Diagram, tableId: Id, position: Position): Diagram {
     x: position.x,
     y: position.y,
   });
+}
+
+/** Moves several tables at once, e.g. after an automatic layout. */
+function placeTables(doc: Diagram, positions: Record<Id, Position>): Diagram {
+  const tables = { ...doc.layout.tables };
+  for (const [tableId, position] of Object.entries(positions)) {
+    getTable(doc, tableId);
+    tables[tableId] = { ...tables[tableId], x: position.x, y: position.y };
+  }
+  return { ...doc, layout: { ...doc.layout, tables } };
 }
 
 /** Also removes the relations that use the table and its layout entry. */
@@ -178,6 +238,46 @@ function checkRelationEnd(doc: Diagram, end: RelationEnd): void {
     throw new OperationError("A relation needs at least one column per end");
   }
   for (const columnId of end.columnIds) getColumn(table, columnId);
+}
+
+// --- Groups ---------------------------------------------------------------
+
+/** Its tables stay in the diagram, without a group. */
+function removeGroup(doc: Diagram, groupId: Id): Diagram {
+  getGroup(doc, groupId);
+  return {
+    ...doc,
+    groups: doc.groups.filter((g) => g.id !== groupId),
+    tables: doc.tables.map((t) =>
+      t.groupId === groupId ? patchTable(t, { groupId: undefined }) : t,
+    ),
+  };
+}
+
+// --- Enums ----------------------------------------------------------------
+
+/** Renaming an enum also renames the type of the columns that use it. */
+function updateEnum(doc: Diagram, enumId: Id, patch: EnumPatch): Diagram {
+  const current = getEnum(doc, enumId);
+  const next = {
+    ...doc,
+    enums: doc.enums.map((e) => (e.id === enumId ? patchEnum(e, patch) : e)),
+  };
+  if (patch.name === undefined || patch.name === current.name) return next;
+  const name = patch.name;
+  return {
+    ...next,
+    tables: next.tables.map((t) =>
+      t.columns.some((c) => isEnumType(current, c.type))
+        ? {
+            ...t,
+            columns: t.columns.map((c) =>
+              isEnumType(current, c.type) ? { ...c, type: name } : c,
+            ),
+          }
+        : t,
+    ),
+  };
 }
 
 // --- Helpers --------------------------------------------------------------

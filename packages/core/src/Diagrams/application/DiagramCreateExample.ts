@@ -1,4 +1,6 @@
 import { createColumn } from "../../Columns";
+import { createEnum } from "../../Enums";
+import { createGroup } from "../../Groups";
 import { createRelation } from "../../Relations";
 import { createTable } from "../../Tables";
 import { createDiagram, type Diagram } from "../domain/Diagram";
@@ -6,7 +8,8 @@ import { createManyToMany } from "../domain/DiagramManyToMany";
 import { applyAll } from "../domain/DiagramOperations";
 
 /**
- * A small blog: users, posts, comments and tags (posts <-> tags is N:M).
+ * A small blog: users, posts, comments and tags (posts <-> tags is N:M),
+ * in two groups, with a post_status enum. Designed for PostgreSQL.
  * Useful for tests, demos and as the editor's starting point.
  */
 export function createExampleDiagram(): Diagram {
@@ -40,6 +43,12 @@ export function createExampleDiagram(): Diagram {
       id("id"),
       foreignKey("author_id"),
       createColumn({ name: "title", type: "varchar(200)", nullable: false }),
+      createColumn({
+        name: "status",
+        type: "post_status",
+        nullable: false,
+        default: "'draft'",
+      }),
       createColumn({ name: "body", type: "text" }),
       createColumn({ name: "published_at", type: "timestamp" }),
     ],
@@ -82,15 +91,57 @@ export function createExampleDiagram(): Diagram {
     }),
   });
 
-  const diagram = applyAll(createDiagram({ name: "Blog" }), [
-    { type: "table.add", table: users, position: { x: 0, y: 0 } },
-    { type: "table.add", table: posts, position: { x: 360, y: 0 } },
-    { type: "table.add", table: comments, position: { x: 180, y: 280 } },
-    { type: "table.add", table: tags, position: { x: 720, y: 0 } },
-    references(posts, "author_id", users, "cascade"),
-    references(comments, "post_id", posts, "cascade"),
-    references(comments, "author_id", users, "set null"),
-  ]);
+  const accounts = createGroup({ name: "Accounts", color: "#2c5f8e" });
+  const content = createGroup({ name: "Content", color: "#21694a" });
+  const inGroup = (table: typeof users, group: typeof accounts) => ({
+    ...table,
+    groupId: group.id,
+  });
 
-  return createManyToMany(diagram, posts.id, tags.id).diagram;
+  const diagram = applyAll(
+    createDiagram({ name: "Blog", dialect: "postgres" }),
+    [
+      { type: "group.add", group: accounts },
+      { type: "group.add", group: content },
+      {
+        type: "enum.add",
+        enum: createEnum({
+          name: "post_status",
+          values: ["draft", "published"],
+        }),
+      },
+      {
+        type: "table.add",
+        table: inGroup(users, accounts),
+        position: { x: 0, y: 0 },
+      },
+      {
+        type: "table.add",
+        table: inGroup(posts, content),
+        position: { x: 360, y: 0 },
+      },
+      {
+        type: "table.add",
+        table: inGroup(comments, content),
+        position: { x: 180, y: 280 },
+      },
+      {
+        type: "table.add",
+        table: inGroup(tags, content),
+        position: { x: 720, y: 0 },
+      },
+      references(posts, "author_id", users, "cascade"),
+      references(comments, "post_id", posts, "cascade"),
+      references(comments, "author_id", users, "set null"),
+    ],
+  );
+
+  const withTags = createManyToMany(diagram, posts.id, tags.id);
+  return applyAll(withTags.diagram, [
+    {
+      type: "table.update",
+      tableId: withTags.tableId,
+      patch: { groupId: content.id },
+    },
+  ]);
 }

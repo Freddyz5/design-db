@@ -15,9 +15,9 @@ This repo follows the repo-blueprints preset `ts-hexagonal`, recorded in `.bluep
 
 `packages/core` uses the `core` variant:
 
-- One folder per concept: `Diagrams`, `Tables`, `Columns`, `Relations`, plus `shared`.
+- One folder per concept: `Diagrams`, `Tables`, `Columns`, `Relations`, `Groups`, `Enums`, plus `shared` and `Formats`.
 - Each module exposes its public API in `index.ts`. Other modules import only from that file, never from its internals.
-- Dependencies go one way: `shared` ← `Columns` ← `Tables` ← `Relations` ← `Diagrams`. Never import against this direction.
+- Dependencies go one way: `shared` ← `Columns` ← `Tables` ← `Relations` ← `Diagrams` ← `Formats`. `Groups` and `Enums` depend only on `shared`. Never import against this direction.
 - `shared` only holds what two or more modules use.
 - Tests live next to the code they test: `<File>.test.ts`.
 - `Diagrams` is the aggregate: the editor changes tables, columns and relations through `apply`, which keeps relations and layout consistent. The entity modules only change one entity at a time.
@@ -26,4 +26,5 @@ Intentional differences from the blueprint:
 
 - No `DiagramRepository` port or `infrastructure/` folder until persistence is added (SQLite, phase 3).
 - A single `Id` in `shared` instead of one per entity, since all ids are the same kind.
-- `Tables`, `Columns` and `Relations` have no `application/` folder: they have no actions of their own.
+- `Tables`, `Columns`, `Relations`, `Groups` and `Enums` have no `application/` folder: they have no actions of their own.
+- `Formats` (SQL and DBML export and import) is not a business concept; it is a module by decision of the project, so formats stay out of `Diagrams`.

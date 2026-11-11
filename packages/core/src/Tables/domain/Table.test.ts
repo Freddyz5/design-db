@@ -85,3 +85,15 @@ describe("isUniqueKey", () => {
     expect(isUniqueKey(table, ["d"])).toBe(false);
   });
 });
+
+describe("groupId", () => {
+  test("is optional and can be set and removed with patchTable", () => {
+    const table = createTable();
+    expect("groupId" in table).toBe(false);
+    const grouped = patchTable(table, { groupId: "g1" });
+    expect(grouped.groupId).toBe("g1");
+    expect("groupId" in patchTable(grouped, { groupId: undefined })).toBe(
+      false,
+    );
+  });
+});

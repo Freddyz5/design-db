@@ -1,0 +1,68 @@
+import type { Dialect } from "../../shared";
+
+const TYPES: Record<Dialect, readonly string[]> = {
+  generic: [
+    "integer",
+    "bigint",
+    "smallint",
+    "decimal(10,2)",
+    "real",
+    "boolean",
+    "varchar(255)",
+    "text",
+    "char(10)",
+    "date",
+    "time",
+    "timestamp",
+    "uuid",
+    "json",
+  ],
+  postgres: [
+    "serial",
+    "bigserial",
+    "integer",
+    "bigint",
+    "smallint",
+    "numeric(10,2)",
+    "real",
+    "double precision",
+    "boolean",
+    "varchar(255)",
+    "text",
+    "char(10)",
+    "date",
+    "time",
+    "timestamp",
+    "timestamptz",
+    "interval",
+    "uuid",
+    "json",
+    "jsonb",
+    "bytea",
+  ],
+  mysql: [
+    "int",
+    "bigint",
+    "smallint",
+    "tinyint",
+    "decimal(10,2)",
+    "float",
+    "double",
+    "boolean",
+    "varchar(255)",
+    "text",
+    "char(10)",
+    "date",
+    "time",
+    "datetime",
+    "timestamp",
+    "json",
+    "blob",
+  ],
+  sqlite: ["integer", "real", "text", "blob", "numeric"],
+};
+
+/** Common column types for a dialect, for the editor's type picker. */
+export function suggestedColumnTypes(dialect: Dialect): string[] {
+  return [...TYPES[dialect]];
+}

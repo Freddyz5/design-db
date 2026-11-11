@@ -1,13 +1,19 @@
 import { z } from "zod";
+import { EnumSchema, isEnumType, type Enum } from "../../Enums";
+import { GroupSchema, type Group } from "../../Groups";
 import { RelationSchema, type Relation } from "../../Relations";
-import { createId, IdSchema, OperationError, type Id } from "../../shared";
+import {
+  createId,
+  DialectSchema,
+  IdSchema,
+  OperationError,
+  type Dialect,
+  type Id,
+} from "../../shared";
 import { TableSchema, type Table } from "../../Tables";
 
 /** Current version of the diagram format. Bump it when the shape changes. */
 export const DIAGRAM_VERSION = 1;
-
-export const DialectSchema = z.enum(["generic", "postgres", "mysql", "sqlite"]);
-export type Dialect = z.infer<typeof DialectSchema>;
 
 export const PositionSchema = z.object({
   x: z.number(),
@@ -34,6 +40,17 @@ export const LayoutSchema = z.object({
 });
 export type Layout = z.infer<typeof LayoutSchema>;
 
+/** A copy of the schema at some moment, to see what changed since then. */
+export const BaseSchema = z.object({
+  /** ISO date of when the base was set. */
+  at: z.string(),
+  tables: z.array(TableSchema),
+  relations: z.array(RelationSchema),
+  groups: z.array(GroupSchema),
+  enums: z.array(EnumSchema),
+});
+export type Base = z.infer<typeof BaseSchema>;
+
 /** The aggregate: tables, columns and relations only exist inside a diagram. */
 export const DiagramSchema = z.object({
   version: z.literal(DIAGRAM_VERSION),
@@ -42,7 +59,10 @@ export const DiagramSchema = z.object({
   dialect: DialectSchema,
   tables: z.array(TableSchema),
   relations: z.array(RelationSchema),
+  groups: z.array(GroupSchema),
+  enums: z.array(EnumSchema),
   layout: LayoutSchema,
+  base: BaseSchema.optional(),
 });
 export type Diagram = z.infer<typeof DiagramSchema>;
 
@@ -69,6 +89,8 @@ export function createDiagram(
     dialect: init.dialect ?? "generic",
     tables: [],
     relations: [],
+    groups: [],
+    enums: [],
     layout: { tables: {}, viewport: { x: 0, y: 0, zoom: 1 } },
   };
 }
@@ -83,4 +105,21 @@ export function getRelation(diagram: Diagram, relationId: Id): Relation {
   const relation = diagram.relations.find((r) => r.id === relationId);
   if (!relation) throw new OperationError(`Relation ${relationId} not found`);
   return relation;
+}
+
+export function getGroup(diagram: Diagram, groupId: Id): Group {
+  const group = diagram.groups.find((g) => g.id === groupId);
+  if (!group) throw new OperationError(`Group ${groupId} not found`);
+  return group;
+}
+
+export function getEnum(diagram: Diagram, enumId: Id): Enum {
+  const found = diagram.enums.find((e) => e.id === enumId);
+  if (!found) throw new OperationError(`Enum ${enumId} not found`);
+  return found;
+}
+
+/** The enum a column type refers to, if any. */
+export function findEnum(diagram: Diagram, type: string): Enum | undefined {
+  return diagram.enums.find((e) => isEnumType(e, type));
 }

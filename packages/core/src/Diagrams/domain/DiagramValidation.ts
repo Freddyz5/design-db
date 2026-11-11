@@ -17,7 +17,14 @@ export type IssueCode =
   | "relation-missing-column"
   | "relation-column-count"
   | "relation-target-not-unique"
-  | "relation-type-mismatch";
+  | "relation-type-mismatch"
+  | "empty-group-name"
+  | "duplicate-group-name"
+  | "table-missing-group"
+  | "empty-enum-name"
+  | "duplicate-enum-name"
+  | "enum-without-values"
+  | "duplicate-enum-value";
 
 /**
  * A problem found in the diagram. `code` is stable so the editor can show
@@ -30,6 +37,8 @@ export type Issue = {
   tableId?: Id;
   columnId?: Id;
   relationId?: Id;
+  groupId?: Id;
+  enumId?: Id;
 };
 
 /**
@@ -41,7 +50,96 @@ export function validate(doc: Diagram): Issue[] {
     ...checkTableNames(doc.tables),
     ...doc.tables.flatMap(checkTable),
     ...doc.relations.flatMap((r) => checkRelation(doc, r)),
+    ...checkGroups(doc),
+    ...checkEnums(doc),
   ];
+}
+
+function checkEnums(doc: Diagram): Issue[] {
+  const issues: Issue[] = [];
+  for (const item of doc.enums) {
+    const label = isBlank(item.name)
+      ? "An unnamed enum"
+      : `Enum "${item.name}"`;
+    if (isBlank(item.name)) {
+      issues.push({
+        code: "empty-enum-name",
+        severity: "error",
+        message: "An enum has no name",
+        enumId: item.id,
+      });
+    }
+    if (item.values.length === 0) {
+      issues.push({
+        code: "enum-without-values",
+        severity: "warning",
+        message: `${label} has no values`,
+        enumId: item.id,
+      });
+    }
+    const seen = new Set<string>();
+    const repeated = new Set<string>();
+    for (const value of item.values) {
+      if (seen.has(value)) repeated.add(value);
+      seen.add(value);
+    }
+    for (const value of repeated) {
+      issues.push({
+        code: "duplicate-enum-value",
+        severity: "error",
+        message: `${label} has the value "${value}" more than once`,
+        enumId: item.id,
+      });
+    }
+  }
+  for (const same of duplicates(doc.enums)) {
+    for (const item of same) {
+      issues.push({
+        code: "duplicate-enum-name",
+        severity: "error",
+        message: `${same.length} enums are named "${item.name.trim()}"`,
+        enumId: item.id,
+      });
+    }
+  }
+  return issues;
+}
+
+function checkGroups(doc: Diagram): Issue[] {
+  const issues: Issue[] = [];
+  for (const group of doc.groups) {
+    if (isBlank(group.name)) {
+      issues.push({
+        code: "empty-group-name",
+        severity: "error",
+        message: "A group has no name",
+        groupId: group.id,
+      });
+    }
+  }
+  for (const same of duplicates(doc.groups)) {
+    for (const group of same) {
+      issues.push({
+        code: "duplicate-group-name",
+        severity: "error",
+        message: `${same.length} groups are named "${group.name.trim()}"`,
+        groupId: group.id,
+      });
+    }
+  }
+  const groupIds = new Set(doc.groups.map((g) => g.id));
+  for (const table of doc.tables) {
+    if (table.groupId !== undefined && !groupIds.has(table.groupId)) {
+      issues.push({
+        code: "table-missing-group",
+        severity: "error",
+        message: `${capitalize(tableLabel(table))} is in a group that does not exist`,
+        tableId: table.id,
+        groupId: table.groupId,
+      });
+    }
+  }
+  return issues;
 }
 
 function checkTableNames(tables: Table[]): Issue[] {

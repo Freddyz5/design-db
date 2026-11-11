@@ -1,5 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { createColumn } from "../../Columns";
+import { createEnum } from "../../Enums";
+import { createGroup } from "../../Groups";
 import { createRelation } from "../../Relations";
 import { OperationError } from "../../shared";
 import { createTable } from "../../Tables";
@@ -307,6 +309,165 @@ describe("relation operations", () => {
     ).toThrow(OperationError);
     expect(() =>
       apply(blogDiagram(), { type: "relation.remove", relationId: "nope" }),
+    ).toThrow(OperationError);
+  });
+});
+
+describe("group operations", () => {
+  const withGroup = () =>
+    apply(blogDiagram(), {
+      type: "group.add",
+      group: createGroup({ id: "content", name: "Content", color: "teal" }),
+    });
+
+  test("group.add adds a group and fails on a repeated id", () => {
+    const doc = withGroup();
+    expect(doc.groups.map((g) => g.name)).toEqual(["Content"]);
+    expect(() =>
+      apply(doc, { type: "group.add", group: createGroup({ id: "content" }) }),
+    ).toThrow(OperationError);
+  });
+
+  test("group.update changes the group", () => {
+    const next = apply(deepFreeze(withGroup()), {
+      type: "group.update",
+      groupId: "content",
+      patch: { name: "Posts", color: undefined },
+    });
+    expect(next.groups).toEqual([{ id: "content", name: "Posts" }]);
+  });
+
+  test("table.update puts a table in a group and takes it out", () => {
+    const grouped = apply(withGroup(), {
+      type: "table.update",
+      tableId: "posts",
+      patch: { groupId: "content" },
+    });
+    expect(grouped.tables[1]!.groupId).toBe("content");
+
+    const ungrouped = apply(grouped, {
+      type: "table.update",
+      tableId: "posts",
+      patch: { groupId: undefined },
+    });
+    expect("groupId" in ungrouped.tables[1]!).toBe(false);
+  });
+
+  test("a table cannot point at a group that does not exist", () => {
+    expect(() =>
+      apply(blogDiagram(), {
+        type: "table.update",
+        tableId: "posts",
+        patch: { groupId: "nope" },
+      }),
+    ).toThrow(OperationError);
+    expect(() =>
+      apply(blogDiagram(), {
+        type: "table.add",
+        table: createTable({ groupId: "nope" }),
+      }),
+    ).toThrow(OperationError);
+  });
+
+  test("group.remove keeps its tables, without a group", () => {
+    const doc = apply(withGroup(), {
+      type: "table.update",
+      tableId: "posts",
+      patch: { groupId: "content" },
+    });
+    const next = apply(doc, { type: "group.remove", groupId: "content" });
+    expect(next.groups).toEqual([]);
+    expect(next.tables).toHaveLength(2);
+    expect("groupId" in next.tables[1]!).toBe(false);
+  });
+
+  test("update and remove fail if the group does not exist", () => {
+    expect(() =>
+      apply(blogDiagram(), {
+        type: "group.update",
+        groupId: "nope",
+        patch: { name: "x" },
+      }),
+    ).toThrow(OperationError);
+    expect(() =>
+      apply(blogDiagram(), { type: "group.remove", groupId: "nope" }),
+    ).toThrow(OperationError);
+  });
+});
+
+describe("enum operations", () => {
+  /** Blog diagram with a post_status enum used by posts.status. */
+  const withEnum = () =>
+    applyAll(blogDiagram(), [
+      {
+        type: "enum.add",
+        enum: createEnum({
+          id: "status",
+          name: "post_status",
+          values: ["draft", "published"],
+        }),
+      },
+      {
+        type: "column.add",
+        tableId: "posts",
+        column: createColumn({
+          id: "posts.status",
+          name: "status",
+          type: "POST_STATUS",
+        }),
+      },
+    ]);
+
+  test("enum.add adds an enum and fails on a repeated id", () => {
+    const doc = withEnum();
+    expect(doc.enums.map((e) => e.name)).toEqual(["post_status"]);
+    expect(() =>
+      apply(doc, { type: "enum.add", enum: createEnum({ id: "status" }) }),
+    ).toThrow(OperationError);
+  });
+
+  test("renaming an enum renames the type of the columns that use it", () => {
+    const doc = deepFreeze(withEnum());
+    const next = apply(doc, {
+      type: "enum.update",
+      enumId: "status",
+      patch: { name: "publication_state" },
+    });
+    expect(next.enums[0]!.name).toBe("publication_state");
+    const status = next.tables[1]!.columns.find((c) => c.id === "posts.status");
+    expect(status!.type).toBe("publication_state");
+    expect(next.tables[0]).toBe(doc.tables[0]!);
+  });
+
+  test("changing only the values keeps the columns", () => {
+    const doc = withEnum();
+    const next = apply(doc, {
+      type: "enum.update",
+      enumId: "status",
+      patch: { values: ["draft", "published", "archived"] },
+    });
+    expect(next.enums[0]!.values).toHaveLength(3);
+    expect(next.tables).toBe(doc.tables);
+  });
+
+  test("enum.remove removes it and leaves the column type unchanged", () => {
+    const next = apply(withEnum(), { type: "enum.remove", enumId: "status" });
+    expect(next.enums).toEqual([]);
+    expect(
+      next.tables[1]!.columns.find((c) => c.id === "posts.status")!.type,
+    ).toBe("POST_STATUS");
+  });
+
+  test("update and remove fail if the enum does not exist", () => {
+    expect(() =>
+      apply(blogDiagram(), {
+        type: "enum.update",
+        enumId: "nope",
+        patch: { name: "x" },
+      }),
+    ).toThrow(OperationError);
+    expect(() =>
+      apply(blogDiagram(), { type: "enum.remove", enumId: "nope" }),
     ).toThrow(OperationError);
   });
 });
