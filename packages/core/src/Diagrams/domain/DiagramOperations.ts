@@ -25,7 +25,9 @@ import {
   getGroup,
   getRelation,
   getTable,
+  patchDiagram,
   type Diagram,
+  type DiagramPatch,
   type Position,
   type TableLayout,
 } from "./Diagram";
@@ -34,6 +36,7 @@ import {
 export type TableUpdatePatch = TablePatch & { color?: string | undefined };
 
 export type Op =
+  | { type: "diagram.update"; patch: DiagramPatch }
   | { type: "table.add"; table: Table; position?: Position }
   | { type: "table.update"; tableId: Id; patch: TableUpdatePatch }
   | { type: "table.move"; tableId: Id; position: Position }
@@ -61,6 +64,8 @@ export type Op =
  */
 export function apply(doc: Diagram, op: Op): Diagram {
   switch (op.type) {
+    case "diagram.update":
+      return patchDiagram(doc, op.patch);
     case "table.add":
       return addTable(doc, op.table, op.position ?? { x: 0, y: 0 });
     case "table.update":

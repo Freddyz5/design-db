@@ -118,6 +118,7 @@ Operations (`Op`):
 
 | Type                                                             | Notes                                                              |
 | ---------------------------------------------------------------- | ------------------------------------------------------------------ |
+| `diagram.update`                                                 | Changes the name or the dialect of the diagram.                    |
 | `table.add` / `table.update` / `table.move` / `table.remove`     | Removing a table also removes its relations and position.          |
 | `column.add` / `column.update` / `column.move` / `column.remove` | Removing a column also removes the relations that use it.          |
 | `relation.add` / `relation.update` / `relation.remove`           | Both ends must point at existing tables and columns.               |

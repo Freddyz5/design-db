@@ -14,10 +14,12 @@ export {
   getRelation,
   getTable,
   parseDiagram,
+  patchDiagram,
 } from "./domain/Diagram";
 export type {
   Base,
   Diagram,
+  DiagramPatch,
   Layout,
   ParseResult,
   Position,
