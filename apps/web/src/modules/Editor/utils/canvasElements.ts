@@ -100,15 +100,17 @@ function sameData(a: TableNodeData, b: TableNodeData): boolean {
 }
 
 /**
- * The tables of the diagram as canvas nodes. A node that did not change is
- * returned as the same object, and one that changed keeps what the canvas
- * knows about it (its measured size, whether it is selected).
+ * The tables of the diagram as canvas nodes, selected when their id is in
+ * `selection`. A node that did not change is returned as the same object, and
+ * one that changed keeps what the canvas knows about it (its measured size).
  */
 export function tableNodes(
   diagram: Diagram,
   previous: readonly TableNode[] = [],
+  selection: readonly Id[] = [],
 ): TableNode[] {
   const before = new Map(previous.map((node) => [node.id, node]));
+  const selected = new Set(selection);
   const unplaced = unplacedPositions(diagram);
 
   return diagram.tables.map((table) => {
@@ -126,6 +128,7 @@ export function tableNodes(
       old &&
       old.position.x === at.x &&
       old.position.y === at.y &&
+      (old.selected ?? false) === selected.has(table.id) &&
       sameData(old.data, data)
     ) {
       return old;
@@ -136,6 +139,7 @@ export function tableNodes(
       type: "table",
       position: { x: at.x, y: at.y },
       data,
+      selected: selected.has(table.id),
       ariaLabel: `Tabla ${table.name}`,
     };
   });

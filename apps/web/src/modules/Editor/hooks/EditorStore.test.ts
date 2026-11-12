@@ -175,6 +175,20 @@ describe("view", () => {
     expect(state().view.selection).toEqual(["users"]);
   });
 
+  test("a notice lasts until the next change", () => {
+    const { state } = setup();
+    state().dispatch({ type: "table.remove", tableId: "posts" });
+    state().notify("posts eliminada");
+    expect(state().view.notice).toBe("posts eliminada");
+
+    state().setView({ selection: ["users"] });
+    expect(state().view.notice).toBe("posts eliminada");
+
+    state().undo();
+    expect(state().view.notice).toBeNull();
+    expect(state().view.selection).toEqual(["users"]);
+  });
+
   test("does not notify when undo has nothing to do", () => {
     const { store, state } = setup();
     let calls = 0;

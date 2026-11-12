@@ -19,6 +19,8 @@ import { createStore, type StoreApi } from "zustand/vanilla";
 export type EditorView = {
   /** Ids of the selected tables. */
   selection: Id[];
+  /** A short message about the last change, shown with a way to undo it. Gone on the next change. */
+  notice: string | null;
 };
 
 export type EditorState = {
@@ -30,6 +32,8 @@ export type EditorState = {
   dispatch: (op: Op) => void;
   /** Makes `next` the diagram as one undo step: several operations at once, an import, a code edit. */
   replace: (next: Diagram) => void;
+  /** Says what the last change was, so it can be undone from the message. Call it after the change. */
+  notify: (notice: string) => void;
   /** Call when a drag starts, so the whole drag is one step and does not join the previous one. */
   beginDrag: () => void;
   undo: () => void;
@@ -41,16 +45,20 @@ export type EditorState = {
 
 export type EditorStore = StoreApi<EditorState>;
 
-const EMPTY_VIEW: EditorView = { selection: [] };
+const EMPTY_VIEW: EditorView = { selection: [], notice: null };
 
-/** Drops from the view what no longer exists in the diagram, such as a selected table that was undone. */
+/**
+ * The view after the diagram changed: without what no longer exists (a
+ * selected table that was undone) and without the notice about the change before.
+ */
 function viewFor(view: EditorView, diagram: Diagram): EditorView {
   const selection = view.selection.filter((id) =>
     diagram.tables.some((table) => table.id === id),
   );
-  return selection.length === view.selection.length
-    ? view
-    : { ...view, selection };
+  if (selection.length === view.selection.length && view.notice === null) {
+    return view;
+  }
+  return { ...view, selection, notice: null };
 }
 
 /** Creates the editor's store. It starts with the example diagram unless one is given. */
@@ -75,6 +83,7 @@ export function createEditorStore(
       undo: () => move(undo),
       redo: () => move(redo),
       load: (next) => set({ history: createHistory(next), view: EMPTY_VIEW }),
+      notify: (notice) => set((state) => ({ view: { ...state.view, notice } })),
       setView: (patch) =>
         set((state) => ({ view: { ...state.view, ...patch } })),
     };

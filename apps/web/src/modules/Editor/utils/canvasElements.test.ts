@@ -98,11 +98,21 @@ describe("tableNodes", () => {
     expect(second[1]!.position).toEqual({ x: 500, y: 40 });
   });
 
+  test("selects the nodes whose id is in the selection", () => {
+    const diagram = blog();
+    const first = tableNodes(diagram);
+    expect(first.map((node) => node.selected)).toEqual([false, false]);
+
+    const second = tableNodes(diagram, first, ["posts"]);
+    expect(second[0]).toBe(first[0]);
+    expect(second[1]!.selected).toBe(true);
+    expect(tableNodes(diagram, second, ["posts"])[1]).toBe(second[1]);
+  });
+
   test("a node that changed keeps what the canvas knows about it", () => {
     const diagram = blog();
     const first = tableNodes(diagram).map((node) => ({
       ...node,
-      selected: true,
       measured: { width: 300, height: 81 },
     }));
     const renamed = apply(diagram, {
@@ -112,7 +122,6 @@ describe("tableNodes", () => {
     });
     const [users, posts] = tableNodes(renamed, first);
     expect(users).toMatchObject({
-      selected: true,
       measured: { width: 300, height: 81 },
       ariaLabel: "Tabla people",
     });

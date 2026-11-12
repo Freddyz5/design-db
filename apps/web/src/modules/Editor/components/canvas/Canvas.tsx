@@ -3,16 +3,17 @@ import {
   BackgroundVariant,
   ConnectionMode,
   ReactFlow,
-  ReactFlowProvider,
+  SelectionMode,
   applyNodeChanges,
   type NodeChange,
   type OnNodeDrag,
+  type OnSelectionChangeFunc,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { MAX_ZOOM, MIN_ZOOM } from "../../constants/canvas";
 import { selectDiagram } from "../../hooks/EditorStore";
-import { useEditorStore } from "../../hooks/useEditorStore";
+import { editorStore, useEditorStore } from "../../hooks/useEditorStore";
 import {
   relationEdges,
   tableNodes,
@@ -20,7 +21,9 @@ import {
   type TableNode,
 } from "../../utils/canvasElements";
 import { CanvasControls } from "./CanvasControls";
+import { Notice } from "./Notice";
 import { RelationEdgeView } from "./RelationEdge";
+import { SelectionBar } from "./SelectionBar";
 import { TableNodeView } from "./TableNode";
 
 const nodeTypes = { table: TableNodeView };
@@ -47,16 +50,33 @@ const ARIA_LABELS = {
     "Pulsa Enter o Espacio para seleccionar la relación. Pulsa Escape para cancelar.",
 };
 
-function CanvasFlow() {
+/** Places the tables where they were dropped: one change to the diagram, so one step to undo. */
+function place(dragged: readonly TableNode[]) {
+  const positions = Object.fromEntries(
+    dragged.map((node) => [
+      node.id,
+      { x: Math.round(node.position.x), y: Math.round(node.position.y) },
+    ]),
+  );
+  editorStore.getState().dispatch({ type: "layout.place", positions });
+}
+
+/**
+ * The canvas: tables as nodes, relations as edges. Drag the background to
+ * pan, Ctrl + wheel or pinch to zoom, Shift + drag to select several tables.
+ */
+export function Canvas() {
   const diagram = useEditorStore(selectDiagram);
-  const dispatch = useEditorStore((state) => state.dispatch);
+  const selection = useEditorStore((state) => state.view.selection);
 
   // The canvas keeps its own copy of the nodes: while a table is dragged its
   // position here is ahead of the diagram, which only changes when it is dropped.
-  const [nodes, setNodes] = useState<TableNode[]>(() => tableNodes(diagram));
+  const [nodes, setNodes] = useState<TableNode[]>(() =>
+    tableNodes(diagram, [], selection),
+  );
   useEffect(() => {
-    setNodes((current) => tableNodes(diagram, current));
-  }, [diagram]);
+    setNodes((current) => tableNodes(diagram, current, selection));
+  }, [diagram, selection]);
 
   const lastEdges = useRef<RelationEdge[]>([]);
   const edges = useMemo(() => {
@@ -70,18 +90,22 @@ function CanvasFlow() {
     [],
   );
 
-  // Dropping the tables is one change to the diagram, so one step to undo.
   const onNodeDragStop = useCallback<OnNodeDrag<TableNode>>(
-    (_event, _node, dragged) => {
-      const positions = Object.fromEntries(
-        dragged.map((node) => [
-          node.id,
-          { x: Math.round(node.position.x), y: Math.round(node.position.y) },
-        ]),
-      );
-      dispatch({ type: "layout.place", positions });
+    (_event, _node, dragged) => place(dragged),
+    [],
+  );
+
+  // The selection lives in the store; the canvas reports what the user picked.
+  const onSelectionChange = useCallback<OnSelectionChangeFunc<TableNode>>(
+    ({ nodes: picked }) => {
+      const ids = picked.map((node) => node.id);
+      const current = editorStore.getState().view.selection;
+      const same =
+        ids.length === current.length &&
+        ids.every((id) => current.includes(id));
+      if (!same) editorStore.getState().setView({ selection: ids });
     },
-    [dispatch],
+    [],
   );
 
   return (
@@ -92,6 +116,9 @@ function CanvasFlow() {
       edgeTypes={edgeTypes}
       onNodesChange={onNodesChange}
       onNodeDragStop={onNodeDragStop}
+      onSelectionDragStop={(_event, dragged) => place(dragged)}
+      onSelectionChange={onSelectionChange}
+      selectionMode={SelectionMode.Partial}
       connectionMode={ConnectionMode.Loose}
       nodesConnectable={false}
       deleteKeyCode={null}
@@ -110,16 +137,9 @@ function CanvasFlow() {
         size={1.6}
         color="var(--color-canvas-dot)"
       />
+      <SelectionBar />
       <CanvasControls />
+      <Notice />
     </ReactFlow>
-  );
-}
-
-/** The canvas: tables as nodes, relations as edges. Drag the background to pan; Ctrl + wheel or pinch to zoom. */
-export function Canvas() {
-  return (
-    <ReactFlowProvider>
-      <CanvasFlow />
-    </ReactFlowProvider>
   );
 }
