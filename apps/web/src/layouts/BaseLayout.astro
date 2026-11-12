@@ -2,6 +2,7 @@
 // Base document shared by every page: head, global styles and the page slot.
 import "../styles/global.css";
 import site from "../content/site.json";
+import { THEME_STORAGE_KEY } from "../modules/shared";
 
 interface Props {
   title?: string;
@@ -18,9 +19,19 @@ const pageTitle = title ? `${title} · ${site.name}` : site.name;
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
+    <meta name="color-scheme" content="light dark" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" href="/favicon.ico" />
     <title>{pageTitle}</title>
+    <!-- Applies the stored theme before the first paint, so the page never flashes the other one. -->
+    <script is:inline define:vars={{ key: THEME_STORAGE_KEY }}>
+      try {
+        const stored = localStorage.getItem(key);
+        if (stored === "light" || stored === "dark") {
+          document.documentElement.dataset.theme = stored;
+        }
+      } catch {}
+    </script>
   </head>
   <body>
     <slot />

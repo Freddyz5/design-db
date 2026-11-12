@@ -1,1 +1,119 @@
 @import "tailwindcss";
+@import "@fontsource/barlow/400.css";
+@import "@fontsource/barlow/500.css";
+@import "@fontsource/barlow/600.css";
+@import "@fontsource/barlow-condensed/500.css";
+@import "@fontsource/barlow-condensed/600.css";
+@import "@fontsource/barlow-condensed/700.css";
+@import "@fontsource-variable/jetbrains-mono/index.css";
+
+/*
+ * Theme of Design DB, shared by the landing and the editor.
+ *
+ * Every table is a departures board: flap faces with letters in fixed cells,
+ * in a steel hall under a black frame bar. Amber is the only lamp.
+ *
+ * Each color is written once as light-dark(light, dark). The system preference
+ * decides which one applies; <html data-theme="light|dark"> forces one.
+ */
+@theme {
+  --color-*: initial;
+
+  --font-sans: "Barlow", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Barlow Condensed", "Arial Narrow", sans-serif;
+  --font-mono:
+    "JetBrains Mono Variable", ui-monospace, "SFMono-Regular", Menlo, monospace;
+
+  /* The hall: the canvas and the panels around it. */
+  --color-canvas: light-dark(#dfe2e4, #1b1d20);
+  --color-canvas-dot: light-dark(#b4b9be, #34383d);
+  --color-panel: light-dark(#f6f7f8, #131517);
+  --color-raised: light-dark(#ffffff, #1e2124);
+  --color-line: light-dark(#c5c9cd, #2f3237);
+  --color-ink: light-dark(#0b0b0d, #eceded);
+  --color-ink-muted: light-dark(#565b61, #9a9fa6);
+
+  /* The frame: the top bar. Black in both themes. */
+  --color-frame: #16181b;
+  --color-frame-deep: #0b0b0d;
+  --color-frame-well: #23262a;
+  --color-frame-line: #3a3e44;
+  --color-frame-ink: #f2f2f2;
+  --color-frame-muted: #a7aaaf;
+
+  /* The lamp: primary action, selection and focus. Nothing else is amber. */
+  --color-lamp: #ffb000;
+  --color-on-lamp: #0b0b0d;
+  /* Amber as text or a thin line on the hall, dark enough to read in the light theme. */
+  --color-lamp-ink: light-dark(#8a5200, #ffb000);
+
+  /* The flaps: the tables. Light flaps by day, black flaps at night. */
+  --color-flap: light-dark(#fbfbf9, #0b0b0d);
+  --color-flap-ink: light-dark(#0b0b0d, #f2f2f2);
+  --color-flap-muted: light-dark(#565b61, #a7aaaf);
+  --color-flap-seam: light-dark(#d9dde0, #1f2226);
+  --color-flap-edge: light-dark(#0b0b0d, #3a3e44);
+  --color-key: light-dark(#ffe680, #2a2408);
+  --color-key-ink: light-dark(#5c4a00, #ffd60a);
+  --color-relation: light-dark(#565b61, #8b9096);
+
+  /* Changes compared with the base. */
+  --color-added: light-dark(#1b7f45, #4cc38a);
+  --color-changed: light-dark(#8a5200, #ffb000);
+  --color-removed: light-dark(#b3261e, #ff6b6b);
+
+  /* Group strips. White text reads on all of them, in both themes. */
+  --color-group-1: #1f5fbf;
+  --color-group-2: #1b7f45;
+  --color-group-3: #a8341f;
+  --color-group-4: #7446b8;
+  --color-group-5: #0f7f86;
+  --color-group-6: #a85a0a;
+  --color-group-7: #b0307a;
+  --color-group-8: #55606e;
+  --color-on-group: #ffffff;
+
+  /* Code. */
+  --color-code-keyword: light-dark(#8a5200, #ffb000);
+  --color-code-type: light-dark(#0b6b74, #6fd3dc);
+  --color-code-string: light-dark(#2f6f37, #8fd694);
+  --color-code-number: light-dark(#6a3fb0, #c4a7f5);
+  --color-code-selection: light-dark(#ffe2a6, #4a3a10);
+  --color-code-error: light-dark(#f9dedc, #4a1f1c);
+
+  --radius-control: 3px;
+  --shadow-float: 0 1px 2px rgb(0 0 0 / 0.14), 0 10px 24px rgb(0 0 0 / 0.16);
+}
+
+@layer base {
+  :root {
+    color-scheme: light dark;
+  }
+  :root[data-theme="light"] {
+    color-scheme: light;
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+  }
+
+  body {
+    background-color: var(--color-canvas);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 1.45;
+    font-variant-numeric: tabular-nums;
+    caret-color: var(--color-lamp-ink);
+    scrollbar-color: var(--color-ink-muted) transparent;
+  }
+
+  ::selection {
+    background-color: var(--color-code-selection);
+    color: var(--color-ink);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-lamp-ink);
+    outline-offset: 2px;
+  }
+}

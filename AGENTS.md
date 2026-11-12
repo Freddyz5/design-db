@@ -35,6 +35,8 @@ Intentional differences from the blueprint:
 - `src/modules/Landing` and `src/modules/Editor`: each exposes its public API in `index.ts`, with its components in `components/`. Pages import only from that file.
 - `Editor` is a single module. Its zones (canvas, table panel, code panel…) share one store, so they are subfolders of `components/`, not sibling modules.
 - The site's text lives in `src/content/site.json`.
+- `src/modules/shared` holds what both modules use: the theme selector and its helpers.
+- The theme is one CSS file, `src/styles/global.css`: each color is written once with `light-dark()` and exposed to Tailwind through `@theme`. Use those tokens; the default Tailwind palette is turned off.
 
 Intentional differences from the blueprint in `apps/web`:
 

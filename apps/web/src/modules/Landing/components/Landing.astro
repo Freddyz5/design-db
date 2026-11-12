@@ -1,14 +1,30 @@
 ---
 // Placeholder until the landing is designed (DDB-43).
 import site from "../../../content/site.json";
+import { ThemeSelect } from "../../shared";
 
 const { title, lead, cta } = site.landing;
 ---
 
-<main class="grid min-h-dvh place-items-center p-6">
-  <div class="flex max-w-prose flex-col gap-4">
-    <h1 class="text-3xl font-semibold">{title}</h1>
-    <p>{lead}</p>
-    <p><a class="underline" href="/app">{cta}</a></p>
-  </div>
-</main>
+<div class="grid min-h-dvh grid-rows-[auto_1fr]">
+  <header
+    class="flex h-12 items-center justify-between bg-frame px-4 text-frame-ink"
+  >
+    <span class="font-display text-lg font-bold tracking-[0.14em] uppercase"
+      >{site.name}</span
+    >
+    <ThemeSelect client:load />
+  </header>
+  <main class="grid place-items-center p-6">
+    <div class="flex max-w-prose flex-col gap-4">
+      <h1 class="font-display text-4xl font-bold">{title}</h1>
+      <p class="text-base text-ink-muted">{lead}</p>
+      <p>
+        <a
+          class="inline-flex h-9 items-center rounded-control bg-lamp px-4 font-semibold text-on-lamp"
+          href="/app">{cta}</a
+        >
+      </p>
+    </div>
+  </main>
+</div>
