@@ -10,16 +10,34 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "test": "bun test --pass-with-no-tests",
+    "check-types": "tsc --noEmit"
   },
   "dependencies": {
     "@astrojs/react": "^7.1.8",
+    "@codemirror/commands": "^6.11.1",
+    "@codemirror/lang-javascript": "^6.2.5",
+    "@codemirror/lang-sql": "^6.10.0",
+    "@codemirror/language": "^6.13.1",
+    "@codemirror/state": "^6.7.6",
+    "@codemirror/view": "^6.43.15",
+    "@design-db/core": "workspace:*",
+    "@lezer/highlight": "^1.2.5",
     "@tailwindcss/vite": "^4.3.5",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
+    "@xyflow/react": "^12.12.1",
     "astro": "^7.4.8",
+    "codemirror": "^6.0.2",
+    "elkjs": "^0.12.1",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
-    "tailwindcss": "^4.3.5"
+    "tailwindcss": "^4.3.5",
+    "zustand": "^5.1.0"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.4.4",
+    "typescript": "7.0.2"
   }
 }
