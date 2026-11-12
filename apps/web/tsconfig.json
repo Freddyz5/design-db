@@ -5,6 +5,8 @@
   "compilerOptions": {
     "jsx": "react-jsx",
     "jsxImportSource": "react",
+    // For bun:test in the *.test.ts files.
+    "types": ["bun"],
     // Same checks as packages/core: its source is compiled as part of this app.
     "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true

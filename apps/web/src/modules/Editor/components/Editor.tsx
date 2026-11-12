@@ -1,9 +1,10 @@
-import { createExampleDiagram } from "@design-db/core";
-
-const diagram = createExampleDiagram();
+import { selectDiagram } from "../hooks/EditorStore";
+import { useEditorStore } from "../hooks/useEditorStore";
 
 /** The diagram editor, mounted by /app as a client-only React island. */
 export function Editor() {
+  const diagram = useEditorStore(selectDiagram);
+
   return (
     <main className="grid h-dvh place-items-center">
       <div className="text-center">
