@@ -1,0 +1,10 @@
+---
+// Thin page for Editor: imports only from modules/Editor.
+import site from "../content/site.json";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { Editor } from "../modules/Editor";
+---
+
+<BaseLayout title={site.editor.title}>
+  <Editor client:only="react" />
+</BaseLayout>

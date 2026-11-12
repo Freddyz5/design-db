@@ -1,0 +1,14 @@
+---
+// Placeholder until the landing is designed (DDB-43).
+import site from "../../../content/site.json";
+
+const { title, lead, cta } = site.landing;
+---
+
+<main class="grid min-h-dvh place-items-center p-6">
+  <div class="flex max-w-prose flex-col gap-4">
+    <h1 class="text-3xl font-semibold">{title}</h1>
+    <p>{lead}</p>
+    <p><a class="underline" href="/app">{cta}</a></p>
+  </div>
+</main>

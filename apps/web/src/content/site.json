@@ -1,0 +1,12 @@
+{
+  "name": "Design DB",
+  "description": "Editor visual de diagramas entidad-relación. El diagrama y el código son el mismo esquema.",
+  "landing": {
+    "title": "Design DB",
+    "lead": "Diseña el esquema de tu base de datos como diagrama y como código a la vez.",
+    "cta": "Abrir el editor"
+  },
+  "editor": {
+    "title": "Editor"
+  }
+}

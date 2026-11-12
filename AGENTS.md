@@ -28,3 +28,14 @@ Intentional differences from the blueprint:
 - A single `Id` in `shared` instead of one per entity, since all ids are the same kind.
 - `Tables`, `Columns`, `Relations`, `Groups` and `Enums` have no `application/` folder: they have no actions of their own.
 - `Formats` (SQL, DBML and Drizzle export and import) is not a business concept; it is a module by decision of the project, so formats stay out of `Diagrams`.
+
+`apps/web` uses the `web-astro` variant. All front-end code lives here; there is no separate editor package.
+
+- `src/pages/` holds thin routes: `/` composes `Landing`, `/app` mounts `Editor` as a client-only React island.
+- `src/modules/Landing` and `src/modules/Editor`: each exposes its public API in `index.ts`, with its components in `components/`. Pages import only from that file.
+- `Editor` is a single module. Its zones (canvas, table panel, code panel…) share one store, so they are subfolders of `components/`, not sibling modules.
+- The site's text lives in `src/content/site.json`.
+
+Intentional differences from the blueprint in `apps/web`:
+
+- `src/layouts/` (base layout) and `src/styles/` (global CSS and theme) follow the Astro convention instead of living in `src/modules/shared/`.
