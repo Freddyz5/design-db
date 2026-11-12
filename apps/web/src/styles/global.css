@@ -117,3 +117,22 @@
     outline-offset: 2px;
   }
 }
+
+/* The canvas (React Flow) takes its colors from the theme. */
+.react-flow {
+  --xy-background-color: transparent;
+  --xy-edge-stroke: var(--color-relation);
+  --xy-edge-stroke-width: 1.4;
+  --xy-edge-stroke-selected: var(--color-lamp-ink);
+  --xy-selection-background-color: color-mix(
+    in srgb,
+    var(--color-lamp) 14%,
+    transparent
+  );
+  --xy-selection-border: 1px solid var(--color-lamp-ink);
+  --xy-attribution-background-color: transparent;
+}
+
+.react-flow__attribution a {
+  color: var(--color-ink-muted);
+}

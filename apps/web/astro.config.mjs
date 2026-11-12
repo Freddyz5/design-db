@@ -10,8 +10,16 @@ export default defineConfig({
 
   vite: {
     plugins: [tailwindcss()],
+    // The editor island's dependencies, optimized up front. Left to be found
+    // on the first load, Vite re-optimizes mid-page and React ends up twice.
     optimizeDeps: {
-      include: ["react-dom/client"],
+      include: [
+        "react-dom/client",
+        "@xyflow/react",
+        "lucide-react",
+        "zustand",
+        "zustand/vanilla",
+      ],
     },
   },
 });

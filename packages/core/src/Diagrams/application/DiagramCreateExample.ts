@@ -9,7 +9,8 @@ import { applyAll } from "../domain/DiagramOperations";
 
 /**
  * A small blog: users, posts, comments and tags (posts <-> tags is N:M),
- * in two groups, with a post_status enum. Designed for PostgreSQL.
+ * in two groups, with a post_status enum. Designed for PostgreSQL. The
+ * positions leave room for tables 300 wide, the width the editor draws.
  * Useful for tests, demos and as the editor's starting point.
  */
 export function createExampleDiagram(): Diagram {
@@ -123,12 +124,12 @@ export function createExampleDiagram(): Diagram {
       {
         type: "table.add",
         table: inGroup(comments, content),
-        position: { x: 180, y: 280 },
+        position: { x: 360, y: 264 },
       },
       {
         type: "table.add",
         table: inGroup(tags, content),
-        position: { x: 720, y: 0 },
+        position: { x: 720, y: 168 },
       },
       references(posts, "author_id", users, "cascade"),
       references(comments, "post_id", posts, "cascade"),
@@ -142,6 +143,12 @@ export function createExampleDiagram(): Diagram {
       type: "table.update",
       tableId: withTags.tableId,
       patch: { groupId: content.id },
+    },
+    // The join table is created between its two tables; move it clear of them.
+    {
+      type: "table.move",
+      tableId: withTags.tableId,
+      position: { x: 720, y: 0 },
     },
   ]);
 }
