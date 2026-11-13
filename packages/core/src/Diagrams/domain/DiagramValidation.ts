@@ -314,8 +314,19 @@ function duplicates<T extends { name: string }>(items: T[]): T[][] {
   return [...byName.values()].filter((group) => group.length > 1);
 }
 
+/** Types that store the same value under another name. */
+const SAME_TYPE: Readonly<Record<string, string>> = {
+  int: "integer",
+  // An auto-numbered key and the foreign key that points at it.
+  serial: "integer",
+  bigserial: "bigint",
+  smallserial: "smallint",
+};
+
+/** The type as stored, so `serial` and the `integer` that references it compare equal. */
 function normalizeType(type: string): string {
-  return type.trim().toLowerCase().replace(/\s+/g, " ");
+  const text = type.trim().toLowerCase().replace(/\s+/g, " ");
+  return SAME_TYPE[text] ?? text;
 }
 
 function isBlank(name: string): boolean {
