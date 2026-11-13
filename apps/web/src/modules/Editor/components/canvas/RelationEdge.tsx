@@ -1,31 +1,26 @@
-import {
-  BaseEdge,
-  Position,
-  getSmoothStepPath,
-  type EdgeProps,
-} from "@xyflow/react";
+import { BaseEdge, Position, type EdgeProps } from "@xyflow/react";
 import { memo } from "react";
 import type { RelationEdge } from "../../utils/canvasElements";
+import {
+  childMark,
+  parentMarks,
+  relationCurve,
+  type RelationEnd,
+} from "../../utils/relationGeometry";
 
 /** 1 when the line leaves the table to the right, -1 to the left. */
-const outward = (position: Position): number =>
+const outward = (position: Position): 1 | -1 =>
   position === Position.Left ? -1 : 1;
 
-/** The mark for "many" at a table edge: a crow's foot opening toward the table. */
-export const manyMark = (x: number, y: number, out: number): string =>
-  `M${x + out * 12},${y} L${x},${y - 6} M${x + out * 12},${y} L${x},${y + 6}`;
-
-/** The mark for "one": a bar across the line. */
-export const oneMark = (x: number, y: number, out: number): string =>
-  `M${x + out * 8},${y - 6} V${y + 6}`;
-
 /**
- * A relation: a line from the foreign key column to the column it points at.
- * The child end shows many (crow's foot) or one (bar), with a circle when the
- * foreign key can be empty. The parent end is always one. With a table in
- * focus, its relations are lit and the rest fade.
+ * A relation: a curve from the foreign key column to the column it points
+ * at. The child end shows many (crow's foot) or one (bar); the parent end
+ * shows two bars, or a bar and a circle when the foreign key can be empty.
+ * With a table in focus, its relations are lit and the rest fade.
  */
 export const RelationEdgeView = memo(function RelationEdgeView({
+  source,
+  target,
   sourceX,
   sourceY,
   sourcePosition,
@@ -35,22 +30,19 @@ export const RelationEdgeView = memo(function RelationEdgeView({
   data,
   selected,
 }: EdgeProps<RelationEdge>) {
-  const [path] = getSmoothStepPath({
-    sourceX,
-    sourceY,
-    sourcePosition,
-    targetX,
-    targetY,
-    targetPosition,
-    borderRadius: 5,
-    offset: 24,
-  });
-  const child = outward(sourcePosition);
-  const parent = outward(targetPosition);
+  const child: RelationEnd = {
+    x: sourceX,
+    y: sourceY,
+    out: outward(sourcePosition),
+  };
+  const parent: RelationEnd = {
+    x: targetX,
+    y: targetY,
+    out: outward(targetPosition),
+  };
+  const path = relationCurve(child, parent, source === target);
   const many = data?.cardinality.kind !== "1:1";
-  const childMark = many
-    ? manyMark(sourceX, sourceY, child)
-    : oneMark(sourceX, sourceY, child);
+  const ends = parentMarks(parent, data?.cardinality.optional ?? false);
 
   // A relation of the table in focus is lit; with a table in focus, the rest fade.
   const lit = selected || data?.emphasis === "high";
@@ -81,16 +73,17 @@ export const RelationEdgeView = memo(function RelationEdgeView({
         }}
       />
       <path
-        d={`${childMark} ${oneMark(targetX, targetY, parent)}`}
+        d={`${childMark(child, many)} ${ends.path}`}
         className={`fill-none ${stroke}`}
         strokeWidth={width}
         strokeLinecap="round"
+        strokeLinejoin="round"
       />
-      {data?.cardinality.optional && (
+      {ends.circle && (
         <circle
-          cx={sourceX + child * 18}
-          cy={sourceY}
-          r={3.5}
+          cx={ends.circle.cx}
+          cy={ends.circle.cy}
+          r={3.6}
           className={`fill-canvas ${stroke}`}
           strokeWidth={width}
         />

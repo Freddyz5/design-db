@@ -41,6 +41,8 @@ export type EditorView = {
    * A new object asks again.
    */
   codeTarget: CodeTarget | null;
+  /** A table that just flashed to say "here it is", as when the search lands on it. A new key flashes again. */
+  flash: { tableId: Id; key: number } | null;
   /** Which columns the tables show. */
   columnsFilter: ColumnsFilter;
   /** Which relations the canvas shows. */
@@ -93,6 +95,7 @@ const EMPTY_VIEW: EditorView = {
   pinnedTableId: null,
   codeTableId: null,
   codeTarget: null,
+  flash: null,
   columnsFilter: "all",
   relationsFilter: "all",
   codeOpen: true,
@@ -136,6 +139,8 @@ function viewFor(view: EditorView, diagram: Diagram): EditorView {
     view.codeTarget !== null && exists(view.codeTarget.tableId)
       ? view.codeTarget
       : null;
+  const flash =
+    view.flash !== null && exists(view.flash.tableId) ? view.flash : null;
   if (
     selection.length === view.selection.length &&
     editingTableId === view.editingTableId &&
@@ -144,6 +149,7 @@ function viewFor(view: EditorView, diagram: Diagram): EditorView {
     pinnedTableId === view.pinnedTableId &&
     codeTableId === view.codeTableId &&
     codeTarget === view.codeTarget &&
+    flash === view.flash &&
     view.notice === null
   ) {
     return view;
@@ -157,6 +163,7 @@ function viewFor(view: EditorView, diagram: Diagram): EditorView {
     pinnedTableId,
     codeTableId,
     codeTarget,
+    flash,
     notice: null,
   };
 }
@@ -200,6 +207,7 @@ export function createEditorStore(
             pinnedTableId: null,
             codeTableId: null,
             codeTarget: null,
+            flash: null,
             notice: null,
           },
         })),

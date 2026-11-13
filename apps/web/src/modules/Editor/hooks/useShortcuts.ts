@@ -1,7 +1,13 @@
 import { useReactFlow } from "@xyflow/react";
 import { useEffect } from "react";
 import { removeTables } from "../utils/diagramEdits";
-import { isTypingTarget, shortcutFor } from "../utils/shortcuts";
+import {
+  NUDGE_STEP,
+  NUDGE_STEP_FAR,
+  isTypingTarget,
+  nudgeFor,
+  shortcutFor,
+} from "../utils/shortcuts";
 import { selectDiagram } from "./EditorStore";
 import { useAddTable } from "./useAddTable";
 import { editorStore } from "./useEditorStore";
@@ -9,10 +15,56 @@ import { editorStore } from "./useEditorStore";
 const fitDuration = () =>
   window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 200;
 
+/** How long after the last arrow the moves count as one step to undo. */
+const NUDGE_REST = 400;
+
 /** The keyboard shortcuts of the editor. They stay quiet while the user types in a field, the code or a dialog. */
 export function useShortcuts(): void {
-  const { fitView } = useReactFlow();
+  const { fitView, zoomIn, zoomOut, zoomTo, getNode } = useReactFlow();
   const addTable = useAddTable();
+
+  // The arrows move the selected tables. They listen first, so the canvas's
+  // own arrow moves, which never reach the diagram, do not run as well.
+  useEffect(() => {
+    let rest: ReturnType<typeof setTimeout> | undefined;
+    const onKey = (event: KeyboardEvent) => {
+      if (isTypingTarget(event.target)) return;
+      const nudge = nudgeFor(event);
+      const state = editorStore.getState();
+      if (!nudge || state.view.selection.length === 0) return;
+      event.preventDefault();
+      event.stopPropagation();
+      const step = event.shiftKey ? NUDGE_STEP_FAR : NUDGE_STEP;
+      const positions = Object.fromEntries(
+        state.view.selection.flatMap((id) => {
+          const at = getNode(id)?.position;
+          return at
+            ? [
+                [
+                  id,
+                  {
+                    x: Math.round(at.x + nudge.dx * step),
+                    y: Math.round(at.y + nudge.dy * step),
+                  },
+                ],
+              ]
+            : [];
+        }),
+      );
+      // Arrows in a row are one step to undo.
+      state.dispatch(
+        { type: "layout.place", positions },
+        { mergeKey: "nudge" },
+      );
+      clearTimeout(rest);
+      rest = setTimeout(() => editorStore.getState().checkpoint(), NUDGE_REST);
+    };
+    document.addEventListener("keydown", onKey, true);
+    return () => {
+      clearTimeout(rest);
+      document.removeEventListener("keydown", onKey, true);
+    };
+  }, [getNode]);
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
@@ -61,7 +113,27 @@ export function useShortcuts(): void {
           state.redo();
           break;
         case "fitView":
-          void fitView({ padding: 0.15, maxZoom: 1, duration: fitDuration() });
+          // The selection if there is one, else the whole diagram.
+          void fitView({
+            padding: 0.15,
+            maxZoom: 1,
+            duration: fitDuration(),
+            ...(view.selection.length > 0
+              ? { nodes: view.selection.map((id) => ({ id })) }
+              : {}),
+          });
+          break;
+        case "zoomIn":
+          void zoomIn({ duration: fitDuration() });
+          break;
+        case "zoomOut":
+          void zoomOut({ duration: fitDuration() });
+          break;
+        case "zoomReset":
+          void zoomTo(1, { duration: fitDuration() });
+          break;
+        case "selectAll":
+          setView({ selection: diagram.tables.map((table) => table.id) });
           break;
         case "toggleCode":
           setView({ codeOpen: !view.codeOpen });
@@ -89,5 +161,5 @@ export function useShortcuts(): void {
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [addTable, fitView]);
+  }, [addTable, fitView, zoomIn, zoomOut, zoomTo]);
 }

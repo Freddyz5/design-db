@@ -8,7 +8,31 @@ export type ShortcutAction =
   | "fitView"
   | "toggleCode"
   | "toggleHelp"
-  | "escape";
+  | "escape"
+  | "zoomIn"
+  | "zoomOut"
+  | "zoomReset"
+  | "selectAll";
+
+/** Where an arrow key moves the selected tables: one step left, right, up or down. */
+export type Nudge = { dx: -1 | 0 | 1; dy: -1 | 0 | 1 };
+
+/** How far an arrow moves the selection; with Shift, further. */
+export const NUDGE_STEP = 10;
+export const NUDGE_STEP_FAR = 40;
+
+const ARROWS: Record<string, Nudge> = {
+  ArrowLeft: { dx: -1, dy: 0 },
+  ArrowRight: { dx: 1, dy: 0 },
+  ArrowUp: { dx: 0, dy: -1 },
+  ArrowDown: { dx: 0, dy: 1 },
+};
+
+/** The way an arrow key moves the selection, or null for any other key. Shift goes further; other modifiers do nothing. */
+export function nudgeFor(press: KeyPress): Nudge | null {
+  if (press.ctrlKey || press.metaKey || press.altKey) return null;
+  return ARROWS[press.key] ?? null;
+}
 
 /** The parts of a key event the shortcuts look at. */
 export type KeyPress = {
@@ -31,9 +55,18 @@ export function shortcutFor(press: KeyPress): ShortcutAction | null {
   if (command) {
     if (key === "z") return press.shiftKey ? "redo" : "undo";
     if (key === "y") return "redo";
+    if (key === "a" && !press.shiftKey) return "selectAll";
     return null;
   }
   switch (press.key) {
+    // "+" needs Shift on many keyboards; "=" is the same key without it.
+    case "+":
+    case "=":
+      return "zoomIn";
+    case "-":
+      return "zoomOut";
+    case "0":
+      return "zoomReset";
     case "Delete":
     case "Backspace":
       return "delete";
@@ -77,7 +110,12 @@ export function shortcutList(
     { keys: ["Supr"], what: "Eliminar lo seleccionado" },
     { keys: [command, "Z"], what: "Deshacer" },
     { keys: [command, "Shift", "Z"], what: "Rehacer" },
-    { keys: ["F"], what: "Ver todo el diagrama" },
+    { keys: ["F"], what: "Encuadrar la selección, o todo el diagrama" },
+    { keys: ["+", "−"], what: "Acercar o alejar" },
+    { keys: ["0"], what: "Zoom al 100 %" },
+    { keys: [command, "A"], what: "Seleccionar todas las tablas" },
+    { keys: ["←↑↓→"], what: "Mover la selección (con Shift, más lejos)" },
+    { keys: ["Espacio"], what: "Mantener y arrastrar para mover el lienzo" },
     { keys: ["/"], what: "Buscar una tabla" },
     { keys: ["C"], what: "Mostrar u ocultar el código" },
     { keys: ["?"], what: "Mostrar u ocultar esta ayuda" },

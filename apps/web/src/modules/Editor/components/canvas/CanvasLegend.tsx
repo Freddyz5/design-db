@@ -1,6 +1,9 @@
 import { Panel } from "@xyflow/react";
 import { shortcutList } from "../../utils/shortcuts";
-import { manyMark, oneMark } from "./RelationEdge";
+import { childMark, parentMarks } from "../../utils/relationGeometry";
+
+const LEFT = { x: 0, y: 7, out: 1 } as const;
+const RIGHT = { x: 44, y: 7, out: -1 } as const;
 
 const LINE = "fill-none stroke-relation";
 
@@ -37,7 +40,7 @@ export function CanvasLegend() {
         <li className="flex items-center gap-2.5">
           <Sample>
             <path
-              d={`${manyMark(0, 7, 1)} ${oneMark(44, 7, -1)}`}
+              d={`${childMark(LEFT, true)} ${parentMarks(RIGHT, false).path}`}
               className={LINE}
               strokeWidth={1.4}
               strokeLinecap="round"
@@ -48,7 +51,7 @@ export function CanvasLegend() {
         <li className="flex items-center gap-2.5">
           <Sample>
             <path
-              d={`${oneMark(0, 7, 1)} ${oneMark(44, 7, -1)}`}
+              d={`${childMark(LEFT, false)} ${parentMarks(RIGHT, false).path}`}
               className={LINE}
               strokeWidth={1.4}
               strokeLinecap="round"
@@ -59,15 +62,15 @@ export function CanvasLegend() {
         <li className="flex items-center gap-2.5">
           <Sample>
             <path
-              d={`${manyMark(0, 7, 1)} ${oneMark(44, 7, -1)}`}
+              d={`${childMark(LEFT, true)} ${parentMarks(RIGHT, true).path}`}
               className={LINE}
               strokeWidth={1.4}
               strokeLinecap="round"
             />
             <circle
-              cx={18}
+              cx={parentMarks(RIGHT, true).circle!.cx}
               cy={7}
-              r={3.5}
+              r={3.6}
               className="fill-raised stroke-relation"
               strokeWidth={1.4}
             />
@@ -115,8 +118,10 @@ export function CanvasLegend() {
         la deja enfocada, la marca en el código, y otro clic en su nombre la
         suelta. El cursor dentro del código enfoca su tabla. Doble clic en una
         tabla para editarla. Arrastra el punto al borde de una columna hasta
-        otra tabla para relacionarlas. Shift + arrastrar selecciona varias
-        tablas; Ctrl + rueda o pellizcar hace zoom.
+        otra tabla para relacionarlas. Shift + clic suma o quita una tabla de la
+        selección; Shift + arrastrar el fondo dibuja un recuadro. El lienzo se
+        mueve arrastrando el fondo o con el botón central; Ctrl + rueda o
+        pellizcar hace zoom.
       </p>
     </Panel>
   );

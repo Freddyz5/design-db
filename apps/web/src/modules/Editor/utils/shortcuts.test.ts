@@ -1,5 +1,10 @@
 import { describe, expect, test } from "bun:test";
-import { shortcutFor, shortcutList, type KeyPress } from "./shortcuts";
+import {
+  nudgeFor,
+  shortcutFor,
+  shortcutList,
+  type KeyPress,
+} from "./shortcuts";
 
 const press = (key: string, mods: Partial<KeyPress> = {}): KeyPress => ({
   key,
@@ -32,6 +37,16 @@ describe("shortcutFor", () => {
     expect(shortcutFor(press("y", { ctrlKey: true }))).toBe("redo");
   });
 
+  test("zoom and select all", () => {
+    expect(shortcutFor(press("+", { shiftKey: true }))).toBe("zoomIn");
+    expect(shortcutFor(press("="))).toBe("zoomIn");
+    expect(shortcutFor(press("-"))).toBe("zoomOut");
+    expect(shortcutFor(press("0"))).toBe("zoomReset");
+    expect(shortcutFor(press("a", { metaKey: true }))).toBe("selectAll");
+    expect(shortcutFor(press("a", { ctrlKey: true }))).toBe("selectAll");
+    expect(shortcutFor(press("a"))).toBeNull();
+  });
+
   test("other combinations do nothing", () => {
     expect(shortcutFor(press("n", { ctrlKey: true }))).toBeNull();
     expect(shortcutFor(press("c", { metaKey: true }))).toBeNull();
@@ -42,10 +57,26 @@ describe("shortcutFor", () => {
   });
 });
 
+describe("nudgeFor", () => {
+  test("arrows move one step, with or without Shift", () => {
+    expect(nudgeFor(press("ArrowLeft"))).toEqual({ dx: -1, dy: 0 });
+    expect(nudgeFor(press("ArrowDown", { shiftKey: true }))).toEqual({
+      dx: 0,
+      dy: 1,
+    });
+  });
+
+  test("with Ctrl, Cmd or Alt, or any other key, nothing", () => {
+    expect(nudgeFor(press("ArrowUp", { metaKey: true }))).toBeNull();
+    expect(nudgeFor(press("ArrowUp", { altKey: true }))).toBeNull();
+    expect(nudgeFor(press("x"))).toBeNull();
+  });
+});
+
 describe("shortcutList", () => {
   test("lists every shortcut, with the command key of the system", () => {
     const list = shortcutList("⌘");
-    expect(list).toHaveLength(10);
+    expect(list).toHaveLength(15);
     expect(list.find((item) => item.what === "Deshacer")!.keys).toEqual([
       "⌘",
       "Z",

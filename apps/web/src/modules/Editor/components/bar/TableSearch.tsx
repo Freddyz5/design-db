@@ -67,6 +67,7 @@ export function TableSearch() {
       selection: [tableId],
       pinnedTableId: tableId,
       codeTarget: { tableId, columnId: null, focus: false },
+      flash: { tableId, key: Date.now() },
     });
     void fitView({
       nodes: [{ id: tableId }],

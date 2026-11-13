@@ -5,6 +5,7 @@ import {
   ReactFlow,
   SelectionMode,
   applyNodeChanges,
+  useKeyPress,
   type EdgeChange,
   type NodeChange,
   type OnConnectEnd,
@@ -52,6 +53,12 @@ const nodeTypes = { table: TableNodeView, zone: GroupNodeView };
 const edgeTypes = { relation: RelationEdgeView };
 
 const FIT = { padding: 0.15, maxZoom: 1 };
+
+/** Shift, Ctrl or Cmd + click adds a table to the selection or takes it out. */
+const MULTI_SELECT = ["Shift", "Meta", "Control"];
+/** The background pans with the left button and with the middle one; with Shift held, the left button draws a box instead. */
+const PAN_BUTTONS = [0, 1];
+const PAN_BUTTONS_SELECTING = [1];
 
 /** The line that follows the pointer while a relation is dragged. */
 const LINK_LINE = {
@@ -124,8 +131,10 @@ export function Canvas() {
       state.view.hoveredTableId ??
       state.view.codeTableId,
   );
+  const flash = useEditorStore((state) => state.view.flash);
   const view = useMemo(
     () => ({
+      flash,
       selection,
       selectedRelationId,
       columns,
@@ -140,11 +149,16 @@ export function Canvas() {
       relations,
       showChanges,
       focusedTableId,
+      flash,
     ],
   );
   const addTable = useAddTable();
   useShortcuts();
   useFollowCodeCursor();
+  // Shift both draws a box on the background and adds a clicked table to the
+  // selection. React Flow's own box key would turn that click into an empty
+  // box, so the box is drawn by dragging the background while Shift is held.
+  const shiftHeld = useKeyPress("Shift");
   /** True while a relation is being dragged from a column. */
   const [linking, setLinking] = useState(false);
   /** While something is dragged, the focus stays where it was. */
@@ -381,6 +395,10 @@ export function Canvas() {
       }}
       onSelectionDragStop={(_event, dragged) => place(dragged)}
       selectionMode={SelectionMode.Partial}
+      multiSelectionKeyCode={MULTI_SELECT}
+      selectionKeyCode={null}
+      selectionOnDrag={shiftHeld}
+      panOnDrag={shiftHeld ? PAN_BUTTONS_SELECTING : PAN_BUTTONS}
       connectionMode={ConnectionMode.Loose}
       deleteKeyCode={null}
       panOnScroll

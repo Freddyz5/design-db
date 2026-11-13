@@ -169,8 +169,30 @@
   }
 }
 
+/* "Here it is": a ring of the lamp that closes in on a table the search lands on. */
+@layer components {
+  .table-flash {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    animation: table-flash 1.1s ease-out both;
+  }
+}
+
+@keyframes table-flash {
+  from {
+    outline: 6px solid var(--color-lamp);
+    outline-offset: 6px;
+  }
+  to {
+    outline: 0 solid transparent;
+    outline-offset: 2px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .flap-cell {
+  .flap-cell,
+  .table-flash {
     animation: none;
   }
 }

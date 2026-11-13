@@ -41,6 +41,8 @@ export type CanvasView = {
    * It and the tables related to it stand out; the rest fade.
    */
   focusedTableId: Id | null;
+  /** The table that flashes, and the key of its flash. */
+  flash: { tableId: Id; key: number } | null;
 };
 
 const DEFAULT_VIEW: CanvasView = {
@@ -50,6 +52,7 @@ const DEFAULT_VIEW: CanvasView = {
   selectedRelationId: null,
   showChanges: false,
   focusedTableId: null,
+  flash: null,
 };
 
 export type TableNodeData = {
@@ -69,6 +72,8 @@ export type TableNodeData = {
   hidden: number;
   /** The table in focus. */
   focused: boolean;
+  /** The key of the flash that says "here it is"; a new one flashes again. */
+  flashKey: number | null;
   /** Faded: a table that has nothing to do with the one in focus or, in "focus", with the selected ones. */
   dimmed: boolean;
   /** What changed since the base, when the changes are shown. */
@@ -256,6 +261,7 @@ function sameData(a: TableNodeData, b: TableNodeData): boolean {
     a.strip.ink === b.strip.ink &&
     a.hidden === b.hidden &&
     a.focused === b.focused &&
+    a.flashKey === b.flashKey &&
     a.dimmed === b.dimmed &&
     sameMarks(a.marks, b.marks) &&
     a.columns.length === b.columns.length &&
@@ -287,10 +293,11 @@ export function tableNodes(
   previous: readonly TableNode[] = [],
   view: Partial<CanvasView> = {},
 ): TableNode[] {
-  const { selection, columns, relations, showChanges, focusedTableId } = {
-    ...DEFAULT_VIEW,
-    ...view,
-  };
+  const { selection, columns, relations, showChanges, focusedTableId, flash } =
+    {
+      ...DEFAULT_VIEW,
+      ...view,
+    };
   const before = new Map(previous.map((node) => [node.id, node]));
   const changes = showChanges ? changeMarks(diagram) : null;
   const noMarks: TableMarks = { columns: {}, removed: [] };
@@ -329,6 +336,7 @@ export function tableNodes(
       note: columns === "all" ? (table.comment ?? null) : null,
       hidden: columns === "keys" ? table.columns.length - shown.length : 0,
       focused: table.id === focused,
+      flashKey: flash?.tableId === table.id ? flash.key : null,
       dimmed: lit !== null && !lit.has(table.id),
       marks: changes
         ? {

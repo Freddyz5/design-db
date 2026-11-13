@@ -149,6 +149,7 @@ export const TableNodeView = memo(function TableNodeView({
     note,
     hidden,
     focused,
+    flashKey,
     dimmed,
     marks,
   } = data;
@@ -165,7 +166,7 @@ export const TableNodeView = memo(function TableNodeView({
       data-table-id={table.id}
     >
       <div
-        className={`border-[1.5px] border-flap-edge bg-flap text-flap-ink shadow-float ${outline}`}
+        className={`relative border-[1.5px] border-flap-edge bg-flap text-flap-ink shadow-float ${outline}`}
       >
         <div
           className="relative flex items-center justify-between gap-2 px-2 font-display text-[15.5px] font-bold tracking-[0.06em]"
@@ -258,6 +259,10 @@ export const TableNodeView = memo(function TableNodeView({
             </li>
           )}
         </ul>
+        {/* Keyed: a new flash mounts a new ring, so it plays again. */}
+        {flashKey !== null && (
+          <span key={flashKey} className="table-flash" aria-hidden />
+        )}
       </div>
       {note && (
         <figcaption
