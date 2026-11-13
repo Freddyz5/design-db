@@ -12,6 +12,7 @@ import type { Dialect } from "@design-db/core";
 import { Check, ChevronsRight, Copy, Download } from "lucide-react";
 import { useEffect, useMemo, useState, type KeyboardEvent } from "react";
 import { selectDiagram } from "../../hooks/EditorStore";
+import { useCodeDraft, type CodeStatus } from "../../hooks/useCodeDraft";
 import { editorStore, useEditorStore } from "../../hooks/useEditorStore";
 import {
   CODE_FORMATS,
@@ -47,7 +48,25 @@ function languageOf(format: CodeFormat, dialect: Dialect): Extension {
   return format === "drizzle" ? javascript({ typescript: true }) : dbmlLanguage;
 }
 
-/** The diagram as code, next to the canvas: SQL, DBML or Drizzle, to copy or download. */
+/** What the footer of the panel says. */
+function statusText(status: CodeStatus): string {
+  switch (status.kind) {
+    case "typing":
+      return "El diagrama se actualiza al dejar de escribir…";
+    case "applied":
+      return status.warnings === 0
+        ? "Diagrama actualizado."
+        : status.warnings === 1
+          ? "Diagrama actualizado, con 1 aviso: pasa el puntero por la línea marcada."
+          : `Diagrama actualizado, con ${status.warnings} avisos: pasa el puntero por las líneas marcadas.`;
+    case "error":
+      return `Línea ${status.line}: ${status.message}${status.count > 1 ? ` (y ${status.count - 1} más)` : ""}. El diagrama no cambió.`;
+    default:
+      return "Escribe aquí: el diagrama se actualiza al dejar de escribir.";
+  }
+}
+
+/** The diagram as code, next to the canvas: SQL, DBML or Drizzle, to read, edit, copy or download. */
 export function CodePanel() {
   const diagram = useEditorStore(selectDiagram);
   const format = useEditorStore((state) => state.view.codeFormat);
@@ -55,7 +74,13 @@ export function CodePanel() {
   const { dialect } = diagram;
   const [copied, setCopied] = useState(false);
 
-  const code = useMemo(() => generateCode(diagram, format), [diagram, format]);
+  const generated = useMemo(
+    () => generateCode(diagram, format),
+    [diagram, format],
+  );
+  const { draft, issues, status, onChange, onFocusChange, discard } =
+    useCodeDraft(format);
+  const code = draft ?? generated;
   const language = useMemo(
     () => languageOf(format, dialect),
     [format, dialect],
@@ -186,10 +211,32 @@ export function CodePanel() {
         <CodeEditor
           value={code}
           language={language}
-          readOnly
+          issues={issues}
+          onChange={onChange}
+          onFocusChange={(focused) => void onFocusChange(focused)}
           ariaLabel={`Código en ${formatLabel(format, dialect)}`}
         />
       </div>
+      <footer
+        className={`flex min-h-8 items-center gap-2 border-t border-line px-2.5 py-1.5 text-[12px] ${status.kind === "error" ? "bg-code-error text-removed" : "text-ink-muted"}`}
+      >
+        <span
+          className={`size-[7px] flex-none rounded-full ${status.kind === "error" ? "bg-removed" : status.kind === "applied" && status.warnings > 0 ? "bg-changed" : "bg-added"}`}
+          aria-hidden
+        />
+        <span className="min-w-0 flex-1" role="status">
+          {statusText(status)}
+        </span>
+        {draft !== null && status.kind === "error" && (
+          <button
+            type="button"
+            className="flex-none cursor-pointer underline underline-offset-2"
+            onClick={discard}
+          >
+            Descartar cambios
+          </button>
+        )}
+      </footer>
     </aside>
   );
 }

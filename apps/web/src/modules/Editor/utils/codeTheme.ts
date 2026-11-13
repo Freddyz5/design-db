@@ -51,6 +51,17 @@ export const codeTheme: Extension = [
       border: "1px solid var(--color-line)",
       color: "var(--color-ink)",
     },
+    ".cm-diagnostic-error": { borderLeftColor: "var(--color-removed)" },
+    ".cm-diagnostic-warning": { borderLeftColor: "var(--color-changed)" },
+    ".cm-lintRange-error": {
+      backgroundImage: "none",
+      backgroundColor: "var(--color-code-error)",
+    },
+    ".cm-lintRange-warning": {
+      backgroundImage: "none",
+      textDecoration: "underline wavy var(--color-changed)",
+      textUnderlineOffset: "3px",
+    },
     ".cm-panels": {
       backgroundColor: "var(--color-panel)",
       color: "var(--color-ink)",

@@ -21,6 +21,7 @@ export default defineConfig({
         "@codemirror/lang-javascript",
         "@codemirror/lang-sql",
         "@codemirror/language",
+        "@codemirror/lint",
         "@codemirror/state",
         "@codemirror/view",
         "@lezer/highlight",
