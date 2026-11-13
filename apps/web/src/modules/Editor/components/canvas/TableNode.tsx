@@ -77,18 +77,15 @@ function ColumnRow({
         className={`flex min-w-0 items-center gap-1 self-stretch border-l border-flap-seam px-[5px] ${column.primaryKey ? "text-key-ink" : "text-flap-muted"}`}
         title={detail}
       >
-        {flags.length > 0 && (
-          <FlapText
-            text={flags.join(" ")}
-            className="font-display text-[11px] font-semibold tracking-[0.08em]"
-          />
-        )}
-        {reference && (
-          <FlapText
-            text={`→ ${reference}`}
-            className="truncate text-[10.5px]"
-          />
-        )}
+        {/* Always mounted, empty when there is nothing to show, so a first flag or a first relation flips too. */}
+        <FlapText
+          text={flags.join(" ")}
+          className="font-display text-[11px] font-semibold tracking-[0.08em] empty:hidden"
+        />
+        <FlapText
+          text={reference ? `→ ${reference}` : ""}
+          className="truncate text-[10.5px] empty:hidden"
+        />
       </span>
       <Handle
         type="source"
