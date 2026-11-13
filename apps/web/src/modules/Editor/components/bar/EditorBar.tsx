@@ -1,17 +1,11 @@
 import { createDiagram } from "@design-db/core";
-import { useReactFlow, useStoreApi } from "@xyflow/react";
-import { Code, FilePlus, LayoutGrid, Plus } from "lucide-react";
+import { Code, FilePlus, Import, LayoutGrid, Plus } from "lucide-react";
 import { ThemeSelect } from "../../../shared";
-import {
-  TABLE_HEADER_HEIGHT,
-  TABLE_ROW_HEIGHT,
-  TABLE_WIDTH,
-} from "../../constants/canvas";
 import { selectDiagram } from "../../hooks/EditorStore";
+import { useAddTable } from "../../hooks/useAddTable";
 import { useAutoLayout } from "../../hooks/useAutoLayout";
 import { editorStore, useEditorStore } from "../../hooks/useEditorStore";
 import { COLUMNS_FILTERS, RELATIONS_FILTERS } from "../../constants/filters";
-import { createDefaultTable, freePosition } from "../../utils/diagramEdits";
 import { BarButton } from "./BarButton";
 import { BarSegment } from "./BarSegment";
 
@@ -27,30 +21,7 @@ export function EditorBar() {
     (state) => selectDiagram(state).tables.length > 0,
   );
   const { arrange, busy } = useAutoLayout();
-  const { screenToFlowPosition } = useReactFlow();
-  const canvas = useStoreApi();
-
-  /** Adds a table in the middle of what the canvas shows, and opens it to be edited. */
-  const addTable = () => {
-    const { dispatch, setView } = editorStore.getState();
-    const diagram = selectDiagram(editorStore.getState());
-    const table = createDefaultTable(diagram);
-
-    const box = canvas.getState().domNode?.getBoundingClientRect();
-    const middle = box
-      ? screenToFlowPosition({
-          x: box.left + box.width / 2,
-          y: box.top + box.height / 2,
-        })
-      : { x: 0, y: 0 };
-    const position = freePosition(diagram, {
-      x: middle.x - TABLE_WIDTH / 2,
-      y: middle.y - (TABLE_HEADER_HEIGHT + TABLE_ROW_HEIGHT) / 2,
-    });
-
-    dispatch({ type: "table.add", table, position });
-    setView({ selection: [table.id], editingTableId: table.id });
-  };
+  const addTable = useAddTable();
 
   /** Starts an empty diagram. It is one step, so undoing brings the old one back. */
   const startNew = () => {
@@ -76,6 +47,14 @@ export function EditorBar() {
         Nuevo
       </BarButton>
       <span className="mx-1 h-5 w-px flex-none bg-frame-line" />
+      <BarButton
+        primary
+        icon={<Import {...ICON} />}
+        title="Pegar o abrir SQL, DBML, Drizzle o JSON"
+        onClick={() => editorStore.getState().setView({ importText: "" })}
+      >
+        Importar
+      </BarButton>
       <BarButton icon={<Plus {...ICON} />} onClick={addTable}>
         Nueva tabla
       </BarButton>

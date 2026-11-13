@@ -34,6 +34,8 @@ export type EditorView = {
   codeOpen: boolean;
   codeFormat: CodeFormat;
   codeWidth: number;
+  /** The text in the import dialog, or null while the dialog is closed. */
+  importText: string | null;
   /** A short message about the last change, shown with a way to undo it. Gone on the next change. */
   notice: string | null;
 };
@@ -73,6 +75,7 @@ const EMPTY_VIEW: EditorView = {
   codeOpen: true,
   codeFormat: "sql",
   codeWidth: CODE_WIDTH,
+  importText: null,
   notice: null,
 };
 

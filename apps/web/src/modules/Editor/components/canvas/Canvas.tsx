@@ -27,7 +27,9 @@ import {
   type TableNode,
 } from "../../utils/canvasElements";
 import { linkColumns } from "../../utils/relationEdits";
+import { useAddTable } from "../../hooks/useAddTable";
 import { CanvasControls } from "./CanvasControls";
+import { EmptyCanvas } from "./EmptyCanvas";
 import { GroupNodeView } from "./GroupNode";
 import { Notice } from "./Notice";
 import { RelationBar } from "./RelationBar";
@@ -104,6 +106,7 @@ export function Canvas() {
     () => ({ selection, selectedRelationId, columns, relations }),
     [selection, selectedRelationId, columns, relations],
   );
+  const addTable = useAddTable();
   /** True while a relation is being dragged from a column. */
   const [linking, setLinking] = useState(false);
 
@@ -295,6 +298,7 @@ export function Canvas() {
         size={1.6}
         color="var(--color-canvas-dot)"
       />
+      <EmptyCanvas onAddTable={addTable} />
       <SelectionBar />
       <RelationBar />
       <TablePanel />
