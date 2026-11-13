@@ -19,6 +19,7 @@ import {
 } from "../constants/canvas";
 import { changeMarks, type TableMarks } from "./diagramChanges";
 import { stripColors, type Strip } from "./groupColor";
+import { columnFaces, noteHeight, type ColumnFace } from "./tableCard";
 
 /** Which columns the tables show: all, only the keys, or none (just the name). */
 export type ColumnsFilter = "all" | "keys" | "name";
@@ -58,6 +59,12 @@ export type TableNodeData = {
   references: Record<Id, string>;
   /** The columns the table shows now. */
   columns: Column[];
+  /** What each column row says besides its name and type. */
+  faces: Record<Id, ColumnFace>;
+  /** The row that names the cells: Atributo, Tipo de dato, Restricción. Only with every column shown. */
+  header: boolean;
+  /** The note of the table, under it. Only with every column shown. */
+  note: string | null;
   /** How many columns the "keys" filter left out. */
   hidden: number;
   /** The table in focus. */
@@ -109,23 +116,29 @@ export const dragHandleId = (columnId: Id): string => `${columnId}:drag`;
 export const dragHandleColumn = (handle: string): Id =>
   handle.slice(0, handle.lastIndexOf(":"));
 
-/** The size of a table drawn with that many rows under its name. */
-const sizeWithRows = (rows: number): Size => ({
+/** The size of a table drawn with that many rows under its name, and its note under it. */
+const sizeWithRows = (rows: number, note: string | null = null): Size => ({
   width: TABLE_WIDTH,
-  height: TABLE_HEADER_HEIGHT + rows * TABLE_ROW_HEIGHT + TABLE_BORDER * 2,
+  height:
+    TABLE_HEADER_HEIGHT +
+    rows * TABLE_ROW_HEIGHT +
+    TABLE_BORDER * 2 +
+    noteHeight(note),
 });
 
-/** The size a table has on the canvas with all its columns. */
+/** The size a table has on the canvas with all its columns: the row that names the cells, and its note. */
 export function tableSize(table: Table): Size {
-  return sizeWithRows(table.columns.length);
+  return sizeWithRows(table.columns.length + 1, table.comment ?? null);
 }
 
 /** The size a table has on the canvas as it is drawn now: its shown columns, and a row for the hidden ones. */
 export function nodeSize(data: TableNodeData): Size {
   return sizeWithRows(
-    data.columns.length +
+    (data.header ? 1 : 0) +
+      data.columns.length +
       (data.marks?.removed.length ?? 0) +
       (data.hidden > 0 ? 1 : 0),
+    data.note,
   );
 }
 
@@ -210,9 +223,35 @@ function sameMarks(a: TableMarks | null, b: TableMarks | null): boolean {
   );
 }
 
+function sameFaces(
+  a: Record<Id, ColumnFace>,
+  b: Record<Id, ColumnFace>,
+): boolean {
+  const keys = Object.keys(a);
+  return (
+    keys.length === Object.keys(b).length &&
+    keys.every((key) => {
+      const x = a[key];
+      const y = b[key];
+      return (
+        x !== undefined &&
+        y !== undefined &&
+        x.rules === y.rules &&
+        x.enumValues === y.enumValues &&
+        x.reference?.table === y.reference?.table &&
+        x.reference?.column === y.reference?.column &&
+        x.reference?.group === y.reference?.group
+      );
+    })
+  );
+}
+
 function sameData(a: TableNodeData, b: TableNodeData): boolean {
   return (
     a.table === b.table &&
+    a.header === b.header &&
+    a.note === b.note &&
+    sameFaces(a.faces, b.faces) &&
     a.strip.background === b.strip.background &&
     a.strip.ink === b.strip.ink &&
     a.hidden === b.hidden &&
@@ -285,6 +324,9 @@ export function tableNodes(
       strip: stripColors(layout?.color ?? group?.color),
       references,
       columns: shown,
+      faces: columnFaces(diagram, table),
+      header: columns === "all",
+      note: columns === "all" ? (table.comment ?? null) : null,
       hidden: columns === "keys" ? table.columns.length - shown.length : 0,
       focused: table.id === focused,
       dimmed: lit !== null && !lit.has(table.id),

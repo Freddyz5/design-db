@@ -154,8 +154,8 @@ describe("tableNodes", () => {
     const tags = nodes.find((node) => node.id === "tags")!;
     const likes = nodes.find((node) => node.id === "likes")!;
     // posts ends at 400 + 300; core leaves 96 after the last table.
-    expect(tags.position).toEqual({ x: 796, y: 0 });
-    expect(likes.position.x).toBe(796);
+    expect(tags.position).toEqual({ x: 856, y: 0 });
+    expect(likes.position.x).toBe(856);
     expect(likes.position.y).toBe(tableSize(diagram.tables[2]!).height + 24);
   });
 });
@@ -165,13 +165,14 @@ describe("groupNodes", () => {
     const diagram = blog();
     const [accounts, ...rest] = groupNodes(diagram, tableNodes(diagram));
     expect(rest).toEqual([]);
-    // users is at (0, 0), 300 wide and 30 + 24 + 3 = 57 tall.
+    // users is at (0, 0), 360 wide and 30 + 2 * 24 + 3 = 81 tall, with the
+    // row that names the cells.
     expect(accounts).toMatchObject({
       id: "group:accounts",
       type: "zone",
       position: { x: -24, y: -64 },
-      width: 348,
-      height: 145,
+      width: 408,
+      height: 169,
       zIndex: -1,
       selectable: false,
       dragHandle: ".group-handle",
@@ -190,11 +191,11 @@ describe("groupNodes", () => {
     });
     const tables = tableNodes(grouped);
     const first = groupNodes(grouped, tables);
-    // posts is at (400, 40), 300 wide and 30 + 2 * 24 + 3 = 81 tall.
+    // posts is at (400, 40), 360 wide and 30 + 3 * 24 + 3 = 105 tall.
     expect(first[0]).toMatchObject({
       position: { x: -24, y: -64 },
-      width: 748,
-      height: 209,
+      width: 808,
+      height: 233,
     });
     expect(first[0]!.data.count).toBe(2);
     expect(groupNodes(grouped, tables, first)[0]).toBe(first[0]);
@@ -285,7 +286,7 @@ describe("view filters", () => {
       diagram,
       tableNodes(diagram, [], { columns: "name" }),
     );
-    expect(all[0]!.height).toBe(145);
+    expect(all[0]!.height).toBe(169);
     expect(named[0]!.height).toBe(121);
   });
 
@@ -465,7 +466,8 @@ describe("change marks", () => {
     const users = nodes.find((n) => n.id === "users")!;
     expect(users.data.columns).toEqual([]);
     expect(users.data.marks!.removed.map((c) => c.name)).toEqual(["id"]);
-    expect(nodeSize(users.data).height).toBe(30 + 24 + 3);
+    // The row that names the cells, and the struck row.
+    expect(nodeSize(users.data).height).toBe(30 + 2 * 24 + 3);
     expect(nodes.find((n) => n.id === "tags")!.data.marks!.table).toBe("added");
     // The relation to users.id went with the column.
     expect(relationEdges(diagram, nodes, [], view)).toEqual([]);
@@ -577,6 +579,35 @@ describe("relationEdges", () => {
     const second = relationEdges(optional, nodes, first);
     expect(second[0]).not.toBe(first[0]);
     expect(second[0]!.data!.cardinality.optional).toBe(true);
+  });
+});
+
+describe("header and note", () => {
+  test("with every column shown, a table names its cells and shows its note", () => {
+    const diagram = apply(blog(), {
+      type: "table.update",
+      tableId: "users",
+      patch: { comment: "Who writes" },
+    });
+    const [users] = tableNodes(diagram);
+    expect(users!.data.header).toBe(true);
+    expect(users!.data.note).toBe("Who writes");
+    // Name strip, header row, one column, borders, and one line of note.
+    expect(nodeSize(users!.data).height).toBe(30 + 2 * 24 + 3 + 6 + 16);
+    expect(tableSize(diagram.tables[0]!).height).toBe(30 + 2 * 24 + 3 + 6 + 16);
+
+    const [keys] = tableNodes(diagram, [], { columns: "keys" });
+    expect(keys!.data.header).toBe(false);
+    expect(keys!.data.note).toBeNull();
+  });
+
+  test("each column row knows what it says", () => {
+    const [, posts] = tableNodes(blog());
+    expect(posts!.data.faces["posts.author_id"]).toEqual({
+      rules: "not null",
+      reference: { table: "users", column: "id", group: 1 },
+      enumValues: null,
+    });
   });
 });
 

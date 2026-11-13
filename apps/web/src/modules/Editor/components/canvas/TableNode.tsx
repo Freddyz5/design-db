@@ -4,6 +4,7 @@ import { memo } from "react";
 import { FlapText } from "../../../shared";
 import {
   TABLE_HEADER_HEIGHT,
+  TABLE_NOTE_GAP,
   TABLE_ROW_HEIGHT,
   TABLE_WIDTH,
 } from "../../constants/canvas";
@@ -13,6 +14,7 @@ import {
   stripHandleId,
   type TableNode,
 } from "../../utils/canvasElements";
+import type { ColumnFace } from "../../utils/tableCard";
 
 /** Where relations attach. Invisible: one point on each side of the row. */
 const ANCHOR =
@@ -31,33 +33,40 @@ const CHANGE_LAMP: Record<
   modified: { className: "bg-changed", label: "Columna que cambió" },
 };
 
+/** The three cells of a row: name, type and constraints. */
+const ROW_GRID = "grid grid-cols-[28%_27%_45%] items-center";
+
 function ColumnRow({
   column,
-  reference,
+  face,
   change,
 }: {
   column: Column;
-  reference: string | undefined;
+  face: ColumnFace | undefined;
   change?: "added" | "modified";
 }) {
-  const flags = [
-    column.primaryKey ? "PK" : null,
-    column.unique && !column.primaryKey ? "UQ" : null,
-    column.nullable ? "NULL" : null,
-  ].filter((flag) => flag !== null);
-  const detail = [...flags, reference ? `→ ${reference}` : null]
-    .filter((part) => part !== null)
-    .join(" ");
+  const reference = face?.reference ?? null;
+  const rules = face?.rules ?? "";
+  const enumValues = face?.enumValues ?? null;
+  const pointsAt = reference ? `FK → ${reference.table}` : "";
+  const detail = [
+    rules,
+    reference ? `FK → ${reference.table}.${reference.column}` : null,
+  ]
+    .filter((part) => part)
+    .join(", ");
 
   return (
     <li
-      className={`relative grid grid-cols-[31%_31%_38%] items-center border-t border-flap-seam font-mono text-[11px] ${column.primaryKey ? "bg-key" : ""}`}
+      className={`relative ${ROW_GRID} border-t border-flap-seam font-mono text-[11px] ${column.primaryKey ? "bg-key" : ""}`}
       style={{ height: TABLE_ROW_HEIGHT }}
       data-column-id={column.id}
     >
       <span
         className="flex min-w-0 items-center gap-1 px-[5px]"
-        title={column.name}
+        title={
+          column.comment ? `${column.name}: ${column.comment}` : column.name
+        }
       >
         {change && (
           <span
@@ -68,24 +77,38 @@ function ColumnRow({
         )}
         <FlapText text={column.name} className="truncate" />
       </span>
-      <FlapText
-        text={column.type}
-        title={column.type}
-        className="truncate border-l border-flap-seam px-[5px] text-flap-muted"
-      />
+      <span
+        className="flex min-w-0 items-center self-stretch border-l border-flap-seam px-[5px] text-flap-muted"
+        title={
+          enumValues ? `${column.type}: ${enumValues.join(" · ")}` : column.type
+        }
+      >
+        <FlapText
+          text={column.type}
+          className={`truncate ${enumValues ? "cursor-help border-b border-dotted border-current" : ""}`}
+        />
+      </span>
       <span
         className={`flex min-w-0 items-center gap-1 self-stretch border-l border-flap-seam px-[5px] ${column.primaryKey ? "text-key-ink" : "text-flap-muted"}`}
         title={detail}
       >
-        {/* Always mounted, empty when there is nothing to show, so a first flag or a first relation flips too. */}
         <FlapText
-          text={flags.join(" ")}
-          className="font-display text-[11px] font-semibold tracking-[0.08em] empty:hidden"
+          text={reference ? `${rules},` : rules}
+          className={`min-w-0 shrink truncate ${column.primaryKey ? "font-semibold" : ""}`}
         />
+        {/* Always mounted, empty without a reference, so a first relation flips too. */}
         <FlapText
-          text={reference ? `→ ${reference}` : ""}
-          className="truncate text-[10.5px] empty:hidden"
+          text={pointsAt}
+          className="flex-none font-semibold text-flap-ink empty:hidden"
         />
+        {reference?.group != null && (
+          <span
+            className="flex-none rounded-[2px] bg-flap-seam px-1 leading-4 text-flap-muted"
+            title={`Tabla del grupo ${reference.group}`}
+          >
+            {reference.group}
+          </span>
+        )}
       </span>
       <Handle
         type="source"
@@ -117,8 +140,18 @@ export const TableNodeView = memo(function TableNodeView({
   data,
   selected,
 }: NodeProps<TableNode>) {
-  const { table, strip, references, columns, hidden, focused, dimmed, marks } =
-    data;
+  const {
+    table,
+    strip,
+    columns,
+    faces,
+    header,
+    note,
+    hidden,
+    focused,
+    dimmed,
+    marks,
+  } = data;
   const outline = selected
     ? "outline-[3px] outline-lamp"
     : focused
@@ -126,87 +159,114 @@ export const TableNodeView = memo(function TableNodeView({
       : "";
 
   return (
-    <div
-      className={`group border-[1.5px] border-flap-edge bg-flap text-flap-ink shadow-float transition-opacity duration-150 motion-reduce:transition-none ${outline} ${dimmed ? "opacity-25" : ""}`}
+    <figure
+      className={`group m-0 transition-opacity duration-150 motion-reduce:transition-none ${dimmed ? "opacity-25" : ""}`}
       style={{ width: TABLE_WIDTH }}
       data-table-id={table.id}
     >
       <div
-        className="relative flex items-center justify-between gap-2 px-2 font-display text-[15.5px] font-bold tracking-[0.06em]"
-        style={{
-          height: TABLE_HEADER_HEIGHT,
-          backgroundColor: strip.background,
-          color: strip.ink,
-        }}
+        className={`border-[1.5px] border-flap-edge bg-flap text-flap-ink shadow-float ${outline}`}
       >
-        <FlapText text={table.name} title={table.name} className="truncate" />
-        {marks?.table && (
-          <span
-            className={`ml-auto rounded-[2px] px-1 text-[10.5px] leading-4 tracking-[0.1em] text-panel uppercase ${marks.table === "added" ? "bg-added" : "bg-changed"}`}
-          >
-            {marks.table === "added" ? "Nueva" : "Cambió"}
-          </span>
-        )}
-        <span
-          className="font-mono text-[11px] font-medium opacity-80"
-          title={`${table.columns.length} columnas`}
+        <div
+          className="relative flex items-center justify-between gap-2 px-2 font-display text-[15.5px] font-bold tracking-[0.06em]"
+          style={{
+            height: TABLE_HEADER_HEIGHT,
+            backgroundColor: strip.background,
+            color: strip.ink,
+          }}
         >
-          {table.columns.length}
-        </span>
-        {/* Where a relation attaches when its column is not shown. */}
-        <Handle
-          type="source"
-          position={Position.Left}
-          id={stripHandleId("l")}
-          isConnectable={false}
-          className={ANCHOR}
-        />
-        <Handle
-          type="source"
-          position={Position.Right}
-          id={stripHandleId("r")}
-          isConnectable={false}
-          className={ANCHOR}
-        />
-      </div>
-      <ul>
-        {columns.map((column) => (
-          <ColumnRow
-            key={column.id}
-            column={column}
-            reference={references[column.id]}
-            {...(marks?.columns[column.id]
-              ? { change: marks.columns[column.id] }
-              : {})}
+          <FlapText text={table.name} title={table.name} className="truncate" />
+          {marks?.table && (
+            <span
+              className={`ml-auto rounded-[2px] px-1 text-[10.5px] leading-4 tracking-[0.1em] text-panel uppercase ${marks.table === "added" ? "bg-added" : "bg-changed"}`}
+            >
+              {marks.table === "added" ? "Nueva" : "Cambió"}
+            </span>
+          )}
+          <span
+            className="font-mono text-[11px] font-medium opacity-80"
+            title={`${table.columns.length} columnas`}
+          >
+            {table.columns.length}
+          </span>
+          {/* Where a relation attaches when its column is not shown. */}
+          <Handle
+            type="source"
+            position={Position.Left}
+            id={stripHandleId("l")}
+            isConnectable={false}
+            className={ANCHOR}
           />
-        ))}
-        {marks?.removed.map((column) => (
-          <li
-            key={column.id}
-            className="grid grid-cols-[31%_31%_38%] items-center border-t border-flap-seam font-mono text-[11px] text-removed"
-            style={{ height: TABLE_ROW_HEIGHT }}
-            aria-label={`Columna eliminada: ${column.name}`}
-          >
-            <span className="truncate px-[5px] line-through">
-              {column.name}
-            </span>
-            <span className="truncate border-l border-flap-seam px-[5px] line-through">
-              {column.type}
-            </span>
-            <span className="border-l border-flap-seam px-[5px] font-display text-[11px] font-semibold tracking-[0.08em] uppercase">
-              Eliminada
-            </span>
-          </li>
-        ))}
-        {hidden > 0 && (
-          <li
-            className="flex items-center border-t border-flap-seam px-[5px] text-[11px] text-flap-muted"
-            style={{ height: TABLE_ROW_HEIGHT }}
-          >
-            {hidden === 1 ? "1 columna más" : `${hidden} columnas más`}
-          </li>
-        )}
-      </ul>
-    </div>
+          <Handle
+            type="source"
+            position={Position.Right}
+            id={stripHandleId("r")}
+            isConnectable={false}
+            className={ANCHOR}
+          />
+        </div>
+        <ul>
+          {header && (
+            <li
+              className={`${ROW_GRID} border-t border-flap-seam font-display text-[11px] font-semibold tracking-[0.08em] text-flap-muted uppercase`}
+              style={{ height: TABLE_ROW_HEIGHT }}
+              aria-hidden
+            >
+              <span className="truncate px-[5px]">Atributo</span>
+              <span className="self-stretch truncate border-l border-flap-seam px-[5px] leading-6">
+                Tipo de dato
+              </span>
+              <span className="self-stretch truncate border-l border-flap-seam px-[5px] leading-6">
+                Restricción
+              </span>
+            </li>
+          )}
+          {columns.map((column) => (
+            <ColumnRow
+              key={column.id}
+              column={column}
+              face={faces[column.id]}
+              {...(marks?.columns[column.id]
+                ? { change: marks.columns[column.id] }
+                : {})}
+            />
+          ))}
+          {marks?.removed.map((column) => (
+            <li
+              key={column.id}
+              className={`${ROW_GRID} border-t border-flap-seam font-mono text-[11px] text-removed`}
+              style={{ height: TABLE_ROW_HEIGHT }}
+              aria-label={`Columna eliminada: ${column.name}`}
+            >
+              <span className="truncate px-[5px] line-through">
+                {column.name}
+              </span>
+              <span className="truncate border-l border-flap-seam px-[5px] line-through">
+                {column.type}
+              </span>
+              <span className="border-l border-flap-seam px-[5px] font-display text-[11px] font-semibold tracking-[0.08em] uppercase">
+                Eliminada
+              </span>
+            </li>
+          ))}
+          {hidden > 0 && (
+            <li
+              className="flex items-center border-t border-flap-seam px-[5px] text-[11px] text-flap-muted"
+              style={{ height: TABLE_ROW_HEIGHT }}
+            >
+              {hidden === 1 ? "1 columna más" : `${hidden} columnas más`}
+            </li>
+          )}
+        </ul>
+      </div>
+      {note && (
+        <figcaption
+          className="px-0.5 text-[12px] leading-4 break-words whitespace-pre-line text-ink-muted"
+          style={{ marginTop: TABLE_NOTE_GAP }}
+        >
+          {note}
+        </figcaption>
+      )}
+    </figure>
   );
 });

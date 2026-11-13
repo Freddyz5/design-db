@@ -119,17 +119,17 @@ export function createExampleDiagram(): Diagram {
       {
         type: "table.add",
         table: inGroup(posts, content),
-        position: { x: 360, y: 0 },
+        position: { x: 420, y: 0 },
       },
       {
         type: "table.add",
         table: inGroup(comments, content),
-        position: { x: 360, y: 264 },
+        position: { x: 420, y: 264 },
       },
       {
         type: "table.add",
         table: inGroup(tags, content),
-        position: { x: 720, y: 168 },
+        position: { x: 840, y: 168 },
       },
       references(posts, "author_id", users, "cascade"),
       references(comments, "post_id", posts, "cascade"),
@@ -148,7 +148,7 @@ export function createExampleDiagram(): Diagram {
     {
       type: "table.move",
       tableId: withTags.tableId,
-      position: { x: 720, y: 0 },
+      position: { x: 840, y: 0 },
     },
   ]);
 }

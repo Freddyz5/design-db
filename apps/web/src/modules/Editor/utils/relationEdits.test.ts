@@ -193,10 +193,11 @@ describe("relateManyToMany", () => {
     const join = edit.diagram.tables.find((t) => t.id === edit.tableId)!;
     expect(join.name).toBe("users_posts");
     expect(edit.diagram.relations).toHaveLength(2);
-    // posts starts at y 100 and is 30 + 3 * 24 + 3 = 105 tall; 48 under it.
+    // posts starts at y 100 and is 30 + 4 * 24 + 3 = 129 tall (with the row
+    // that names the cells); 48 under it.
     expect(edit.diagram.layout.tables[edit.tableId]).toEqual({
       x: 200,
-      y: 253,
+      y: 277,
     });
     expect(edit.notice).toBe(
       "Nueva tabla users_posts para la relación de muchos a muchos.",
