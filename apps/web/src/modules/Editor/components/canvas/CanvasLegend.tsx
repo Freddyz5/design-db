@@ -65,6 +65,17 @@ export function CanvasLegend() {
           la relación es opcional
         </li>
         <li className="flex items-center gap-2.5">
+          <svg viewBox="0 0 44 14" className="h-3.5 w-11 flex-none" aria-hidden>
+            <path
+              d="M0,7 H44"
+              className={LINE}
+              strokeWidth={1.4}
+              strokeDasharray="5 4"
+            />
+          </svg>
+          va a otro grupo
+        </li>
+        <li className="flex items-center gap-2.5">
           <span className="h-3.5 w-11 flex-none border border-flap-edge bg-key" />
           clave primaria
         </li>

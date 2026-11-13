@@ -7,6 +7,7 @@ import {
   canRelateManyToMany,
   relateManyToMany,
 } from "../../utils/relationEdits";
+import { addGroupWith } from "../../utils/tableEdits";
 
 const BUTTON =
   "h-7 cursor-pointer rounded-[2px] border border-line bg-raised px-2.5 hover:border-ink-muted";
@@ -62,6 +63,16 @@ export function SelectionBar() {
           </>
         )}
       </span>
+      <button
+        type="button"
+        className={BUTTON}
+        title="Crea un grupo con la selección"
+        onClick={() =>
+          editorStore.getState().replace(addGroupWith(diagram, ids).diagram)
+        }
+      >
+        Agrupar
+      </button>
       {diagram.groups.length > 0 && (
         <select
           className={`${BUTTON} max-w-44`}

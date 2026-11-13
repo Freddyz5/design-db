@@ -11,6 +11,7 @@ import {
 import {
   dragHandleColumn,
   dragHandleId,
+  groupNodes,
   handleId,
   relationEdges,
   relationSides,
@@ -153,6 +154,65 @@ describe("tableNodes", () => {
   });
 });
 
+describe("groupNodes", () => {
+  test("a region around the tables of the group, with room for its name", () => {
+    const diagram = blog();
+    const [accounts, ...rest] = groupNodes(diagram, tableNodes(diagram));
+    expect(rest).toEqual([]);
+    // users is at (0, 0), 300 wide and 30 + 24 + 3 = 57 tall.
+    expect(accounts).toMatchObject({
+      id: "group:accounts",
+      type: "zone",
+      position: { x: -24, y: -64 },
+      width: 348,
+      height: 145,
+      zIndex: -1,
+      selectable: false,
+      dragHandle: ".group-handle",
+    });
+    expect(accounts!.data).toMatchObject({
+      color: "var(--color-group-1)",
+      count: 1,
+    });
+  });
+
+  test("follows the tables as they move, and grows with a second table", () => {
+    const grouped = apply(blog(), {
+      type: "table.update",
+      tableId: "posts",
+      patch: { groupId: "accounts" },
+    });
+    const tables = tableNodes(grouped);
+    const first = groupNodes(grouped, tables);
+    // posts is at (400, 40), 300 wide and 30 + 2 * 24 + 3 = 81 tall.
+    expect(first[0]).toMatchObject({
+      position: { x: -24, y: -64 },
+      width: 748,
+      height: 209,
+    });
+    expect(first[0]!.data.count).toBe(2);
+    expect(groupNodes(grouped, tables, first)[0]).toBe(first[0]);
+
+    const moved = tables.map((node) =>
+      node.id === "users" ? { ...node, position: { x: 100, y: 0 } } : node,
+    );
+    expect(groupNodes(grouped, moved, first)[0]!.position).toEqual({
+      x: 76,
+      y: -64,
+    });
+  });
+
+  test("a relation inside one group does not cross groups", () => {
+    const grouped = apply(blog(), {
+      type: "table.update",
+      tableId: "posts",
+      patch: { groupId: "accounts" },
+    });
+    const [edge] = relationEdges(grouped, tableNodes(grouped));
+    expect(edge!.data!.crossesGroups).toBe(false);
+  });
+});
+
 describe("relationSides", () => {
   test("uses the sides that face each other", () => {
     expect(relationSides(400, 0)).toEqual(["l", "r"]);
@@ -179,7 +239,10 @@ describe("relationEdges", () => {
         sourceHandle: handleId("posts.author_id", "l"),
         targetHandle: handleId("users.id", "r"),
         selected: false,
-        data: { cardinality: { kind: "1:N", optional: false } },
+        data: {
+          cardinality: { kind: "1:N", optional: false },
+          crossesGroups: true,
+        },
       },
     ]);
   });

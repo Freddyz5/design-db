@@ -3,6 +3,7 @@ import {
   placementOrigin,
   type Cardinality,
   type Diagram,
+  type Group,
   type Id,
   type Position,
   type Size,
@@ -25,7 +26,23 @@ export type TableNodeData = {
 };
 export type TableNode = Node<TableNodeData, "table">;
 
-export type RelationEdgeData = { cardinality: Cardinality };
+export type GroupNodeData = {
+  group: Group;
+  /** The color of the group, as a CSS color. */
+  color: string;
+  /** How many tables the group has. */
+  count: number;
+};
+/** The node type is "zone": React Flow styles its own "group" type. */
+export type GroupNode = Node<GroupNodeData, "zone">;
+
+export type CanvasNode = TableNode | GroupNode;
+
+export type RelationEdgeData = {
+  cardinality: Cardinality;
+  /** The two tables are not in the same group. */
+  crossesGroups: boolean;
+};
 export type RelationEdge = Edge<RelationEdgeData, "relation">;
 
 /** The side of a table a relation leaves from: left or right. */
@@ -152,6 +169,80 @@ export function tableNodes(
   });
 }
 
+/** The id of the canvas node of a group. Table nodes use the id of the table. */
+export const groupNodeId = (groupId: Id): string => `group:${groupId}`;
+
+/** The room a group leaves around its tables; the top holds its name. */
+export const GROUP_PADDING = { top: 64, side: 24, bottom: 24 };
+
+/**
+ * The groups of the diagram as canvas nodes: a region behind the tables of
+ * each group, sized from where those tables are now. A group without tables
+ * has no region. A node that did not change is returned as the same object.
+ */
+export function groupNodes(
+  diagram: Diagram,
+  tables: readonly TableNode[],
+  previous: readonly GroupNode[] = [],
+): GroupNode[] {
+  const before = new Map(previous.map((node) => [node.id, node]));
+
+  return diagram.groups.flatMap((group) => {
+    const members = tables.filter(
+      (node) => node.data.table.groupId === group.id,
+    );
+    if (members.length === 0) return [];
+
+    let left = Infinity;
+    let top = Infinity;
+    let right = -Infinity;
+    let bottom = -Infinity;
+    for (const node of members) {
+      const size = tableSize(node.data.table);
+      left = Math.min(left, node.position.x);
+      top = Math.min(top, node.position.y);
+      right = Math.max(right, node.position.x + size.width);
+      bottom = Math.max(bottom, node.position.y + size.height);
+    }
+    const x = left - GROUP_PADDING.side;
+    const y = top - GROUP_PADDING.top;
+    const width = right - left + GROUP_PADDING.side * 2;
+    const height = bottom - top + GROUP_PADDING.top + GROUP_PADDING.bottom;
+    const color = stripColors(group.color).background;
+
+    const id = groupNodeId(group.id);
+    const old = before.get(id);
+    if (
+      old &&
+      old.position.x === x &&
+      old.position.y === y &&
+      old.width === width &&
+      old.height === height &&
+      old.data.group === group &&
+      old.data.color === color &&
+      old.data.count === members.length
+    ) {
+      return [old];
+    }
+    return [
+      {
+        id,
+        type: "zone",
+        position: { x, y },
+        width,
+        height,
+        data: { group, color, count: members.length },
+        // Behind the tables and the relations. Only its label takes the pointer.
+        zIndex: -1,
+        selectable: false,
+        focusable: false,
+        dragHandle: ".group-handle",
+        style: { pointerEvents: "none" },
+      },
+    ];
+  });
+}
+
 /**
  * Which side each end of a relation uses, from where the two tables are:
  * the sides that face each other, or both right sides when one table is
@@ -180,6 +271,10 @@ export function relationEdges(
 
   return diagram.relations.flatMap((relation) => {
     const cardinality = getCardinality(diagram, relation);
+    const group = (tableId: Id) =>
+      diagram.tables.find((table) => table.id === tableId)?.groupId;
+    const crossesGroups =
+      group(relation.from.tableId) !== group(relation.to.tableId);
     // A relation over several columns is drawn from its first pair.
     const childColumn = relation.from.columnIds[0];
     const parentColumn = relation.to.columnIds[0];
@@ -197,7 +292,7 @@ export function relationEdges(
       sourceHandle: handleId(childColumn, childSide),
       targetHandle: handleId(parentColumn, parentSide),
       selected: relation.id === selectedId,
-      data: { cardinality },
+      data: { cardinality, crossesGroups },
     };
 
     const old = before.get(relation.id);
@@ -209,7 +304,8 @@ export function relationEdges(
       old.targetHandle === edge.targetHandle &&
       (old.selected ?? false) === edge.selected &&
       old.data?.cardinality.kind === cardinality.kind &&
-      old.data.cardinality.optional === cardinality.optional;
+      old.data.cardinality.optional === cardinality.optional &&
+      old.data.crossesGroups === crossesGroups;
     return [same ? old : edge];
   });
 }

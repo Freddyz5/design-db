@@ -56,7 +56,14 @@ export const RelationEdgeView = memo(function RelationEdgeView({
 
   return (
     <>
-      <BaseEdge path={path} style={{ strokeWidth: width }} />
+      <BaseEdge
+        path={path}
+        style={{
+          strokeWidth: width,
+          // A relation that goes to another group is dashed.
+          strokeDasharray: data?.crossesGroups ? "5 4" : undefined,
+        }}
+      />
       <path
         d={`${childMark} ${oneMark(targetX, targetY, parent)}`}
         className={`fill-none ${stroke}`}

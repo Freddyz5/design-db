@@ -16,7 +16,8 @@
  * Each color is written once as light-dark(light, dark). The system preference
  * decides which one applies; <html data-theme="light|dark"> forces one.
  */
-@theme {
+/* static: every token is written to the page, also the ones only read from code. */
+@theme static {
   --color-*: initial;
 
   --font-sans: "Barlow", ui-sans-serif, system-ui, sans-serif;

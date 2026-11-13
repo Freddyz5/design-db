@@ -18,13 +18,17 @@ import { selectDiagram } from "../../hooks/EditorStore";
 import { editorStore, useEditorStore } from "../../hooks/useEditorStore";
 import {
   dragHandleColumn,
+  groupNodes,
   relationEdges,
   tableNodes,
+  type CanvasNode,
+  type GroupNode,
   type RelationEdge,
   type TableNode,
 } from "../../utils/canvasElements";
 import { linkColumns } from "../../utils/relationEdits";
 import { CanvasControls } from "./CanvasControls";
+import { GroupNodeView } from "./GroupNode";
 import { Notice } from "./Notice";
 import { RelationBar } from "./RelationBar";
 import { RelationEdgeView } from "./RelationEdge";
@@ -32,7 +36,7 @@ import { SelectionBar } from "./SelectionBar";
 import { TablePanel } from "../table-panel/TablePanel";
 import { TableNodeView } from "./TableNode";
 
-const nodeTypes = { table: TableNodeView };
+const nodeTypes = { table: TableNodeView, zone: GroupNodeView };
 const edgeTypes = { relation: RelationEdgeView };
 
 const FIT = { padding: 0.15, maxZoom: 1 };
@@ -69,10 +73,14 @@ const ARIA_LABELS = {
     "Pulsa Enter o Espacio para seleccionar la relación. Pulsa Escape para cancelar.",
 };
 
+const isTable = (node: CanvasNode): node is TableNode => node.type === "table";
+
 /** Places the tables where they were dropped: one change to the diagram, so one step to undo. */
-function place(dragged: readonly TableNode[]) {
+function place(dragged: readonly CanvasNode[]) {
+  const tables = dragged.filter(isTable);
+  if (tables.length === 0) return;
   const positions = Object.fromEntries(
-    dragged.map((node) => [
+    tables.map((node) => [
       node.id,
       { x: Math.round(node.position.x), y: Math.round(node.position.y) },
     ]),
@@ -102,6 +110,17 @@ export function Canvas() {
     setNodes((current) => tableNodes(diagram, current, selection));
   }, [diagram, selection]);
 
+  // The regions of the groups follow the tables, also while they are dragged.
+  const lastGroups = useRef<GroupNode[]>([]);
+  const groups = useMemo(() => {
+    lastGroups.current = groupNodes(diagram, nodes, lastGroups.current);
+    return lastGroups.current;
+  }, [diagram, nodes]);
+  const canvasNodes = useMemo<CanvasNode[]>(
+    () => [...groups, ...nodes],
+    [groups, nodes],
+  );
+
   const lastEdges = useRef<RelationEdge[]>([]);
   const edges = useMemo(() => {
     lastEdges.current = relationEdges(
@@ -113,14 +132,69 @@ export function Canvas() {
     return lastEdges.current;
   }, [diagram, nodes, selectedRelationId]);
 
+  // Only the tables are kept here; a group region is worked out from them.
   const onNodesChange = useCallback(
-    (changes: NodeChange<TableNode>[]) =>
-      setNodes((current) => applyNodeChanges(changes, current)),
+    (changes: NodeChange<CanvasNode>[]) =>
+      setNodes((current) => {
+        const ids = new Set(current.map((node) => node.id));
+        const own = changes.filter(
+          (change) => !("id" in change) || ids.has(change.id),
+        ) as NodeChange<TableNode>[];
+        return own.length > 0 ? applyNodeChanges(own, current) : current;
+      }),
     [],
   );
 
-  const onNodeDragStop = useCallback<OnNodeDrag<TableNode>>(
-    (_event, _node, dragged) => place(dragged),
+  // Dragging a group by its name moves its tables: where the group and each
+  // of its tables were when the drag started.
+  const groupDrag = useRef<{
+    from: { x: number; y: number };
+    tables: Map<string, { x: number; y: number }>;
+  } | null>(null);
+  const tablesNow = useRef(nodes);
+  tablesNow.current = nodes;
+
+  const onNodeDragStart = useCallback<OnNodeDrag<CanvasNode>>(
+    (_event, node) => {
+      if (node.type !== "zone") return;
+      const groupId = node.data.group.id;
+      groupDrag.current = {
+        from: { ...node.position },
+        tables: new Map(
+          tablesNow.current
+            .filter((table) => table.data.table.groupId === groupId)
+            .map((table) => [table.id, { ...table.position }]),
+        ),
+      };
+    },
+    [],
+  );
+
+  const onNodeDrag = useCallback<OnNodeDrag<CanvasNode>>((_event, node) => {
+    const drag = groupDrag.current;
+    if (node.type !== "zone" || !drag) return;
+    const dx = node.position.x - drag.from.x;
+    const dy = node.position.y - drag.from.y;
+    setNodes((current) =>
+      current.map((table) => {
+        const start = drag.tables.get(table.id);
+        return start
+          ? { ...table, position: { x: start.x + dx, y: start.y + dy } }
+          : table;
+      }),
+    );
+  }, []);
+
+  const onNodeDragStop = useCallback<OnNodeDrag<CanvasNode>>(
+    (_event, node, dragged) => {
+      const drag = groupDrag.current;
+      groupDrag.current = null;
+      if (node.type === "zone" && drag) {
+        place(tablesNow.current.filter((table) => drag.tables.has(table.id)));
+      } else {
+        place(dragged);
+      }
+    },
     [],
   );
 
@@ -167,9 +241,9 @@ export function Canvas() {
   }, []);
 
   // The selection lives in the store; the canvas reports what the user picked.
-  const onSelectionChange = useCallback<OnSelectionChangeFunc<TableNode>>(
+  const onSelectionChange = useCallback<OnSelectionChangeFunc<CanvasNode>>(
     ({ nodes: picked }) => {
-      const ids = picked.map((node) => node.id);
+      const ids = picked.filter(isTable).map((node) => node.id);
       const current = editorStore.getState().view.selection;
       const same =
         ids.length === current.length &&
@@ -181,7 +255,7 @@ export function Canvas() {
 
   return (
     <ReactFlow
-      nodes={nodes}
+      nodes={canvasNodes}
       edges={edges}
       nodeTypes={nodeTypes}
       edgeTypes={edgeTypes}
@@ -191,12 +265,15 @@ export function Canvas() {
       onConnectStart={() => setLinking(true)}
       onConnectEnd={onConnectEnd}
       connectionLineStyle={LINK_LINE}
+      onNodeDragStart={onNodeDragStart}
+      onNodeDrag={onNodeDrag}
       onNodeDragStop={onNodeDragStop}
-      onNodeDoubleClick={(_event, node) =>
+      onNodeDoubleClick={(_event, node) => {
+        if (!isTable(node)) return;
         editorStore
           .getState()
-          .setView({ selection: [node.id], editingTableId: node.id })
-      }
+          .setView({ selection: [node.id], editingTableId: node.id });
+      }}
       onSelectionDragStop={(_event, dragged) => place(dragged)}
       onSelectionChange={onSelectionChange}
       selectionMode={SelectionMode.Partial}
