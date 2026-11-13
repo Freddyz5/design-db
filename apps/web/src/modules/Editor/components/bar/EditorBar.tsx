@@ -10,13 +10,13 @@ import { useOverflowEnd } from "../../hooks/useOverflowEnd";
 import { BarButton } from "./BarButton";
 import { BarSegment } from "./BarSegment";
 import { BaseButton } from "./BaseButton";
+import { DiagramName } from "./DiagramName";
 import { TableSearch } from "./TableSearch";
 
 const ICON = { size: 15, strokeWidth: 1.75, "aria-hidden": true } as const;
 
 /** The frame bar: the name of the product and of the diagram, and the tools. */
 export function EditorBar() {
-  const name = useEditorStore((state) => selectDiagram(state).name);
   const columnsFilter = useEditorStore((state) => state.view.columnsFilter);
   const relationsFilter = useEditorStore((state) => state.view.relationsFilter);
   const codeOpen = useEditorStore((state) => state.view.codeOpen);
@@ -45,12 +45,7 @@ export function EditorBar() {
       <span className="mr-1 flex-none font-display text-lg font-bold tracking-[0.14em] whitespace-nowrap uppercase max-[560px]:hidden">
         Design DB
       </span>
-      <span
-        className="max-w-60 min-w-12 flex-none truncate max-[560px]:max-w-28 rounded-control bg-frame-well px-2.5 py-1 font-display text-[15px] font-semibold tracking-wide"
-        title={name}
-      >
-        {name}
-      </span>
+      <DiagramName />
       <BarButton
         compact
         icon={<FilePlus {...ICON} />}

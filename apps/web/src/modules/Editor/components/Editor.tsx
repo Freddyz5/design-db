@@ -1,4 +1,5 @@
 import { ReactFlowProvider } from "@xyflow/react";
+import { Code } from "lucide-react";
 import { useEffect, useState, type DragEvent } from "react";
 import { editorStore, useEditorStore } from "../hooks/useEditorStore";
 import { readTextFile } from "../utils/readTextFile";
@@ -71,6 +72,21 @@ export function Editor() {
             }}
           >
             <Canvas />
+            {!codeOpen && (
+              <button
+                type="button"
+                className="absolute top-1/2 right-0 z-10 flex -translate-y-1/2 cursor-pointer flex-col items-center gap-2 rounded-l-control border border-r-0 border-line bg-raised px-1.5 py-3 font-display text-[12px] font-semibold tracking-[0.1em] text-ink uppercase shadow-float hover:bg-canvas"
+                title="Mostrar el código (C)"
+                onClick={() =>
+                  editorStore.getState().setView({ codeOpen: true })
+                }
+              >
+                <Code size={15} strokeWidth={1.75} aria-hidden />
+                <span className="rotate-180 [writing-mode:vertical-rl]">
+                  Código
+                </span>
+              </button>
+            )}
             {dropping && (
               <div className="pointer-events-none absolute inset-2.5 z-20 grid place-items-center rounded-[4px] border-2 border-dashed border-lamp-ink bg-canvas/85 font-display text-[22px] font-bold tracking-[0.06em] text-lamp-ink uppercase">
                 Suelta el archivo para importarlo
