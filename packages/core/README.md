@@ -118,16 +118,16 @@ Each entity module also exports its own pure helpers (`patchTable`, `addColumn`,
 
 Operations (`Op`):
 
-| Type                                                             | Notes                                                              |
-| ---------------------------------------------------------------- | ------------------------------------------------------------------ |
-| `diagram.update`                                                 | Changes the name or the dialect of the diagram.                    |
-| `table.add` / `table.update` / `table.move` / `table.remove`     | Removing a table also removes its relations and position.          |
-| `column.add` / `column.update` / `column.move` / `column.remove` | Removing a column also removes the relations that use it.          |
-| `relation.add` / `relation.update` / `relation.remove`           | Both ends must point at existing tables and columns.               |
-| `group.add` / `group.update` / `group.remove`                    | Removing a group leaves its tables without a group.                |
-| `enum.add` / `enum.update` / `enum.remove`                       | Renaming an enum also renames the type of the columns that use it. |
-| `layout.place`                                                   | Moves several tables in one step (automatic layout).               |
-| `base.set` / `base.clear`                                        | Saves a copy of the schema to compare with `diffDiagram`.          |
+| Type                                                             | Notes                                                                                |
+| ---------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| `diagram.update`                                                 | Changes the name or the dialect of the diagram.                                      |
+| `table.add` / `table.update` / `table.move` / `table.remove`     | Removing a table also removes its relations and position.                            |
+| `column.add` / `column.update` / `column.move` / `column.remove` | Removing a column also removes the relations that use it.                            |
+| `relation.add` / `relation.update` / `relation.remove`           | Both ends must point at existing tables and columns.                                 |
+| `group.add` / `group.update` / `group.remove`                    | Removing a group leaves its tables without a group.                                  |
+| `enum.add` / `enum.update` / `enum.remove`                       | Renaming an enum also renames the type of the columns that use it.                   |
+| `layout.place`                                                   | Moves several tables in one step (automatic layout).                                 |
+| `base.set` / `base.clear`                                        | Saves a copy of the schema, and where each table was, to compare with `diffDiagram`. |
 
 In patches, `undefined` on an optional field (`comment`, `default`, `groupId`, `note`, `color`, `name` of a relation) removes it.
 

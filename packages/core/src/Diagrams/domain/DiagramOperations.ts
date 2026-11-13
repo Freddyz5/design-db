@@ -130,7 +130,16 @@ export function apply(doc: Diagram, op: Op): Diagram {
       return placeTables(doc, op.positions);
     case "base.set": {
       const { tables, relations, groups, enums } = doc;
-      return { ...doc, base: { at: op.at, tables, relations, groups, enums } };
+      const positions = Object.fromEntries(
+        Object.entries(doc.layout.tables).map(([id, { x, y }]) => [
+          id,
+          { x, y },
+        ]),
+      );
+      return {
+        ...doc,
+        base: { at: op.at, tables, relations, groups, enums, positions },
+      };
     }
     case "base.clear": {
       const { base: _removed, ...rest } = doc;

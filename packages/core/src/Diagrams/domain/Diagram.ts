@@ -49,6 +49,8 @@ export const BaseSchema = z.object({
   relations: z.array(RelationSchema),
   groups: z.array(GroupSchema),
   enums: z.array(EnumSchema),
+  /** Where each placed table was, so a removed table can be drawn where it stood. Older bases have none. */
+  positions: z.record(IdSchema, PositionSchema).optional(),
 });
 export type Base = z.infer<typeof BaseSchema>;
 
