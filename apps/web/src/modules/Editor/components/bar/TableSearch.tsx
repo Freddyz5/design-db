@@ -77,7 +77,7 @@ export function TableSearch() {
   };
 
   return (
-    <div className="relative flex-none">
+    <div className="relative flex-none max-[720px]:hidden">
       <Search
         size={14}
         strokeWidth={1.75}

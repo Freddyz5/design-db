@@ -27,7 +27,7 @@ export type DemoTexts = {
 const ARRIVING_MS = 2600;
 
 const ROW =
-  "grid grid-cols-[minmax(0,1.4fr)_minmax(0,0.6fr)_minmax(0,1.6fr)_minmax(0,1fr)] max-[720px]:grid-cols-[minmax(0,1.5fr)_minmax(0,0.6fr)_minmax(0,1fr)] items-center gap-3 px-5 max-[720px]:px-3";
+  "grid grid-cols-[minmax(0,1.4fr)_minmax(0,0.6fr)_minmax(0,1.6fr)_minmax(0,1fr)] max-[720px]:grid-cols-[minmax(0,1fr)_auto_minmax(0,1.15fr)] items-center gap-3 px-5 max-[720px]:px-3";
 
 const references = (table: DemoTable): string =>
   [

@@ -39,12 +39,12 @@ export function EditorBar() {
   };
 
   return (
-    <header className="flex h-12 items-center gap-2 border-b border-frame-deep bg-frame px-4 text-frame-ink">
-      <span className="mr-1 flex-none font-display text-lg font-bold tracking-[0.14em] whitespace-nowrap uppercase">
+    <header className="flex h-12 items-center gap-2 border-b border-frame-deep bg-frame px-4 text-frame-ink max-[560px]:px-2">
+      <span className="mr-1 flex-none font-display text-lg font-bold tracking-[0.14em] whitespace-nowrap uppercase max-[560px]:hidden">
         Design DB
       </span>
       <span
-        className="max-w-60 min-w-16 flex-none truncate rounded-control bg-frame-well px-2.5 py-1 font-display text-[15px] font-semibold tracking-wide"
+        className="max-w-60 min-w-12 flex-none truncate max-[560px]:max-w-28 rounded-control bg-frame-well px-2.5 py-1 font-display text-[15px] font-semibold tracking-wide"
         title={name}
       >
         {name}
@@ -58,7 +58,7 @@ export function EditorBar() {
         Nuevo
       </BarButton>
       {/* The tools scroll sideways when the window is too narrow for them. */}
-      <div className="flex min-w-0 flex-1 items-center gap-2 overflow-x-auto [scrollbar-width:none]">
+      <div className="relative flex min-w-0 flex-1 items-center gap-2 overflow-x-auto [scrollbar-width:none]">
         <span className="mx-1 h-5 w-px flex-none bg-frame-line" />
         <BarButton
           primary
