@@ -209,6 +209,17 @@ describe("groupNodes", () => {
     });
   });
 
+  test("a group with a note leaves room for it above its tables", () => {
+    const diagram = apply(blog(), {
+      type: "group.update",
+      groupId: "accounts",
+      patch: { note: "Who writes" },
+    });
+    const [accounts] = groupNodes(diagram, tableNodes(diagram));
+    expect(accounts!.position.y).toBe(-64 - 20);
+    expect(accounts!.height).toBe(169 + 20);
+  });
+
   test("a relation inside one group does not cross groups", () => {
     const grouped = apply(blog(), {
       type: "table.update",

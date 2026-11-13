@@ -411,6 +411,8 @@ export const groupNodeId = (groupId: Id): string => `group:${groupId}`;
 
 /** The room a group leaves around its tables; the top holds its name. */
 export const GROUP_PADDING = { top: 64, side: 24, bottom: 24 };
+/** The extra room at the top for the note of a group: one line. */
+export const GROUP_NOTE_ROOM = 20;
 
 /**
  * The groups of the diagram as canvas nodes: a region behind the tables of
@@ -441,10 +443,11 @@ export function groupNodes(
       right = Math.max(right, node.position.x + size.width);
       bottom = Math.max(bottom, node.position.y + size.height);
     }
+    const above = GROUP_PADDING.top + (group.note ? GROUP_NOTE_ROOM : 0);
     const x = left - GROUP_PADDING.side;
-    const y = top - GROUP_PADDING.top;
+    const y = top - above;
     const width = right - left + GROUP_PADDING.side * 2;
-    const height = bottom - top + GROUP_PADDING.top + GROUP_PADDING.bottom;
+    const height = bottom - top + above + GROUP_PADDING.bottom;
     const color = stripColors(group.color).background;
 
     const id = groupNodeId(group.id);
