@@ -63,7 +63,9 @@ export function TableSearch() {
   }, [showList]);
 
   const pick = (tableId: string) => {
-    editorStore.getState().setView({ selection: [tableId] });
+    editorStore
+      .getState()
+      .setView({ selection: [tableId], pinnedTableId: tableId });
     void fitView({
       nodes: [{ id: tableId }],
       padding: 0.6,

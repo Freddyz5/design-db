@@ -117,11 +117,17 @@ export const TableNodeView = memo(function TableNodeView({
   data,
   selected,
 }: NodeProps<TableNode>) {
-  const { table, strip, references, columns, hidden, dimmed, marks } = data;
+  const { table, strip, references, columns, hidden, focused, dimmed, marks } =
+    data;
+  const outline = selected
+    ? "outline-[3px] outline-lamp"
+    : focused
+      ? "outline-2 outline-offset-2 outline-lamp-ink"
+      : "";
 
   return (
     <div
-      className={`group border-[1.5px] border-flap-edge bg-flap text-flap-ink shadow-float transition-opacity duration-150 ${selected ? "outline-[3px] outline-lamp" : ""} ${dimmed ? "opacity-30" : ""}`}
+      className={`group border-[1.5px] border-flap-edge bg-flap text-flap-ink shadow-float transition-opacity duration-150 motion-reduce:transition-none ${outline} ${dimmed ? "opacity-25" : ""}`}
       style={{ width: TABLE_WIDTH }}
       data-table-id={table.id}
     >

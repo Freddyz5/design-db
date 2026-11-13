@@ -27,7 +27,9 @@ export function ChangesPanel() {
   if (!open || !diagram.base) return null;
 
   const show = (tableId: string) => {
-    editorStore.getState().setView({ selection: [tableId] });
+    editorStore
+      .getState()
+      .setView({ selection: [tableId], pinnedTableId: tableId });
     void fitView({
       nodes: [{ id: tableId }],
       padding: 0.6,

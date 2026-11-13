@@ -22,7 +22,8 @@ export const oneMark = (x: number, y: number, out: number): string =>
 /**
  * A relation: a line from the foreign key column to the column it points at.
  * The child end shows many (crow's foot) or one (bar), with a circle when the
- * foreign key can be empty. The parent end is always one.
+ * foreign key can be empty. The parent end is always one. With a table in
+ * focus, its relations are lit and the rest fade.
  */
 export const RelationEdgeView = memo(function RelationEdgeView({
   sourceX,
@@ -51,21 +52,29 @@ export const RelationEdgeView = memo(function RelationEdgeView({
     ? manyMark(sourceX, sourceY, child)
     : oneMark(sourceX, sourceY, child);
 
+  // A relation of the table in focus is lit; with a table in focus, the rest fade.
+  const lit = selected || data?.emphasis === "high";
   const stroke = selected
     ? "stroke-lamp-ink"
     : data?.change === "added"
       ? "stroke-added"
       : data?.change === "modified"
         ? "stroke-changed"
-        : "stroke-relation";
-  const width = selected ? 2.2 : 1.4;
+        : lit
+          ? "stroke-lamp-ink"
+          : "stroke-relation";
+  const width = lit ? 2.2 : 1.4;
 
   return (
-    <>
+    <g
+      className={`transition-opacity duration-150 motion-reduce:transition-none ${data?.emphasis === "low" && !selected ? "opacity-[0.12]" : ""}`}
+    >
       <BaseEdge
         path={path}
         className={stroke}
         style={{
+          // Inline: React Flow's own stroke rule wins over a utility class.
+          stroke: `var(--color-${stroke.slice("stroke-".length)})`,
           strokeWidth: width,
           // A relation that goes to another group is dashed.
           strokeDasharray: data?.crossesGroups ? "5 4" : undefined,
@@ -86,6 +95,6 @@ export const RelationEdgeView = memo(function RelationEdgeView({
           strokeWidth={width}
         />
       )}
-    </>
+    </g>
   );
 });

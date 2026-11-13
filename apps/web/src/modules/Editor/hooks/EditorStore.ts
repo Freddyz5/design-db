@@ -26,6 +26,10 @@ export type EditorView = {
   editingTableId: Id | null;
   /** The selected relation, if any. */
   selectedRelationId: Id | null;
+  /** The table under the pointer: it and the tables related to it stand out. */
+  hoveredTableId: Id | null;
+  /** The table a click fixed the focus on. While set, it stands out instead of the hovered one. */
+  pinnedTableId: Id | null;
   /** Which columns the tables show. */
   columnsFilter: ColumnsFilter;
   /** Which relations the canvas shows. */
@@ -74,6 +78,8 @@ const EMPTY_VIEW: EditorView = {
   selection: [],
   editingTableId: null,
   selectedRelationId: null,
+  hoveredTableId: null,
+  pinnedTableId: null,
   columnsFilter: "all",
   relationsFilter: "all",
   codeOpen: true,
@@ -101,10 +107,20 @@ function viewFor(view: EditorView, diagram: Diagram): EditorView {
     diagram.relations.some((r) => r.id === view.selectedRelationId)
       ? view.selectedRelationId
       : null;
+  const hoveredTableId =
+    view.hoveredTableId !== null && exists(view.hoveredTableId)
+      ? view.hoveredTableId
+      : null;
+  const pinnedTableId =
+    view.pinnedTableId !== null && exists(view.pinnedTableId)
+      ? view.pinnedTableId
+      : null;
   if (
     selection.length === view.selection.length &&
     editingTableId === view.editingTableId &&
     selectedRelationId === view.selectedRelationId &&
+    hoveredTableId === view.hoveredTableId &&
+    pinnedTableId === view.pinnedTableId &&
     view.notice === null
   ) {
     return view;
@@ -114,6 +130,8 @@ function viewFor(view: EditorView, diagram: Diagram): EditorView {
     selection,
     editingTableId,
     selectedRelationId,
+    hoveredTableId,
+    pinnedTableId,
     notice: null,
   };
 }
@@ -153,6 +171,8 @@ export function createEditorStore(
             selection: [],
             editingTableId: null,
             selectedRelationId: null,
+            hoveredTableId: null,
+            pinnedTableId: null,
             notice: null,
           },
         })),

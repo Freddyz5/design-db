@@ -111,9 +111,11 @@ export function CanvasLegend() {
         ))}
       </dl>
       <p className="text-[12px] text-ink-muted">
-        Doble clic en una tabla para editarla. Arrastra el punto al borde de una
-        columna hasta otra tabla para relacionarlas. Shift + arrastrar
-        selecciona varias tablas; Ctrl + rueda o pellizcar hace zoom.
+        Pasa el cursor por una tabla para ver con cuáles se relaciona; un clic
+        la deja enfocada y otro clic en su nombre la suelta. Doble clic en una
+        tabla para editarla. Arrastra el punto al borde de una columna hasta
+        otra tabla para relacionarlas. Shift + arrastrar selecciona varias
+        tablas; Ctrl + rueda o pellizcar hace zoom.
       </p>
     </Panel>
   );

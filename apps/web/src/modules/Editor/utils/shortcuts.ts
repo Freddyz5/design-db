@@ -81,6 +81,9 @@ export function shortcutList(
     { keys: ["/"], what: "Buscar una tabla" },
     { keys: ["C"], what: "Mostrar u ocultar el código" },
     { keys: ["?"], what: "Mostrar u ocultar esta ayuda" },
-    { keys: ["Esc"], what: "Quitar la selección o cerrar el panel" },
+    {
+      keys: ["Esc"],
+      what: "Soltar la selección y el enfoque, o cerrar el panel",
+    },
   ];
 }

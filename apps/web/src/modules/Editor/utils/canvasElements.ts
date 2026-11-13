@@ -35,6 +35,11 @@ export type CanvasView = {
   selectedRelationId: Id | null;
   /** Mark what changed since the base. */
   showChanges: boolean;
+  /**
+   * The table in focus: the pinned one, or else the one under the pointer.
+   * It and the tables related to it stand out; the rest fade.
+   */
+  focusedTableId: Id | null;
 };
 
 const DEFAULT_VIEW: CanvasView = {
@@ -43,6 +48,7 @@ const DEFAULT_VIEW: CanvasView = {
   relations: "all",
   selectedRelationId: null,
   showChanges: false,
+  focusedTableId: null,
 };
 
 export type TableNodeData = {
@@ -54,7 +60,9 @@ export type TableNodeData = {
   columns: Column[];
   /** How many columns the "keys" filter left out. */
   hidden: number;
-  /** Faded: in "focus", a table that has nothing to do with the selected ones. */
+  /** The table in focus. */
+  focused: boolean;
+  /** Faded: a table that has nothing to do with the one in focus or, in "focus", with the selected ones. */
   dimmed: boolean;
   /** What changed since the base, when the changes are shown. */
   marks: TableMarks | null;
@@ -79,6 +87,8 @@ export type RelationEdgeData = {
   crossesGroups: boolean;
   /** New or changed since the base, when the changes are shown. */
   change?: "added" | "modified";
+  /** With a table in focus: "high" for its relations, "low" for the rest. */
+  emphasis?: "high" | "low";
 };
 export type RelationEdge = Edge<RelationEdgeData, "relation">;
 
@@ -206,6 +216,7 @@ function sameData(a: TableNodeData, b: TableNodeData): boolean {
     a.strip.background === b.strip.background &&
     a.strip.ink === b.strip.ink &&
     a.hidden === b.hidden &&
+    a.focused === b.focused &&
     a.dimmed === b.dimmed &&
     sameMarks(a.marks, b.marks) &&
     a.columns.length === b.columns.length &&
@@ -237,7 +248,7 @@ export function tableNodes(
   previous: readonly TableNode[] = [],
   view: Partial<CanvasView> = {},
 ): TableNode[] {
-  const { selection, columns, relations, showChanges } = {
+  const { selection, columns, relations, showChanges, focusedTableId } = {
     ...DEFAULT_VIEW,
     ...view,
   };
@@ -246,15 +257,27 @@ export function tableNodes(
   const noMarks: TableMarks = { columns: {}, removed: [] };
   const selected = new Set(selection);
   const unplaced = unplacedPositions(diagram);
-  const focus =
-    relations === "focus" && selection.length > 0
-      ? relatedTo(diagram, selection)
+  const focused =
+    focusedTableId !== null &&
+    diagram.tables.some((table) => table.id === focusedTableId)
+      ? focusedTableId
       : null;
+  // The table in focus wins over the "focus" filter, which follows the selection.
+  const lit =
+    focused !== null
+      ? relatedTo(diagram, [focused])
+      : relations === "focus" && selection.length > 0
+        ? relatedTo(diagram, selection)
+        : null;
 
   return diagram.tables.map((table) => {
     const layout = diagram.layout.tables[table.id];
     const group = diagram.groups.find((g) => g.id === table.groupId);
-    const at = layout ?? unplaced.get(table.id) ?? { x: 0, y: 0 };
+    const old = before.get(table.id);
+    // A table being dragged stays under the pointer until it is dropped.
+    const at = old?.dragging
+      ? old.position
+      : (layout ?? unplaced.get(table.id) ?? { x: 0, y: 0 });
     const references = referencesOf(diagram, table);
     const shown = shownColumns(table, references, columns);
     const data: TableNodeData = {
@@ -263,7 +286,8 @@ export function tableNodes(
       references,
       columns: shown,
       hidden: columns === "keys" ? table.columns.length - shown.length : 0,
-      dimmed: focus !== null && !focus.has(table.id),
+      focused: table.id === focused,
+      dimmed: lit !== null && !lit.has(table.id),
       marks: changes
         ? {
             ...noMarks,
@@ -277,7 +301,6 @@ export function tableNodes(
         : null,
     };
 
-    const old = before.get(table.id);
     if (
       old &&
       old.position.x === at.x &&
@@ -297,6 +320,26 @@ export function tableNodes(
       ariaLabel: `Tabla ${table.name}`,
     };
   });
+}
+
+/**
+ * The selection after the canvas picked or dropped some tables. The same
+ * array when nothing changed.
+ */
+export function nextSelection(
+  selection: readonly Id[],
+  picks: readonly { id: Id; selected: boolean }[],
+): Id[] {
+  const next = new Set(selection);
+  for (const pick of picks) {
+    if (pick.selected) next.add(pick.id);
+    else next.delete(pick.id);
+  }
+  const ids = [...next];
+  const same =
+    ids.length === selection.length &&
+    ids.every((id, index) => id === selection[index]);
+  return same ? (selection as Id[]) : ids;
 }
 
 /** The id of the canvas node of a group. Table nodes use the id of the table. */
@@ -391,9 +434,10 @@ export function relationSides(childX: number, parentX: number): [Side, Side] {
  * column that is not shown attaches to the name strip.
  *
  * The view decides which relations are drawn: all, those inside a group, or
- * those of the selected tables. The relations of the selected tables and the
- * selected relation are always drawn. An edge that did not change is returned
- * as the same object.
+ * those of the selected tables. The relations of the selected tables, of the
+ * table in focus and the selected relation are always drawn. With a table in
+ * focus, its relations stand out and come last, so they are drawn on top of
+ * the rest. An edge that did not change is returned as the same object.
  */
 export function relationEdges(
   diagram: Diagram,
@@ -405,6 +449,11 @@ export function relationEdges(
     ...DEFAULT_VIEW,
     ...view,
   };
+  const focusedTableId =
+    view.focusedTableId != null &&
+    diagram.tables.some((table) => table.id === view.focusedTableId)
+      ? view.focusedTableId
+      : null;
   const before = new Map(previous.map((edge) => [edge.id, edge]));
   const x = new Map(nodes.map((node) => [node.id, node.position.x]));
   const changed = showChanges ? changeMarks(diagram).relations : {};
@@ -419,7 +468,7 @@ export function relationEdges(
       ? handleId(columnId, side)
       : stripHandleId(side);
 
-  return diagram.relations.flatMap((relation) => {
+  const edges = diagram.relations.flatMap((relation) => {
     const cardinality = getCardinality(diagram, relation);
     const group = (tableId: Id) =>
       diagram.tables.find((table) => table.id === tableId)?.groupId;
@@ -430,7 +479,14 @@ export function relationEdges(
     const parentColumn = relation.to.columnIds[0];
     if (!cardinality || !childColumn || !parentColumn) return [];
 
+    const touchesFocus =
+      focusedTableId !== null &&
+      (relation.from.tableId === focusedTableId ||
+        relation.to.tableId === focusedTableId);
+    const emphasis =
+      focusedTableId === null ? undefined : touchesFocus ? "high" : "low";
     const focused =
+      touchesFocus ||
       relation.id === selectedRelationId ||
       selection.includes(relation.from.tableId) ||
       selection.includes(relation.to.tableId);
@@ -453,6 +509,7 @@ export function relationEdges(
         cardinality,
         crossesGroups,
         ...(changed[relation.id] ? { change: changed[relation.id] } : {}),
+        ...(emphasis ? { emphasis } : {}),
       },
     };
 
@@ -467,7 +524,13 @@ export function relationEdges(
       old.data?.cardinality.kind === cardinality.kind &&
       old.data.cardinality.optional === cardinality.optional &&
       old.data.crossesGroups === crossesGroups &&
-      old.data.change === changed[relation.id];
+      old.data.change === changed[relation.id] &&
+      old.data.emphasis === emphasis;
     return [same ? old : edge];
   });
+  // The relations in focus last: React Flow draws later edges on top.
+  return [
+    ...edges.filter((edge) => edge.data?.emphasis !== "high"),
+    ...edges.filter((edge) => edge.data?.emphasis === "high"),
+  ];
 }

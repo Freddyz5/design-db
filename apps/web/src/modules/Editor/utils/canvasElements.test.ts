@@ -13,6 +13,7 @@ import {
   dragHandleId,
   groupNodes,
   handleId,
+  nextSelection,
   nodeSize,
   relationEdges,
   relationSides,
@@ -346,6 +347,100 @@ describe("view filters", () => {
   });
 });
 
+describe("table in focus", () => {
+  function chain(): Diagram {
+    // users ← posts ← tags
+    return apply(
+      apply(blog(), {
+        type: "table.add",
+        table: createTable({
+          id: "tags",
+          name: "tags",
+          columns: [createColumn({ id: "tags.post_id", name: "post_id" })],
+        }),
+        position: { x: 800, y: 0 },
+      }),
+      {
+        type: "relation.add",
+        relation: createRelation({
+          id: "tags-post",
+          from: { tableId: "tags", columnIds: ["tags.post_id"] },
+          to: { tableId: "posts", columnIds: ["posts.id"] },
+        }),
+      },
+    );
+  }
+
+  test("fades the tables that have no relation with it", () => {
+    const nodes = tableNodes(chain(), [], { focusedTableId: "users" });
+    expect(nodes.map((node) => node.data.dimmed)).toEqual([false, false, true]);
+    expect(nodes.map((node) => node.data.focused)).toEqual([
+      true,
+      false,
+      false,
+    ]);
+
+    const middle = tableNodes(chain(), [], { focusedTableId: "posts" });
+    expect(middle.map((node) => node.data.dimmed)).toEqual([
+      false,
+      false,
+      false,
+    ]);
+  });
+
+  test("wins over the focus filter, and a missing table is no focus", () => {
+    const diagram = chain();
+    const dimmed = (view: Parameters<typeof tableNodes>[2]) =>
+      tableNodes(diagram, [], view).map((node) => node.data.dimmed);
+    expect(
+      dimmed({
+        relations: "focus",
+        selection: ["tags"],
+        focusedTableId: "users",
+      }),
+    ).toEqual([false, false, true]);
+    expect(dimmed({ focusedTableId: "gone" })).toEqual([false, false, false]);
+  });
+
+  test("its relations stand out and come last; the rest fade", () => {
+    const diagram = chain();
+    const edges = relationEdges(diagram, tableNodes(diagram), [], {
+      focusedTableId: "users",
+    });
+    expect(edges.map((edge) => [edge.id, edge.data?.emphasis])).toEqual([
+      ["tags-post", "low"],
+      ["posts-author", "high"],
+    ]);
+    const calm = relationEdges(diagram, tableNodes(diagram));
+    expect(calm.map((edge) => edge.data?.emphasis)).toEqual([
+      undefined,
+      undefined,
+    ]);
+  });
+
+  test("its relations show under the focus filter", () => {
+    const diagram = chain();
+    const edges = relationEdges(diagram, tableNodes(diagram), [], {
+      relations: "focus",
+      focusedTableId: "tags",
+    });
+    expect(edges.map((edge) => edge.id)).toEqual(["tags-post"]);
+  });
+
+  test("an edge whose emphasis changes is a new object", () => {
+    const diagram = chain();
+    const nodes = tableNodes(diagram);
+    const calm = relationEdges(diagram, nodes);
+    const lit = relationEdges(diagram, nodes, calm, { focusedTableId: "tags" });
+    expect(lit.find((edge) => edge.id === "posts-author")).not.toBe(
+      calm.find((edge) => edge.id === "posts-author"),
+    );
+    expect(
+      relationEdges(diagram, nodes, lit, { focusedTableId: "tags" }),
+    ).toEqual(lit);
+  });
+});
+
 describe("change marks", () => {
   test("without showChanges nothing is marked", () => {
     const diagram = apply(blog(), { type: "base.set", at: "now" });
@@ -481,5 +576,42 @@ describe("relationEdges", () => {
     const second = relationEdges(optional, nodes, first);
     expect(second[0]).not.toBe(first[0]);
     expect(second[0]!.data!.cardinality.optional).toBe(true);
+  });
+});
+
+describe("nextSelection", () => {
+  test("adds the picked tables and drops the released ones", () => {
+    expect(
+      nextSelection(
+        ["users"],
+        [
+          { id: "users", selected: false },
+          { id: "posts", selected: true },
+        ],
+      ),
+    ).toEqual(["posts"]);
+    expect(nextSelection(["users"], [{ id: "posts", selected: true }])).toEqual(
+      ["users", "posts"],
+    );
+  });
+
+  test("is the same array when nothing changed", () => {
+    const selection = ["users", "posts"];
+    expect(nextSelection(selection, [{ id: "users", selected: true }])).toBe(
+      selection,
+    );
+  });
+});
+
+describe("dragging", () => {
+  test("a table being dragged keeps its position when the view changes", () => {
+    const diagram = blog();
+    const [users, posts] = tableNodes(diagram);
+    const dragged = { ...users!, position: { x: 90, y: 90 }, dragging: true };
+    const next = tableNodes(diagram, [dragged, posts!], {
+      selection: ["users"],
+    });
+    expect(next[0]?.position).toEqual({ x: 90, y: 90 });
+    expect(next[0]?.selected).toBe(true);
   });
 });

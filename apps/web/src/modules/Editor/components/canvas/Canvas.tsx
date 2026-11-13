@@ -9,16 +9,23 @@ import {
   type NodeChange,
   type OnConnectEnd,
   type OnNodeDrag,
-  type OnSelectionChangeFunc,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type MouseEvent as ReactMouseEvent,
+} from "react";
 import { MAX_ZOOM, MIN_ZOOM } from "../../constants/canvas";
 import { selectDiagram } from "../../hooks/EditorStore";
 import { editorStore, useEditorStore } from "../../hooks/useEditorStore";
 import {
   dragHandleColumn,
   groupNodes,
+  nextSelection,
   relationEdges,
   tableNodes,
   type CanvasNode,
@@ -108,14 +115,35 @@ export function Canvas() {
     (state) =>
       state.view.showChanges && selectDiagram(state).base !== undefined,
   );
+  // The pinned table holds the focus; without one, the table under the pointer.
+  const focusedTableId = useEditorStore(
+    (state) => state.view.pinnedTableId ?? state.view.hoveredTableId,
+  );
   const view = useMemo(
-    () => ({ selection, selectedRelationId, columns, relations, showChanges }),
-    [selection, selectedRelationId, columns, relations, showChanges],
+    () => ({
+      selection,
+      selectedRelationId,
+      columns,
+      relations,
+      showChanges,
+      focusedTableId,
+    }),
+    [
+      selection,
+      selectedRelationId,
+      columns,
+      relations,
+      showChanges,
+      focusedTableId,
+    ],
   );
   const addTable = useAddTable();
   useShortcuts();
   /** True while a relation is being dragged from a column. */
   const [linking, setLinking] = useState(false);
+  /** While something is dragged, the focus stays where it was. */
+  const busy = useRef(false);
+  busy.current = linking;
 
   // The canvas keeps its own copy of the nodes: while a table is dragged its
   // position here is ahead of the diagram, which only changes when it is dropped.
@@ -144,17 +172,29 @@ export function Canvas() {
   }, [diagram, nodes, view]);
 
   // Only the tables are kept here; a group region is worked out from them.
-  const onNodesChange = useCallback(
-    (changes: NodeChange<CanvasNode>[]) =>
-      setNodes((current) => {
-        const ids = new Set(current.map((node) => node.id));
-        const own = changes.filter(
-          (change) => !("id" in change) || ids.has(change.id),
-        ) as NodeChange<TableNode>[];
-        return own.length > 0 ? applyNodeChanges(own, current) : current;
-      }),
-    [],
-  );
+  // The selection lives in the store alone: the canvas draws it from there.
+  // Keeping a second copy here let the two answer each other forever when a
+  // click both selected and dragged a table.
+  const onNodesChange = useCallback((changes: NodeChange<CanvasNode>[]) => {
+    const picks = changes.filter((change) => change.type === "select");
+    if (picks.length > 0) {
+      const { view, setView } = editorStore.getState();
+      const selection = nextSelection(view.selection, picks);
+      if (selection !== view.selection) setView({ selection });
+    }
+    const rest = changes.filter((change) => change.type !== "select");
+    if (rest.length === 0) return;
+    setNodes((current) => {
+      const ids = new Set(current.map((node) => node.id));
+      const own = rest.filter(
+        (change) => !("id" in change) || ids.has(change.id),
+      ) as NodeChange<TableNode>[];
+      return own.length > 0 ? applyNodeChanges(own, current) : current;
+    });
+  }, []);
+
+  /** True while a table or a group is dragged. */
+  const dragging = useRef(false);
 
   // Dragging a group by its name moves its tables: where the group and each
   // of its tables were when the drag started.
@@ -167,6 +207,7 @@ export function Canvas() {
 
   const onNodeDragStart = useCallback<OnNodeDrag<CanvasNode>>(
     (_event, node) => {
+      dragging.current = true;
       if (node.type !== "zone") return;
       const groupId = node.data.group.id;
       groupDrag.current = {
@@ -198,6 +239,7 @@ export function Canvas() {
 
   const onNodeDragStop = useCallback<OnNodeDrag<CanvasNode>>(
     (_event, node, dragged) => {
+      dragging.current = false;
       const drag = groupDrag.current;
       groupDrag.current = null;
       if (node.type === "zone" && drag) {
@@ -209,17 +251,28 @@ export function Canvas() {
     [],
   );
 
-  // Which relation is selected lives in the store too.
+  // Which relation is selected lives in the store too. A click or Enter on
+  // the relation selects it; a box over some tables picks the tables, not
+  // their relations.
   const onEdgesChange = useCallback((changes: EdgeChange<RelationEdge>[]) => {
     for (const change of changes) {
       if (change.type !== "select") continue;
       const { view, setView } = editorStore.getState();
-      if (change.selected) setView({ selectedRelationId: change.id });
-      else if (view.selectedRelationId === change.id) {
+      if (change.selected) {
+        const focused = document.activeElement?.closest(".react-flow__edge");
+        if (focused?.getAttribute("data-id") === change.id) {
+          setView({ selectedRelationId: change.id });
+        }
+      } else if (view.selectedRelationId === change.id) {
         setView({ selectedRelationId: null });
       }
     }
   }, []);
+  const onEdgeClick = useCallback(
+    (_event: ReactMouseEvent, edge: RelationEdge) =>
+      editorStore.getState().setView({ selectedRelationId: edge.id }),
+    [],
+  );
 
   // A relation is dragged from a column and dropped anywhere on a table, or
   // on one of its columns: what is under the pointer decides the target.
@@ -251,18 +304,40 @@ export function Canvas() {
     notify(edit.notice);
   }, []);
 
-  // The selection lives in the store; the canvas reports what the user picked.
-  const onSelectionChange = useCallback<OnSelectionChangeFunc<CanvasNode>>(
-    ({ nodes: picked }) => {
-      const ids = picked.filter(isTable).map((node) => node.id);
-      const current = editorStore.getState().view.selection;
-      const same =
-        ids.length === current.length &&
-        ids.every((id) => current.includes(id));
-      if (!same) editorStore.getState().setView({ selection: ids });
+  // The table under the pointer stands out, with the tables related to it.
+  const hover = useCallback((tableId: string | null) => {
+    if (busy.current || dragging.current) return;
+    const { view, setView } = editorStore.getState();
+    if (view.hoveredTableId !== tableId) setView({ hoveredTableId: tableId });
+  }, []);
+
+  // A click on a table fixes the focus on it; a second click on its name lets
+  // go. A click on one of its columns keeps it fixed. With Shift or Ctrl the
+  // click only adds to the selection.
+  const onNodeClick = useCallback(
+    (event: ReactMouseEvent, node: CanvasNode) => {
+      if (!isTable(node) || event.shiftKey || event.metaKey || event.ctrlKey) {
+        return;
+      }
+      const onColumn =
+        event.target instanceof Element &&
+        event.target.closest("[data-column-id]") !== null;
+      const { view, setView } = editorStore.getState();
+      setView({
+        pinnedTableId:
+          view.pinnedTableId === node.id && !onColumn ? null : node.id,
+      });
     },
     [],
   );
+
+  // A click on the background lets go of the selection and the focus.
+  const onPaneClick = useCallback(() => {
+    const { view, setView } = editorStore.getState();
+    if (view.pinnedTableId !== null || view.selection.length > 0) {
+      setView({ pinnedTableId: null, selection: [] });
+    }
+  }, []);
 
   return (
     <ReactFlow
@@ -273,12 +348,20 @@ export function Canvas() {
       className={linking ? "linking" : undefined}
       onNodesChange={onNodesChange}
       onEdgesChange={onEdgesChange}
+      onEdgeClick={onEdgeClick}
       onConnectStart={() => setLinking(true)}
       onConnectEnd={onConnectEnd}
       connectionLineStyle={LINK_LINE}
       onNodeDragStart={onNodeDragStart}
       onNodeDrag={onNodeDrag}
       onNodeDragStop={onNodeDragStop}
+      onNodeMouseEnter={(_event, node) => {
+        if (isTable(node)) hover(node.id);
+      }}
+      onNodeMouseLeave={() => hover(null)}
+      onPaneMouseLeave={() => hover(null)}
+      onNodeClick={onNodeClick}
+      onPaneClick={onPaneClick}
       onNodeDoubleClick={(_event, node) => {
         if (!isTable(node)) return;
         editorStore
@@ -286,7 +369,6 @@ export function Canvas() {
           .setView({ selection: [node.id], editingTableId: node.id });
       }}
       onSelectionDragStop={(_event, dragged) => place(dragged)}
-      onSelectionChange={onSelectionChange}
       selectionMode={SelectionMode.Partial}
       connectionMode={ConnectionMode.Loose}
       deleteKeyCode={null}

@@ -72,8 +72,16 @@ export function useShortcuts(): void {
         case "escape":
           if (view.editingTableId) setView({ editingTableId: null });
           else if (view.helpOpen) setView({ helpOpen: false });
-          else if (view.selection.length > 0 || view.selectedRelationId) {
-            setView({ selection: [], selectedRelationId: null });
+          else if (
+            view.selection.length > 0 ||
+            view.selectedRelationId ||
+            view.pinnedTableId
+          ) {
+            setView({
+              selection: [],
+              selectedRelationId: null,
+              pinnedTableId: null,
+            });
           } else return;
           break;
       }

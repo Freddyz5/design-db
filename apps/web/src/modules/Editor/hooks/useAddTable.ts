@@ -32,6 +32,10 @@ export function useAddTable(): () => void {
     });
 
     dispatch({ type: "table.add", table, position });
-    setView({ selection: [table.id], editingTableId: table.id });
+    setView({
+      selection: [table.id],
+      editingTableId: table.id,
+      pinnedTableId: table.id,
+    });
   }, [canvas, screenToFlowPosition]);
 }

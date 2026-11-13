@@ -234,6 +234,17 @@ describe("view", () => {
     expect(state().view.selectedRelationId).toBeNull();
   });
 
+  test("the focus lets go of a table that no longer exists", () => {
+    const { state } = setup();
+    state().setView({ hoveredTableId: "posts", pinnedTableId: "posts" });
+    state().dispatch({ type: "table.remove", tableId: "users" });
+    expect(state().view.pinnedTableId).toBe("posts");
+
+    state().dispatch({ type: "table.remove", tableId: "posts" });
+    expect(state().view.hoveredTableId).toBeNull();
+    expect(state().view.pinnedTableId).toBeNull();
+  });
+
   test("a notice lasts until the next change", () => {
     const { state } = setup();
     state().dispatch({ type: "table.remove", tableId: "posts" });
