@@ -148,3 +148,28 @@
   outline: 2px solid var(--color-lamp-ink);
   outline-offset: -2px;
 }
+
+/* The flap cascade: a character of the board flips when its text changes. */
+@layer components {
+  .flap-cell {
+    transform-origin: 50% 50%;
+    animation: flap 160ms steps(4, end) both;
+  }
+}
+
+@keyframes flap {
+  from {
+    transform: rotateX(90deg);
+    opacity: 0.2;
+  }
+  to {
+    transform: rotateX(0deg);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flap-cell {
+    animation: none;
+  }
+}

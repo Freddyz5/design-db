@@ -1,10 +1,38 @@
 {
   "name": "Design DB",
-  "description": "Editor visual de diagramas entidad-relación. El diagrama y el código son el mismo esquema.",
+  "description": "Editor visual de diagramas entidad-relación, de código abierto. El diagrama y el código son el mismo esquema: SQL, DBML y Drizzle.",
+  "repository": "https://github.com/Freddyz5/design-db",
   "landing": {
     "title": "Design DB",
-    "lead": "Diseña el esquema de tu base de datos como diagrama y como código a la vez.",
-    "cta": "Abrir el editor"
+    "headline": "Diseña tu esquema",
+    "cta": "Abrir el editor",
+    "repositoryLink": "Ver el código en GitHub",
+    "lead": "Design DB es un editor de diagramas entidad-relación de código abierto. El diagrama y el código son el mismo esquema.",
+    "try": "Escribe una tabla en el SQL y mira cómo entra al tablero. Funciona en tu navegador: sin cuenta y sin enviar tu esquema a ningún servidor.",
+    "board": {
+      "label": "Tablero del esquema",
+      "table": "Tabla",
+      "columns": "Columnas",
+      "references": "Referencias",
+      "status": "Estado",
+      "onBoard": "En tablero",
+      "arriving": "Llegando",
+      "empty": "Escribe un CREATE TABLE para empezar."
+    },
+    "sql": {
+      "label": "Escribe SQL · el tablero se actualiza",
+      "ok": "El tablero está al día.",
+      "error": "Línea {line}: {message}. El tablero no cambió."
+    },
+    "formats": {
+      "title": "El mismo esquema, en otros formatos",
+      "lead": "Lo que escribiste arriba, escrito por el mismo código que usa el editor. En el editor también puedes escribir en DBML o Drizzle y el diagrama cambia."
+    },
+    "close": {
+      "title": "Tu esquema, a la vista",
+      "lead": "Tablas, columnas, relaciones y grupos en un lienzo, con el código al lado. Importa un esquema que ya tienes, ordénalo con un clic y compara los cambios con una base."
+    },
+    "footer": "Design DB es de código abierto."
   },
   "editor": {
     "title": "Editor"

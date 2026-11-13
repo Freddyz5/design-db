@@ -1,30 +1,79 @@
 ---
-// Placeholder until the landing is designed (DDB-43).
 import site from "../../../content/site.json";
 import { ThemeSelect } from "../../shared";
+import { DemoBoard } from "./DemoBoard";
 
-const { title, lead, cta } = site.landing;
+const { landing, repository, name } = site;
 ---
 
-<div class="grid min-h-dvh grid-rows-[auto_1fr]">
+<div class="flex min-h-dvh flex-col">
   <header
-    class="flex h-12 items-center justify-between bg-frame px-4 text-frame-ink"
+    class="flex h-14 items-center gap-5 border-b border-frame-deep bg-frame px-10 text-frame-ink max-[720px]:gap-3 max-[720px]:px-4"
   >
-    <span class="font-display text-lg font-bold tracking-[0.14em] uppercase"
-      >{site.name}</span
+    <span
+      class="font-display text-xl font-bold tracking-[0.14em] whitespace-nowrap uppercase"
+    >
+      {name}
+    </span>
+    <span class="flex-1"></span>
+    <a
+      href={repository}
+      class="text-[14px] text-frame-muted hover:text-frame-ink max-[480px]:hidden"
+      >GitHub</a
+    >
+    <a
+      href="/app"
+      class="inline-flex h-10 items-center rounded-control bg-lamp px-4 text-[15px] font-semibold whitespace-nowrap text-on-lamp hover:brightness-105 max-[480px]:px-3"
+      >{landing.cta}</a
     >
     <ThemeSelect client:load />
   </header>
-  <main class="grid place-items-center p-6">
-    <div class="flex max-w-prose flex-col gap-4">
-      <h1 class="font-display text-4xl font-bold">{title}</h1>
-      <p class="text-base text-ink-muted">{lead}</p>
-      <p>
-        <a
-          class="inline-flex h-9 items-center rounded-control bg-lamp px-4 font-semibold text-on-lamp"
-          href="/app">{cta}</a
+
+  <main
+    class="flex flex-1 flex-col gap-6 bg-canvas bg-[radial-gradient(circle,var(--color-canvas-dot)_1.1px,transparent_1.4px)] bg-size-[24px_24px] px-10 pt-9 pb-20 max-[720px]:px-4 max-[720px]:pt-5"
+  >
+    <DemoBoard
+      client:load
+      texts={{ ...landing, repository }}
+    />
+
+    <section
+      class="mt-14 flex flex-wrap items-end justify-between gap-6 border-t border-line pt-10"
+      aria-labelledby="close-title"
+    >
+      <div class="flex max-w-[60ch] flex-col gap-2">
+        <h2
+          id="close-title"
+          class="font-display text-[36px] leading-none font-bold tracking-[0.03em] uppercase"
         >
-      </p>
-    </div>
+          {landing.close.title}
+        </h2>
+        <p class="text-[17px] text-ink-muted">{landing.close.lead}</p>
+      </div>
+      <div class="flex flex-wrap gap-3">
+        <a
+          href="/app"
+          class="inline-flex h-12 items-center rounded-control bg-lamp px-5 text-[17px] font-semibold text-on-lamp hover:brightness-105"
+          >{landing.cta}</a
+        >
+        <a
+          href={repository}
+          class="inline-flex h-12 items-center rounded-control border border-line bg-raised px-5 text-[17px] font-medium hover:border-ink-muted"
+          >{landing.repositoryLink}</a
+        >
+      </div>
+    </section>
   </main>
+
+  <footer
+    class="flex flex-wrap items-center gap-3 border-t border-frame-deep bg-frame px-10 py-5 text-[13px] text-frame-muted max-[720px]:px-4"
+  >
+    <span class="font-display font-bold tracking-[0.14em] text-frame-ink uppercase"
+      >{name}</span
+    >
+    <span>{landing.footer}</span>
+    <a href={repository} class="underline underline-offset-4 hover:text-frame-ink"
+      >GitHub</a
+    >
+  </footer>
 </div>
