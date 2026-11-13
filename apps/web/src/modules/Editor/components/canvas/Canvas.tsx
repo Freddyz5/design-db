@@ -98,17 +98,23 @@ export function Canvas() {
   const selectedRelationId = useEditorStore(
     (state) => state.view.selectedRelationId,
   );
+  const columns = useEditorStore((state) => state.view.columnsFilter);
+  const relations = useEditorStore((state) => state.view.relationsFilter);
+  const view = useMemo(
+    () => ({ selection, selectedRelationId, columns, relations }),
+    [selection, selectedRelationId, columns, relations],
+  );
   /** True while a relation is being dragged from a column. */
   const [linking, setLinking] = useState(false);
 
   // The canvas keeps its own copy of the nodes: while a table is dragged its
   // position here is ahead of the diagram, which only changes when it is dropped.
   const [nodes, setNodes] = useState<TableNode[]>(() =>
-    tableNodes(diagram, [], selection),
+    tableNodes(diagram, [], view),
   );
   useEffect(() => {
-    setNodes((current) => tableNodes(diagram, current, selection));
-  }, [diagram, selection]);
+    setNodes((current) => tableNodes(diagram, current, view));
+  }, [diagram, view]);
 
   // The regions of the groups follow the tables, also while they are dragged.
   const lastGroups = useRef<GroupNode[]>([]);
@@ -123,14 +129,9 @@ export function Canvas() {
 
   const lastEdges = useRef<RelationEdge[]>([]);
   const edges = useMemo(() => {
-    lastEdges.current = relationEdges(
-      diagram,
-      nodes,
-      lastEdges.current,
-      selectedRelationId,
-    );
+    lastEdges.current = relationEdges(diagram, nodes, lastEdges.current, view);
     return lastEdges.current;
-  }, [diagram, nodes, selectedRelationId]);
+  }, [diagram, nodes, view]);
 
   // Only the tables are kept here; a group region is worked out from them.
   const onNodesChange = useCallback(

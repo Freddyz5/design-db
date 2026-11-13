@@ -9,6 +9,7 @@ import {
 import {
   dragHandleId,
   handleId,
+  stripHandleId,
   type TableNode,
 } from "../../utils/canvasElements";
 
@@ -94,16 +95,16 @@ export const TableNodeView = memo(function TableNodeView({
   data,
   selected,
 }: NodeProps<TableNode>) {
-  const { table, strip, references } = data;
+  const { table, strip, references, columns, hidden, dimmed } = data;
 
   return (
     <div
-      className={`group border-[1.5px] border-flap-edge bg-flap text-flap-ink shadow-float ${selected ? "outline-[3px] outline-lamp" : ""}`}
+      className={`group border-[1.5px] border-flap-edge bg-flap text-flap-ink shadow-float transition-opacity duration-150 ${selected ? "outline-[3px] outline-lamp" : ""} ${dimmed ? "opacity-30" : ""}`}
       style={{ width: TABLE_WIDTH }}
       data-table-id={table.id}
     >
       <div
-        className="flex items-center justify-between gap-2 px-2 font-display text-[15.5px] font-bold tracking-[0.06em]"
+        className="relative flex items-center justify-between gap-2 px-2 font-display text-[15.5px] font-bold tracking-[0.06em]"
         style={{
           height: TABLE_HEADER_HEIGHT,
           backgroundColor: strip.background,
@@ -119,15 +120,38 @@ export const TableNodeView = memo(function TableNodeView({
         >
           {table.columns.length}
         </span>
+        {/* Where a relation attaches when its column is not shown. */}
+        <Handle
+          type="source"
+          position={Position.Left}
+          id={stripHandleId("l")}
+          isConnectable={false}
+          className={ANCHOR}
+        />
+        <Handle
+          type="source"
+          position={Position.Right}
+          id={stripHandleId("r")}
+          isConnectable={false}
+          className={ANCHOR}
+        />
       </div>
       <ul>
-        {table.columns.map((column) => (
+        {columns.map((column) => (
           <ColumnRow
             key={column.id}
             column={column}
             reference={references[column.id]}
           />
         ))}
+        {hidden > 0 && (
+          <li
+            className="flex items-center border-t border-flap-seam px-[5px] text-[11px] text-flap-muted"
+            style={{ height: TABLE_ROW_HEIGHT }}
+          >
+            {hidden === 1 ? "1 columna más" : `${hidden} columnas más`}
+          </li>
+        )}
       </ul>
     </div>
   );

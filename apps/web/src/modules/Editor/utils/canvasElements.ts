@@ -2,6 +2,7 @@ import {
   getCardinality,
   placementOrigin,
   type Cardinality,
+  type Column,
   type Diagram,
   type Group,
   type Id,
@@ -18,11 +19,39 @@ import {
 } from "../constants/canvas";
 import { stripColors, type Strip } from "./groupColor";
 
+/** Which columns the tables show: all, only the keys, or none (just the name). */
+export type ColumnsFilter = "all" | "keys" | "name";
+/** Which relations show: all, those inside a group, or those of the selected tables. */
+export type RelationsFilter = "all" | "group" | "focus";
+
+/** What of the view changes how the canvas is drawn. */
+export type CanvasView = {
+  /** Ids of the selected tables. */
+  selection: readonly Id[];
+  columns: ColumnsFilter;
+  relations: RelationsFilter;
+  /** The selected relation, if any. */
+  selectedRelationId: Id | null;
+};
+
+const DEFAULT_VIEW: CanvasView = {
+  selection: [],
+  columns: "all",
+  relations: "all",
+  selectedRelationId: null,
+};
+
 export type TableNodeData = {
   table: Table;
   strip: Strip;
   /** For each foreign key column, what it points at, such as "users.id". */
   references: Record<Id, string>;
+  /** The columns the table shows now. */
+  columns: Column[];
+  /** How many columns the "keys" filter left out. */
+  hidden: number;
+  /** Faded: in "focus", a table that has nothing to do with the selected ones. */
+  dimmed: boolean;
 };
 export type TableNode = Node<TableNodeData, "table">;
 
@@ -52,6 +81,9 @@ export type Side = "l" | "r";
 export const handleId = (columnId: Id, side: Side): string =>
   `${columnId}:${side}`;
 
+/** The id of the connection point on the name strip, for a column that is not shown. */
+export const stripHandleId = (side: Side): string => `strip:${side}`;
+
 /** The id of the point a relation is dragged from. It is not where relations attach. */
 export const dragHandleId = (columnId: Id): string => `${columnId}:drag`;
 
@@ -59,15 +91,34 @@ export const dragHandleId = (columnId: Id): string => `${columnId}:drag`;
 export const dragHandleColumn = (handle: string): Id =>
   handle.slice(0, handle.lastIndexOf(":"));
 
-/** The size a table has on the canvas. */
+/** The size of a table drawn with that many rows under its name. */
+const sizeWithRows = (rows: number): Size => ({
+  width: TABLE_WIDTH,
+  height: TABLE_HEADER_HEIGHT + rows * TABLE_ROW_HEIGHT + TABLE_BORDER * 2,
+});
+
+/** The size a table has on the canvas with all its columns. */
 export function tableSize(table: Table): Size {
-  return {
-    width: TABLE_WIDTH,
-    height:
-      TABLE_HEADER_HEIGHT +
-      table.columns.length * TABLE_ROW_HEIGHT +
-      TABLE_BORDER * 2,
-  };
+  return sizeWithRows(table.columns.length);
+}
+
+/** The size a table has on the canvas as it is drawn now: its shown columns, and a row for the hidden ones. */
+export function nodeSize(data: TableNodeData): Size {
+  return sizeWithRows(data.columns.length + (data.hidden > 0 ? 1 : 0));
+}
+
+/** The columns a table shows under a filter. Keys are primary keys, unique columns and foreign keys. */
+export function shownColumns(
+  table: Table,
+  references: Record<Id, string>,
+  filter: ColumnsFilter,
+): Column[] {
+  if (filter === "all") return table.columns;
+  if (filter === "name") return [];
+  return table.columns.filter(
+    (column) =>
+      column.primaryKey || column.unique || references[column.id] !== undefined,
+  );
 }
 
 /** Space between the tables that have no position yet. */
@@ -119,32 +170,59 @@ function sameData(a: TableNodeData, b: TableNodeData): boolean {
     a.table === b.table &&
     a.strip.background === b.strip.background &&
     a.strip.ink === b.strip.ink &&
+    a.hidden === b.hidden &&
+    a.dimmed === b.dimmed &&
+    a.columns.length === b.columns.length &&
+    a.columns.every((column, index) => column === b.columns[index]) &&
     sameRecord(a.references, b.references)
   );
 }
 
+/** The tables that share a relation with one of `tableIds`, and those tables themselves. */
+function relatedTo(diagram: Diagram, tableIds: readonly Id[]): Set<Id> {
+  const related = new Set(tableIds);
+  for (const relation of diagram.relations) {
+    const child = relation.from.tableId;
+    const parent = relation.to.tableId;
+    if (tableIds.includes(child)) related.add(parent);
+    if (tableIds.includes(parent)) related.add(child);
+  }
+  return related;
+}
+
 /**
- * The tables of the diagram as canvas nodes, selected when their id is in
- * `selection`. A node that did not change is returned as the same object, and
- * one that changed keeps what the canvas knows about it (its measured size).
+ * The tables of the diagram as canvas nodes, drawn as the view asks: which
+ * are selected, which columns show, which are faded. A node that did not
+ * change is returned as the same object, and one that changed keeps what the
+ * canvas knows about it (its measured size).
  */
 export function tableNodes(
   diagram: Diagram,
   previous: readonly TableNode[] = [],
-  selection: readonly Id[] = [],
+  view: Partial<CanvasView> = {},
 ): TableNode[] {
+  const { selection, columns, relations } = { ...DEFAULT_VIEW, ...view };
   const before = new Map(previous.map((node) => [node.id, node]));
   const selected = new Set(selection);
   const unplaced = unplacedPositions(diagram);
+  const focus =
+    relations === "focus" && selection.length > 0
+      ? relatedTo(diagram, selection)
+      : null;
 
   return diagram.tables.map((table) => {
     const layout = diagram.layout.tables[table.id];
     const group = diagram.groups.find((g) => g.id === table.groupId);
     const at = layout ?? unplaced.get(table.id) ?? { x: 0, y: 0 };
+    const references = referencesOf(diagram, table);
+    const shown = shownColumns(table, references, columns);
     const data: TableNodeData = {
       table,
       strip: stripColors(layout?.color ?? group?.color),
-      references: referencesOf(diagram, table),
+      references,
+      columns: shown,
+      hidden: columns === "keys" ? table.columns.length - shown.length : 0,
+      dimmed: focus !== null && !focus.has(table.id),
     };
 
     const old = before.get(table.id);
@@ -198,7 +276,7 @@ export function groupNodes(
     let right = -Infinity;
     let bottom = -Infinity;
     for (const node of members) {
-      const size = tableSize(node.data.table);
+      const size = nodeSize(node.data);
       left = Math.min(left, node.position.x);
       top = Math.min(top, node.position.y);
       right = Math.max(right, node.position.x + size.width);
@@ -257,17 +335,36 @@ export function relationSides(childX: number, parentX: number): [Side, Side] {
 /**
  * The relations of the diagram as canvas edges, from the child column to the
  * parent column. `nodes` gives the current positions, which during a drag are
- * ahead of the diagram. The edge of `selectedId` is selected. An edge that did
- * not change is returned as the same object.
+ * ahead of the diagram, and which columns each table shows: a relation to a
+ * column that is not shown attaches to the name strip.
+ *
+ * The view decides which relations are drawn: all, those inside a group, or
+ * those of the selected tables. The relations of the selected tables and the
+ * selected relation are always drawn. An edge that did not change is returned
+ * as the same object.
  */
 export function relationEdges(
   diagram: Diagram,
   nodes: readonly TableNode[],
   previous: readonly RelationEdge[] = [],
-  selectedId: Id | null = null,
+  view: Partial<CanvasView> = {},
 ): RelationEdge[] {
+  const { selection, relations, selectedRelationId } = {
+    ...DEFAULT_VIEW,
+    ...view,
+  };
   const before = new Map(previous.map((edge) => [edge.id, edge]));
   const x = new Map(nodes.map((node) => [node.id, node.position.x]));
+  const shown = new Map(
+    nodes.map((node) => [
+      node.id,
+      new Set(node.data.columns.map((column) => column.id)),
+    ]),
+  );
+  const handle = (tableId: Id, columnId: Id, side: Side) =>
+    shown.get(tableId)?.has(columnId)
+      ? handleId(columnId, side)
+      : stripHandleId(side);
 
   return diagram.relations.flatMap((relation) => {
     const cardinality = getCardinality(diagram, relation);
@@ -280,6 +377,13 @@ export function relationEdges(
     const parentColumn = relation.to.columnIds[0];
     if (!cardinality || !childColumn || !parentColumn) return [];
 
+    const focused =
+      relation.id === selectedRelationId ||
+      selection.includes(relation.from.tableId) ||
+      selection.includes(relation.to.tableId);
+    if (!focused && relations === "focus") return [];
+    if (!focused && relations === "group" && crossesGroups) return [];
+
     const [childSide, parentSide] = relationSides(
       x.get(relation.from.tableId) ?? 0,
       x.get(relation.to.tableId) ?? 0,
@@ -289,9 +393,9 @@ export function relationEdges(
       type: "relation",
       source: relation.from.tableId,
       target: relation.to.tableId,
-      sourceHandle: handleId(childColumn, childSide),
-      targetHandle: handleId(parentColumn, parentSide),
-      selected: relation.id === selectedId,
+      sourceHandle: handle(relation.from.tableId, childColumn, childSide),
+      targetHandle: handle(relation.to.tableId, parentColumn, parentSide),
+      selected: relation.id === selectedRelationId,
       data: { cardinality, crossesGroups },
     };
 

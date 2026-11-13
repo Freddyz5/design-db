@@ -149,9 +149,9 @@ describe("replace", () => {
 });
 
 describe("load", () => {
-  test("starts over with an empty history and an empty view", () => {
+  test("starts over with an empty history and nothing selected, keeping the filters", () => {
     const { state, present } = setup();
-    state().setView({ selection: ["users"] });
+    state().setView({ selection: ["users"], columnsFilter: "keys" });
     state().dispatch({ type: "table.remove", tableId: "posts" });
 
     const other = createDiagram({ name: "Empty" });
@@ -159,10 +159,19 @@ describe("load", () => {
     expect(present()).toBe(other);
     expect(selectCanUndo(state())).toBe(false);
     expect(state().view.selection).toEqual([]);
+    expect(state().view.columnsFilter).toBe("keys");
   });
 });
 
 describe("view", () => {
+  test("the filters start showing everything and are not undo steps", () => {
+    const { state } = setup();
+    expect(state().view.columnsFilter).toBe("all");
+    expect(state().view.relationsFilter).toBe("all");
+    state().setView({ relationsFilter: "focus" });
+    expect(selectCanUndo(state())).toBe(false);
+  });
+
   test("changing the view adds no undo step", () => {
     const { state, initial, present } = setup();
     state().setView({ selection: ["users", "posts"] });

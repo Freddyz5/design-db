@@ -13,8 +13,10 @@ import {
   dragHandleId,
   groupNodes,
   handleId,
+  nodeSize,
   relationEdges,
   relationSides,
+  stripHandleId,
   tableNodes,
   tableSize,
 } from "./canvasElements";
@@ -106,10 +108,12 @@ describe("tableNodes", () => {
     const first = tableNodes(diagram);
     expect(first.map((node) => node.selected)).toEqual([false, false]);
 
-    const second = tableNodes(diagram, first, ["posts"]);
+    const second = tableNodes(diagram, first, { selection: ["posts"] });
     expect(second[0]).toBe(first[0]);
     expect(second[1]!.selected).toBe(true);
-    expect(tableNodes(diagram, second, ["posts"])[1]).toBe(second[1]);
+    expect(tableNodes(diagram, second, { selection: ["posts"] })[1]).toBe(
+      second[1],
+    );
   });
 
   test("a node that changed keeps what the canvas knows about it", () => {
@@ -213,6 +217,135 @@ describe("groupNodes", () => {
   });
 });
 
+describe("view filters", () => {
+  /** blog() plus tags (no group) with a relation to posts, and a plain column in posts. */
+  function wider(): Diagram {
+    let diagram = blog();
+    for (const op of [
+      {
+        type: "column.add",
+        tableId: "posts",
+        column: createColumn({ id: "posts.title", name: "title" }),
+      },
+      {
+        type: "table.add",
+        table: createTable({
+          id: "tags",
+          name: "tags",
+          columns: [
+            createColumn({ id: "tags.id", name: "id", primaryKey: true }),
+            createColumn({ id: "tags.post_id", name: "post_id" }),
+          ],
+        }),
+        position: { x: 800, y: 0 },
+      },
+      {
+        type: "relation.add",
+        relation: createRelation({
+          id: "tags-post",
+          from: { tableId: "tags", columnIds: ["tags.post_id"] },
+          to: { tableId: "posts", columnIds: ["posts.id"] },
+        }),
+      },
+    ] as const) {
+      diagram = apply(diagram, op);
+    }
+    return diagram;
+  }
+  const names = (node: { data: { columns: { name: string }[] } }) =>
+    node.data.columns.map((column) => column.name);
+
+  test("keys shows primary keys, unique columns and foreign keys, and counts the rest", () => {
+    const [users, posts] = tableNodes(wider(), [], { columns: "keys" });
+    expect(names(users!)).toEqual(["id"]);
+    expect(users!.data.hidden).toBe(0);
+    expect(names(posts!)).toEqual(["id", "author_id"]);
+    expect(posts!.data.hidden).toBe(1);
+    // The name, two columns and the row that says one is hidden.
+    expect(nodeSize(posts!.data).height).toBe(30 + 3 * 24 + 3);
+  });
+
+  test("name shows no columns, and relations attach to the name strip", () => {
+    const diagram = wider();
+    const nodes = tableNodes(diagram, [], { columns: "name" });
+    expect(nodes.map(names)).toEqual([[], [], []]);
+    expect(nodeSize(nodes[0]!.data).height).toBe(33);
+
+    const [author] = relationEdges(diagram, nodes);
+    expect(author!.sourceHandle).toBe(stripHandleId("l"));
+    expect(author!.targetHandle).toBe(stripHandleId("r"));
+  });
+
+  test("a region shrinks with the columns its tables show", () => {
+    const diagram = wider();
+    const all = groupNodes(diagram, tableNodes(diagram));
+    const named = groupNodes(
+      diagram,
+      tableNodes(diagram, [], { columns: "name" }),
+    );
+    expect(all[0]!.height).toBe(145);
+    expect(named[0]!.height).toBe(121);
+  });
+
+  const ids = (edges: { id: string }[]) => edges.map((edge) => edge.id);
+
+  test("group hides the relations that go to another group, unless a table of theirs is selected", () => {
+    // users is in a group and posts and tags are in none.
+    const diagram = wider();
+    const nodes = tableNodes(diagram);
+    expect(ids(relationEdges(diagram, nodes))).toEqual([
+      "posts-author",
+      "tags-post",
+    ]);
+    expect(
+      ids(relationEdges(diagram, nodes, [], { relations: "group" })),
+    ).toEqual(["tags-post"]);
+    expect(
+      ids(
+        relationEdges(diagram, nodes, [], {
+          relations: "group",
+          selection: ["users"],
+        }),
+      ),
+    ).toEqual(["posts-author", "tags-post"]);
+  });
+
+  test("focus shows only the relations of the selected tables, and the selected relation", () => {
+    const diagram = wider();
+    const nodes = tableNodes(diagram);
+    const focus = { relations: "focus" } as const;
+    expect(relationEdges(diagram, nodes, [], focus)).toEqual([]);
+    expect(
+      ids(relationEdges(diagram, nodes, [], { ...focus, selection: ["tags"] })),
+    ).toEqual(["tags-post"]);
+    expect(
+      ids(
+        relationEdges(diagram, nodes, [], {
+          ...focus,
+          selectedRelationId: "posts-author",
+        }),
+      ),
+    ).toEqual(["posts-author"]);
+  });
+
+  test("focus fades the tables that have nothing to do with the selected ones", () => {
+    const diagram = wider();
+    const dimmed = (view: Parameters<typeof tableNodes>[2]) =>
+      tableNodes(diagram, [], view).map((node) => node.data.dimmed);
+    expect(dimmed({ relations: "focus" })).toEqual([false, false, false]);
+    expect(dimmed({ relations: "focus", selection: ["users"] })).toEqual([
+      false,
+      false,
+      true,
+    ]);
+    expect(dimmed({ relations: "all", selection: ["users"] })).toEqual([
+      false,
+      false,
+      false,
+    ]);
+  });
+});
+
 describe("relationSides", () => {
   test("uses the sides that face each other", () => {
     expect(relationSides(400, 0)).toEqual(["l", "r"]);
@@ -261,11 +394,15 @@ describe("relationEdges", () => {
     const diagram = blog();
     const nodes = tableNodes(diagram);
     const first = relationEdges(diagram, nodes);
-    const second = relationEdges(diagram, nodes, first, "posts-author");
+    const second = relationEdges(diagram, nodes, first, {
+      selectedRelationId: "posts-author",
+    });
     expect(second[0]!.selected).toBe(true);
-    expect(relationEdges(diagram, nodes, second, "posts-author")[0]).toBe(
-      second[0],
-    );
+    expect(
+      relationEdges(diagram, nodes, second, {
+        selectedRelationId: "posts-author",
+      })[0],
+    ).toBe(second[0]);
   });
 
   test("the drag point of a column gives the column back", () => {

@@ -9,14 +9,18 @@ import {
 } from "../../constants/canvas";
 import { selectDiagram } from "../../hooks/EditorStore";
 import { editorStore, useEditorStore } from "../../hooks/useEditorStore";
+import { COLUMNS_FILTERS, RELATIONS_FILTERS } from "../../constants/filters";
 import { createDefaultTable, freePosition } from "../../utils/diagramEdits";
 import { BarButton } from "./BarButton";
+import { BarSegment } from "./BarSegment";
 
 const ICON = { size: 15, strokeWidth: 1.75, "aria-hidden": true } as const;
 
 /** The frame bar: the name of the product and of the diagram, and the tools. */
 export function EditorBar() {
   const name = useEditorStore((state) => selectDiagram(state).name);
+  const columnsFilter = useEditorStore((state) => state.view.columnsFilter);
+  const relationsFilter = useEditorStore((state) => state.view.relationsFilter);
   const { screenToFlowPosition } = useReactFlow();
   const canvas = useStoreApi();
 
@@ -69,6 +73,23 @@ export function EditorBar() {
       <BarButton icon={<Plus {...ICON} />} onClick={addTable}>
         Nueva tabla
       </BarButton>
+      <span className="mx-1 h-5 w-px flex-none bg-frame-line" />
+      <BarSegment
+        legend="Columnas visibles"
+        options={COLUMNS_FILTERS}
+        value={columnsFilter}
+        onChange={(value) =>
+          editorStore.getState().setView({ columnsFilter: value })
+        }
+      />
+      <BarSegment
+        legend="Relaciones visibles"
+        options={RELATIONS_FILTERS}
+        value={relationsFilter}
+        onChange={(value) =>
+          editorStore.getState().setView({ relationsFilter: value })
+        }
+      />
       <span className="flex-1" />
       <ThemeSelect />
     </header>
