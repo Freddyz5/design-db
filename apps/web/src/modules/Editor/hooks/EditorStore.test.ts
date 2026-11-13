@@ -208,6 +208,23 @@ describe("view", () => {
     expect(state().view.editingTableId).toBeNull();
   });
 
+  test("a relation that no longer exists is no longer selected", () => {
+    const { state } = setup();
+    state().dispatch({
+      type: "relation.add",
+      relation: {
+        id: "posts-users",
+        from: { tableId: "posts", columnIds: ["posts.id"] },
+        to: { tableId: "users", columnIds: ["users.id"] },
+        onDelete: "no action",
+        onUpdate: "no action",
+      },
+    });
+    state().setView({ selectedRelationId: "posts-users" });
+    state().undo();
+    expect(state().view.selectedRelationId).toBeNull();
+  });
+
   test("a notice lasts until the next change", () => {
     const { state } = setup();
     state().dispatch({ type: "table.remove", tableId: "posts" });

@@ -9,6 +9,8 @@ import {
   type Diagram,
 } from "@design-db/core";
 import {
+  dragHandleColumn,
+  dragHandleId,
   handleId,
   relationEdges,
   relationSides,
@@ -176,6 +178,7 @@ describe("relationEdges", () => {
         target: "users",
         sourceHandle: handleId("posts.author_id", "l"),
         targetHandle: handleId("users.id", "r"),
+        selected: false,
         data: { cardinality: { kind: "1:N", optional: false } },
       },
     ]);
@@ -189,6 +192,24 @@ describe("relationEdges", () => {
     const [edge] = relationEdges(diagram, nodes);
     expect(edge!.sourceHandle).toBe(handleId("posts.author_id", "r"));
     expect(edge!.targetHandle).toBe(handleId("users.id", "l"));
+  });
+
+  test("selects the edge of the selected relation", () => {
+    const diagram = blog();
+    const nodes = tableNodes(diagram);
+    const first = relationEdges(diagram, nodes);
+    const second = relationEdges(diagram, nodes, first, "posts-author");
+    expect(second[0]!.selected).toBe(true);
+    expect(relationEdges(diagram, nodes, second, "posts-author")[0]).toBe(
+      second[0],
+    );
+  });
+
+  test("the drag point of a column gives the column back", () => {
+    expect(dragHandleColumn(dragHandleId("posts.author_id"))).toBe(
+      "posts.author_id",
+    );
+    expect(dragHandleColumn(dragHandleId("a:b"))).toBe("a:b");
   });
 
   test("an edge that did not change is the same object", () => {

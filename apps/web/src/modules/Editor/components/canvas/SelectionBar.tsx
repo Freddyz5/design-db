@@ -3,6 +3,10 @@ import { X } from "lucide-react";
 import { selectDiagram } from "../../hooks/EditorStore";
 import { editorStore, useEditorStore } from "../../hooks/useEditorStore";
 import { removeTables, setTablesGroup } from "../../utils/diagramEdits";
+import {
+  canRelateManyToMany,
+  relateManyToMany,
+} from "../../utils/relationEdits";
 
 const BUTTON =
   "h-7 cursor-pointer rounded-[2px] border border-line bg-raised px-2.5 hover:border-ink-muted";
@@ -22,6 +26,17 @@ export function SelectionBar() {
 
   const moveToGroup = (groupId: string | undefined) =>
     editorStore.getState().replace(setTablesGroup(diagram, ids, groupId));
+
+  const [, second] = tables;
+  const pair = tables.length === 2 && first && second ? [first, second] : null;
+  const relate = () => {
+    if (!pair) return;
+    const { replace, notify, setView } = editorStore.getState();
+    const edit = relateManyToMany(diagram, pair[0]!.id, pair[1]!.id);
+    replace(edit.diagram);
+    setView({ selection: [edit.tableId] });
+    notify(edit.notice);
+  };
 
   const remove = () => {
     const { replace, notify } = editorStore.getState();
@@ -82,6 +97,21 @@ export function SelectionBar() {
           }
         >
           Editar
+        </button>
+      )}
+      {pair && (
+        <button
+          type="button"
+          className={`${BUTTON} disabled:cursor-default disabled:opacity-45`}
+          disabled={!canRelateManyToMany(pair[0]!, pair[1]!)}
+          title={
+            canRelateManyToMany(pair[0]!, pair[1]!)
+              ? "Crea una tabla intermedia entre las dos"
+              : "Las dos tablas necesitan una clave primaria"
+          }
+          onClick={relate}
+        >
+          Relacionar N:M
         </button>
       )}
       <button

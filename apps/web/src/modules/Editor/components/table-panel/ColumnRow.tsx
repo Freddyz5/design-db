@@ -8,6 +8,7 @@ import type {
 } from "@design-db/core";
 import { Ellipsis } from "lucide-react";
 import type { KeyboardEvent } from "react";
+import { REF_ACTIONS } from "../../constants/relations";
 import { editorStore } from "../../hooks/useEditorStore";
 import { columnRelation, setColumnReference } from "../../utils/tableEdits";
 import { BUTTON, CHECKBOX, Field, INPUT, IssueList } from "./Field";
@@ -15,13 +16,6 @@ import { BUTTON, CHECKBOX, Field, INPUT, IssueList } from "./Field";
 /** The columns of the grid: name, type, PK, NN, UQ and the button for more. */
 export const COLUMN_GRID =
   "grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_24px_24px_24px_28px] items-center gap-1 px-1.5";
-
-const ON_DELETE: readonly (readonly [RefAction, string])[] = [
-  ["no action", "Sin acción"],
-  ["cascade", "Eliminar en cascada"],
-  ["set null", "Dejar en null"],
-  ["restrict", "Impedir"],
-];
 
 const SERIAL = /^(small|big)?serial$/i;
 
@@ -254,7 +248,7 @@ export function ColumnRow({
                   })
                 }
               >
-                {ON_DELETE.map(([value, label]) => (
+                {REF_ACTIONS.map(([value, label]) => (
                   <option key={value} value={value}>
                     {label}
                   </option>

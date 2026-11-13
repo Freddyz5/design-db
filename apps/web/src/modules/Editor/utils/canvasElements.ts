@@ -35,6 +35,13 @@ export type Side = "l" | "r";
 export const handleId = (columnId: Id, side: Side): string =>
   `${columnId}:${side}`;
 
+/** The id of the point a relation is dragged from. It is not where relations attach. */
+export const dragHandleId = (columnId: Id): string => `${columnId}:drag`;
+
+/** The column a drag started from, given the id of its drag point. */
+export const dragHandleColumn = (handle: string): Id =>
+  handle.slice(0, handle.lastIndexOf(":"));
+
 /** The size a table has on the canvas. */
 export function tableSize(table: Table): Size {
   return {
@@ -159,12 +166,14 @@ export function relationSides(childX: number, parentX: number): [Side, Side] {
 /**
  * The relations of the diagram as canvas edges, from the child column to the
  * parent column. `nodes` gives the current positions, which during a drag are
- * ahead of the diagram. An edge that did not change is returned as the same object.
+ * ahead of the diagram. The edge of `selectedId` is selected. An edge that did
+ * not change is returned as the same object.
  */
 export function relationEdges(
   diagram: Diagram,
   nodes: readonly TableNode[],
   previous: readonly RelationEdge[] = [],
+  selectedId: Id | null = null,
 ): RelationEdge[] {
   const before = new Map(previous.map((edge) => [edge.id, edge]));
   const x = new Map(nodes.map((node) => [node.id, node.position.x]));
@@ -187,6 +196,7 @@ export function relationEdges(
       target: relation.to.tableId,
       sourceHandle: handleId(childColumn, childSide),
       targetHandle: handleId(parentColumn, parentSide),
+      selected: relation.id === selectedId,
       data: { cardinality },
     };
 
@@ -197,6 +207,7 @@ export function relationEdges(
       old.target === edge.target &&
       old.sourceHandle === edge.sourceHandle &&
       old.targetHandle === edge.targetHandle &&
+      (old.selected ?? false) === edge.selected &&
       old.data?.cardinality.kind === cardinality.kind &&
       old.data.cardinality.optional === cardinality.optional;
     return [same ? old : edge];

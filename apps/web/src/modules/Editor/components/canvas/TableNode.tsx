@@ -6,11 +6,19 @@ import {
   TABLE_ROW_HEIGHT,
   TABLE_WIDTH,
 } from "../../constants/canvas";
-import { handleId, type TableNode } from "../../utils/canvasElements";
+import {
+  dragHandleId,
+  handleId,
+  type TableNode,
+} from "../../utils/canvasElements";
 
 /** Where relations attach. Invisible: one point on each side of the row. */
 const ANCHOR =
   "!h-px !min-h-0 !w-px !min-w-0 !border-0 !bg-transparent !opacity-0";
+
+/** The point to drag a relation from. It shows when the pointer is over the table. */
+const DRAG_POINT =
+  "!size-[11px] !border-[1.5px] !border-lamp-ink !bg-raised opacity-0 transition-opacity duration-100 group-hover:opacity-100 hover:!bg-lamp [.linking_&]:opacity-100";
 
 function ColumnRow({
   column,
@@ -32,6 +40,7 @@ function ColumnRow({
     <li
       className={`relative grid grid-cols-[31%_31%_38%] items-center border-t border-flap-seam font-mono text-[11px] ${column.primaryKey ? "bg-key" : ""}`}
       style={{ height: TABLE_ROW_HEIGHT }}
+      data-column-id={column.id}
     >
       <span className="truncate px-[5px]" title={column.name}>
         {column.name}
@@ -69,6 +78,13 @@ function ColumnRow({
         isConnectable={false}
         className={ANCHOR}
       />
+      <Handle
+        type="source"
+        position={Position.Right}
+        id={dragHandleId(column.id)}
+        className={DRAG_POINT}
+        title="Arrastra hasta otra tabla para relacionarlas"
+      />
     </li>
   );
 }
@@ -82,8 +98,9 @@ export const TableNodeView = memo(function TableNodeView({
 
   return (
     <div
-      className={`border-[1.5px] border-flap-edge bg-flap text-flap-ink shadow-float ${selected ? "outline-[3px] outline-lamp" : ""}`}
+      className={`group border-[1.5px] border-flap-edge bg-flap text-flap-ink shadow-float ${selected ? "outline-[3px] outline-lamp" : ""}`}
       style={{ width: TABLE_WIDTH }}
+      data-table-id={table.id}
     >
       <div
         className="flex items-center justify-between gap-2 px-2 font-display text-[15.5px] font-bold tracking-[0.06em]"

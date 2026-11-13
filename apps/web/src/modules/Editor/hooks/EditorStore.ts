@@ -22,6 +22,8 @@ export type EditorView = {
   selection: Id[];
   /** The table open in the edit panel, if any. */
   editingTableId: Id | null;
+  /** The selected relation, if any. */
+  selectedRelationId: Id | null;
   /** A short message about the last change, shown with a way to undo it. Gone on the next change. */
   notice: string | null;
 };
@@ -55,6 +57,7 @@ export type EditorStore = StoreApi<EditorState>;
 const EMPTY_VIEW: EditorView = {
   selection: [],
   editingTableId: null,
+  selectedRelationId: null,
   notice: null,
 };
 
@@ -69,14 +72,26 @@ function viewFor(view: EditorView, diagram: Diagram): EditorView {
     view.editingTableId !== null && exists(view.editingTableId)
       ? view.editingTableId
       : null;
+  const selectedRelationId =
+    view.selectedRelationId !== null &&
+    diagram.relations.some((r) => r.id === view.selectedRelationId)
+      ? view.selectedRelationId
+      : null;
   if (
     selection.length === view.selection.length &&
     editingTableId === view.editingTableId &&
+    selectedRelationId === view.selectedRelationId &&
     view.notice === null
   ) {
     return view;
   }
-  return { ...view, selection, editingTableId, notice: null };
+  return {
+    ...view,
+    selection,
+    editingTableId,
+    selectedRelationId,
+    notice: null,
+  };
 }
 
 /** Creates the editor's store. It starts with the example diagram unless one is given. */

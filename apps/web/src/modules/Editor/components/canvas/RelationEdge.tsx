@@ -32,6 +32,7 @@ export const RelationEdgeView = memo(function RelationEdgeView({
   targetY,
   targetPosition,
   data,
+  selected,
 }: EdgeProps<RelationEdge>) {
   const [path] = getSmoothStepPath({
     sourceX,
@@ -50,13 +51,16 @@ export const RelationEdgeView = memo(function RelationEdgeView({
     ? manyMark(sourceX, sourceY, child)
     : oneMark(sourceX, sourceY, child);
 
+  const stroke = selected ? "stroke-lamp-ink" : "stroke-relation";
+  const width = selected ? 2.2 : 1.4;
+
   return (
     <>
-      <BaseEdge path={path} />
+      <BaseEdge path={path} style={{ strokeWidth: width }} />
       <path
         d={`${childMark} ${oneMark(targetX, targetY, parent)}`}
-        className="fill-none stroke-relation"
-        strokeWidth={1.4}
+        className={`fill-none ${stroke}`}
+        strokeWidth={width}
         strokeLinecap="round"
       />
       {data?.cardinality.optional && (
@@ -64,8 +68,8 @@ export const RelationEdgeView = memo(function RelationEdgeView({
           cx={sourceX + child * 18}
           cy={sourceY}
           r={3.5}
-          className="fill-canvas stroke-relation"
-          strokeWidth={1.4}
+          className={`fill-canvas ${stroke}`}
+          strokeWidth={width}
         />
       )}
     </>

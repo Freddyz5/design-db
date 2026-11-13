@@ -136,3 +136,14 @@
 .react-flow__attribution a {
   color: var(--color-ink-muted);
 }
+
+/* While a relation is dragged, the row or table under the pointer lights up. */
+.react-flow.linking [data-table-id]:hover {
+  outline: 2px dashed var(--color-lamp-ink);
+  outline-offset: 3px;
+}
+
+.react-flow.linking [data-column-id]:hover {
+  outline: 2px solid var(--color-lamp-ink);
+  outline-offset: -2px;
+}
