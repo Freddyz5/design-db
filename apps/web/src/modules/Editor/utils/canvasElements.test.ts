@@ -346,6 +346,60 @@ describe("view filters", () => {
   });
 });
 
+describe("change marks", () => {
+  test("without showChanges nothing is marked", () => {
+    const diagram = apply(blog(), { type: "base.set", at: "now" });
+    expect(tableNodes(diagram)[0]!.data.marks).toBeNull();
+  });
+
+  test("marks new tables, new relations, and strikes removed columns into the size", () => {
+    let diagram = apply(blog(), { type: "base.set", at: "now" });
+    diagram = apply(diagram, {
+      type: "column.remove",
+      tableId: "users",
+      columnId: "users.id",
+    });
+    diagram = apply(diagram, {
+      type: "table.add",
+      table: createTable({ id: "tags", name: "tags" }),
+      position: { x: 0, y: 300 },
+    });
+    const view = { showChanges: true };
+    const nodes = tableNodes(diagram, [], view);
+    const users = nodes.find((n) => n.id === "users")!;
+    expect(users.data.columns).toEqual([]);
+    expect(users.data.marks!.removed.map((c) => c.name)).toEqual(["id"]);
+    expect(nodeSize(users.data).height).toBe(30 + 24 + 3);
+    expect(nodes.find((n) => n.id === "tags")!.data.marks!.table).toBe("added");
+    // The relation to users.id went with the column.
+    expect(relationEdges(diagram, nodes, [], view)).toEqual([]);
+  });
+
+  test("a new relation is marked as added", () => {
+    let diagram = apply(blog(), {
+      type: "relation.remove",
+      relationId: "posts-author",
+    });
+    diagram = apply(diagram, { type: "base.set", at: "now" });
+    diagram = apply(diagram, {
+      type: "relation.add",
+      relation: createRelation({
+        id: "again",
+        from: { tableId: "posts", columnIds: ["posts.author_id"] },
+        to: { tableId: "users", columnIds: ["users.id"] },
+      }),
+    });
+    const view = { showChanges: true };
+    const [edge] = relationEdges(
+      diagram,
+      tableNodes(diagram, [], view),
+      [],
+      view,
+    );
+    expect(edge!.data!.change).toBe("added");
+  });
+});
+
 describe("relationSides", () => {
   test("uses the sides that face each other", () => {
     expect(relationSides(400, 0)).toEqual(["l", "r"]);

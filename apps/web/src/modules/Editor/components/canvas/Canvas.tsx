@@ -29,6 +29,7 @@ import {
 import { linkColumns } from "../../utils/relationEdits";
 import { useAddTable } from "../../hooks/useAddTable";
 import { CanvasControls } from "./CanvasControls";
+import { ChangesPanel } from "./ChangesPanel";
 import { EmptyCanvas } from "./EmptyCanvas";
 import { GroupNodeView } from "./GroupNode";
 import { Notice } from "./Notice";
@@ -102,9 +103,13 @@ export function Canvas() {
   );
   const columns = useEditorStore((state) => state.view.columnsFilter);
   const relations = useEditorStore((state) => state.view.relationsFilter);
+  const showChanges = useEditorStore(
+    (state) =>
+      state.view.showChanges && selectDiagram(state).base !== undefined,
+  );
   const view = useMemo(
-    () => ({ selection, selectedRelationId, columns, relations }),
-    [selection, selectedRelationId, columns, relations],
+    () => ({ selection, selectedRelationId, columns, relations, showChanges }),
+    [selection, selectedRelationId, columns, relations, showChanges],
   );
   const addTable = useAddTable();
   /** True while a relation is being dragged from a column. */
@@ -299,6 +304,7 @@ export function Canvas() {
         color="var(--color-canvas-dot)"
       />
       <EmptyCanvas onAddTable={addTable} />
+      <ChangesPanel />
       <SelectionBar />
       <RelationBar />
       <TablePanel />

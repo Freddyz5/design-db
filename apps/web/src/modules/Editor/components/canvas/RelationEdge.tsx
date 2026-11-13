@@ -51,13 +51,20 @@ export const RelationEdgeView = memo(function RelationEdgeView({
     ? manyMark(sourceX, sourceY, child)
     : oneMark(sourceX, sourceY, child);
 
-  const stroke = selected ? "stroke-lamp-ink" : "stroke-relation";
+  const stroke = selected
+    ? "stroke-lamp-ink"
+    : data?.change === "added"
+      ? "stroke-added"
+      : data?.change === "modified"
+        ? "stroke-changed"
+        : "stroke-relation";
   const width = selected ? 2.2 : 1.4;
 
   return (
     <>
       <BaseEdge
         path={path}
+        className={stroke}
         style={{
           strokeWidth: width,
           // A relation that goes to another group is dashed.

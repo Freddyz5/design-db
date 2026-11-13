@@ -42,7 +42,7 @@ export function Editor() {
   return (
     // The provider wraps the bar too: its tools need to know what the canvas shows.
     <ReactFlowProvider>
-      <div className="grid h-dvh grid-rows-[auto_minmax(0,1fr)]">
+      <div className="grid h-dvh grid-cols-[minmax(0,1fr)] grid-rows-[auto_minmax(0,1fr)]">
         <EditorBar />
         <div className="relative flex min-h-0">
           <main

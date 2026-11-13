@@ -5,12 +5,15 @@ type Props = ButtonHTMLAttributes<HTMLButtonElement> & {
   icon?: ReactNode;
   /** The one amber button of the bar. */
   primary?: boolean;
+  /** On narrow screens only the icon shows; the label stays for screen readers and the tooltip. */
+  compact?: boolean;
 };
 
 /** A button on the frame bar. */
 export function BarButton({
   icon,
   primary,
+  compact,
   className,
   children,
   ...rest
@@ -22,11 +25,15 @@ export function BarButton({
   return (
     <button
       type="button"
-      className={`inline-flex h-[30px] flex-none cursor-pointer items-center gap-1.5 rounded-control border px-[11px] text-[13px] whitespace-nowrap focus-visible:outline-lamp disabled:cursor-default disabled:opacity-45 ${look} ${className ?? ""}`}
+      className={`inline-flex h-[30px] flex-none cursor-pointer items-center gap-1.5 rounded-control border ${compact ? "px-[11px] max-[1439px]:px-[7px]" : "px-[11px]"} text-[13px] whitespace-nowrap focus-visible:outline-lamp disabled:cursor-default disabled:opacity-45 ${look} ${className ?? ""}`}
       {...rest}
     >
       {icon}
-      {children}
+      {compact ? (
+        <span className="max-[1439px]:sr-only">{children}</span>
+      ) : (
+        children
+      )}
     </button>
   );
 }

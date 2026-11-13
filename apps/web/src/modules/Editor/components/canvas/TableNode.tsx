@@ -21,12 +21,23 @@ const ANCHOR =
 const DRAG_POINT =
   "!size-[11px] !border-[1.5px] !border-lamp-ink !bg-raised opacity-0 transition-opacity duration-100 group-hover:opacity-100 hover:!bg-lamp [.linking_&]:opacity-100";
 
+/** The lamp of a changed column: a small square before its name. */
+const CHANGE_LAMP: Record<
+  "added" | "modified",
+  { className: string; label: string }
+> = {
+  added: { className: "bg-added", label: "Columna nueva" },
+  modified: { className: "bg-changed", label: "Columna que cambió" },
+};
+
 function ColumnRow({
   column,
   reference,
+  change,
 }: {
   column: Column;
   reference: string | undefined;
+  change?: "added" | "modified";
 }) {
   const flags = [
     column.primaryKey ? "PK" : null,
@@ -43,8 +54,18 @@ function ColumnRow({
       style={{ height: TABLE_ROW_HEIGHT }}
       data-column-id={column.id}
     >
-      <span className="truncate px-[5px]" title={column.name}>
-        {column.name}
+      <span
+        className="flex min-w-0 items-center gap-1 px-[5px]"
+        title={column.name}
+      >
+        {change && (
+          <span
+            className={`size-1.5 flex-none ${CHANGE_LAMP[change].className}`}
+            role="img"
+            aria-label={CHANGE_LAMP[change].label}
+          />
+        )}
+        <span className="truncate">{column.name}</span>
       </span>
       <span
         className="truncate border-l border-flap-seam px-[5px] text-flap-muted"
@@ -95,7 +116,7 @@ export const TableNodeView = memo(function TableNodeView({
   data,
   selected,
 }: NodeProps<TableNode>) {
-  const { table, strip, references, columns, hidden, dimmed } = data;
+  const { table, strip, references, columns, hidden, dimmed, marks } = data;
 
   return (
     <div
@@ -114,6 +135,13 @@ export const TableNodeView = memo(function TableNodeView({
         <span className="truncate" title={table.name}>
           {table.name}
         </span>
+        {marks?.table && (
+          <span
+            className={`ml-auto rounded-[2px] px-1 text-[10.5px] leading-4 tracking-[0.1em] text-panel uppercase ${marks.table === "added" ? "bg-added" : "bg-changed"}`}
+          >
+            {marks.table === "added" ? "Nueva" : "Cambió"}
+          </span>
+        )}
         <span
           className="font-mono text-[11px] font-medium opacity-80"
           title={`${table.columns.length} columnas`}
@@ -142,7 +170,28 @@ export const TableNodeView = memo(function TableNodeView({
             key={column.id}
             column={column}
             reference={references[column.id]}
+            {...(marks?.columns[column.id]
+              ? { change: marks.columns[column.id] }
+              : {})}
           />
+        ))}
+        {marks?.removed.map((column) => (
+          <li
+            key={column.id}
+            className="grid grid-cols-[31%_31%_38%] items-center border-t border-flap-seam font-mono text-[11px] text-removed"
+            style={{ height: TABLE_ROW_HEIGHT }}
+            aria-label={`Columna eliminada: ${column.name}`}
+          >
+            <span className="truncate px-[5px] line-through">
+              {column.name}
+            </span>
+            <span className="truncate border-l border-flap-seam px-[5px] line-through">
+              {column.type}
+            </span>
+            <span className="border-l border-flap-seam px-[5px] font-display text-[11px] font-semibold tracking-[0.08em] uppercase">
+              Eliminada
+            </span>
+          </li>
         ))}
         {hidden > 0 && (
           <li

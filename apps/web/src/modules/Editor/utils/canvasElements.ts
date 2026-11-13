@@ -17,6 +17,7 @@ import {
   TABLE_ROW_HEIGHT,
   TABLE_WIDTH,
 } from "../constants/canvas";
+import { changeMarks, type TableMarks } from "./diagramChanges";
 import { stripColors, type Strip } from "./groupColor";
 
 /** Which columns the tables show: all, only the keys, or none (just the name). */
@@ -32,6 +33,8 @@ export type CanvasView = {
   relations: RelationsFilter;
   /** The selected relation, if any. */
   selectedRelationId: Id | null;
+  /** Mark what changed since the base. */
+  showChanges: boolean;
 };
 
 const DEFAULT_VIEW: CanvasView = {
@@ -39,6 +42,7 @@ const DEFAULT_VIEW: CanvasView = {
   columns: "all",
   relations: "all",
   selectedRelationId: null,
+  showChanges: false,
 };
 
 export type TableNodeData = {
@@ -52,6 +56,8 @@ export type TableNodeData = {
   hidden: number;
   /** Faded: in "focus", a table that has nothing to do with the selected ones. */
   dimmed: boolean;
+  /** What changed since the base, when the changes are shown. */
+  marks: TableMarks | null;
 };
 export type TableNode = Node<TableNodeData, "table">;
 
@@ -71,6 +77,8 @@ export type RelationEdgeData = {
   cardinality: Cardinality;
   /** The two tables are not in the same group. */
   crossesGroups: boolean;
+  /** New or changed since the base, when the changes are shown. */
+  change?: "added" | "modified";
 };
 export type RelationEdge = Edge<RelationEdgeData, "relation">;
 
@@ -104,7 +112,11 @@ export function tableSize(table: Table): Size {
 
 /** The size a table has on the canvas as it is drawn now: its shown columns, and a row for the hidden ones. */
 export function nodeSize(data: TableNodeData): Size {
-  return sizeWithRows(data.columns.length + (data.hidden > 0 ? 1 : 0));
+  return sizeWithRows(
+    data.columns.length +
+      (data.marks?.removed.length ?? 0) +
+      (data.hidden > 0 ? 1 : 0),
+  );
 }
 
 /** The size of every table as the canvas draws it under a columns filter. */
@@ -178,6 +190,16 @@ function sameRecord(a: Record<string, string>, b: Record<string, string>) {
   );
 }
 
+function sameMarks(a: TableMarks | null, b: TableMarks | null): boolean {
+  if (a === null || b === null) return a === b;
+  return (
+    a.table === b.table &&
+    sameRecord(a.columns, b.columns) &&
+    a.removed.length === b.removed.length &&
+    a.removed.every((column, index) => column === b.removed[index])
+  );
+}
+
 function sameData(a: TableNodeData, b: TableNodeData): boolean {
   return (
     a.table === b.table &&
@@ -185,6 +207,7 @@ function sameData(a: TableNodeData, b: TableNodeData): boolean {
     a.strip.ink === b.strip.ink &&
     a.hidden === b.hidden &&
     a.dimmed === b.dimmed &&
+    sameMarks(a.marks, b.marks) &&
     a.columns.length === b.columns.length &&
     a.columns.every((column, index) => column === b.columns[index]) &&
     sameRecord(a.references, b.references)
@@ -214,8 +237,13 @@ export function tableNodes(
   previous: readonly TableNode[] = [],
   view: Partial<CanvasView> = {},
 ): TableNode[] {
-  const { selection, columns, relations } = { ...DEFAULT_VIEW, ...view };
+  const { selection, columns, relations, showChanges } = {
+    ...DEFAULT_VIEW,
+    ...view,
+  };
   const before = new Map(previous.map((node) => [node.id, node]));
+  const changes = showChanges ? changeMarks(diagram) : null;
+  const noMarks: TableMarks = { columns: {}, removed: [] };
   const selected = new Set(selection);
   const unplaced = unplacedPositions(diagram);
   const focus =
@@ -236,6 +264,17 @@ export function tableNodes(
       columns: shown,
       hidden: columns === "keys" ? table.columns.length - shown.length : 0,
       dimmed: focus !== null && !focus.has(table.id),
+      marks: changes
+        ? {
+            ...noMarks,
+            ...changes.tables[table.id],
+            // Struck rows only make sense with every column shown.
+            removed:
+              columns === "all"
+                ? (changes.tables[table.id]?.removed ?? [])
+                : [],
+          }
+        : null,
     };
 
     const old = before.get(table.id);
@@ -362,12 +401,13 @@ export function relationEdges(
   previous: readonly RelationEdge[] = [],
   view: Partial<CanvasView> = {},
 ): RelationEdge[] {
-  const { selection, relations, selectedRelationId } = {
+  const { selection, relations, selectedRelationId, showChanges } = {
     ...DEFAULT_VIEW,
     ...view,
   };
   const before = new Map(previous.map((edge) => [edge.id, edge]));
   const x = new Map(nodes.map((node) => [node.id, node.position.x]));
+  const changed = showChanges ? changeMarks(diagram).relations : {};
   const shown = new Map(
     nodes.map((node) => [
       node.id,
@@ -409,7 +449,11 @@ export function relationEdges(
       sourceHandle: handle(relation.from.tableId, childColumn, childSide),
       targetHandle: handle(relation.to.tableId, parentColumn, parentSide),
       selected: relation.id === selectedRelationId,
-      data: { cardinality, crossesGroups },
+      data: {
+        cardinality,
+        crossesGroups,
+        ...(changed[relation.id] ? { change: changed[relation.id] } : {}),
+      },
     };
 
     const old = before.get(relation.id);
@@ -422,7 +466,8 @@ export function relationEdges(
       (old.selected ?? false) === edge.selected &&
       old.data?.cardinality.kind === cardinality.kind &&
       old.data.cardinality.optional === cardinality.optional &&
-      old.data.crossesGroups === crossesGroups;
+      old.data.crossesGroups === crossesGroups &&
+      old.data.change === changed[relation.id];
     return [same ? old : edge];
   });
 }
