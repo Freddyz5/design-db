@@ -1,6 +1,6 @@
 import { createDiagram } from "@design-db/core";
 import { useReactFlow, useStoreApi } from "@xyflow/react";
-import { FilePlus, Plus } from "lucide-react";
+import { Code, FilePlus, Plus } from "lucide-react";
 import { ThemeSelect } from "../../../shared";
 import {
   TABLE_HEADER_HEIGHT,
@@ -21,6 +21,7 @@ export function EditorBar() {
   const name = useEditorStore((state) => selectDiagram(state).name);
   const columnsFilter = useEditorStore((state) => state.view.columnsFilter);
   const relationsFilter = useEditorStore((state) => state.view.relationsFilter);
+  const codeOpen = useEditorStore((state) => state.view.codeOpen);
   const { screenToFlowPosition } = useReactFlow();
   const canvas = useStoreApi();
 
@@ -91,6 +92,15 @@ export function EditorBar() {
         }
       />
       <span className="flex-1" />
+      <BarButton
+        icon={<Code {...ICON} />}
+        aria-pressed={codeOpen}
+        title={codeOpen ? "Ocultar el código" : "Mostrar el código"}
+        className="aria-pressed:border-frame-deep aria-pressed:bg-frame-deep aria-pressed:text-lamp"
+        onClick={() => editorStore.getState().setView({ codeOpen: !codeOpen })}
+      >
+        Código
+      </BarButton>
       <ThemeSelect />
     </header>
   );

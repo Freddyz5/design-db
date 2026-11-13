@@ -16,6 +16,13 @@ export default defineConfig({
       include: [
         "react-dom/client",
         "@xyflow/react",
+        "codemirror",
+        "@codemirror/lang-javascript",
+        "@codemirror/lang-sql",
+        "@codemirror/language",
+        "@codemirror/state",
+        "@codemirror/view",
+        "@lezer/highlight",
         "lucide-react",
         "zustand",
         "zustand/vanilla",

@@ -282,7 +282,7 @@ function TablePanelBody({
           </datalist>
         </div>
 
-        <footer className="flex items-center border-t border-line px-3.5 py-2">
+        <footer className="flex items-center gap-3 border-t border-line px-3.5 py-2">
           <button
             type="button"
             className={`${BUTTON} text-removed`}
@@ -290,6 +290,9 @@ function TablePanelBody({
           >
             Eliminar tabla
           </button>
+          <span className="ml-auto text-right text-[11.5px] text-ink-muted">
+            Los cambios se escriben en el código al instante.
+          </span>
         </footer>
       </section>
     </Panel>

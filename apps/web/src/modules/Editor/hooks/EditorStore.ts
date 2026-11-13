@@ -16,6 +16,7 @@ import {
 } from "@design-db/core";
 import { createStore, type StoreApi } from "zustand/vanilla";
 import type { ColumnsFilter, RelationsFilter } from "../utils/canvasElements";
+import { CODE_WIDTH, type CodeFormat } from "../utils/codeFormats";
 
 /** What the user is looking at. It is not part of the diagram, so it never enters the history. */
 export type EditorView = {
@@ -29,6 +30,10 @@ export type EditorView = {
   columnsFilter: ColumnsFilter;
   /** Which relations the canvas shows. */
   relationsFilter: RelationsFilter;
+  /** Whether the code panel shows, in which format, and how wide. */
+  codeOpen: boolean;
+  codeFormat: CodeFormat;
+  codeWidth: number;
   /** A short message about the last change, shown with a way to undo it. Gone on the next change. */
   notice: string | null;
 };
@@ -52,7 +57,7 @@ export type EditorState = {
   checkpoint: () => void;
   undo: () => void;
   redo: () => void;
-  /** Starts over with another diagram, an empty history and nothing selected. The filters stay. */
+  /** Starts over with another diagram, an empty history and nothing selected. The filters and the code panel stay. */
   load: (diagram: Diagram) => void;
   setView: (patch: Partial<EditorView>) => void;
 };
@@ -65,6 +70,9 @@ const EMPTY_VIEW: EditorView = {
   selectedRelationId: null,
   columnsFilter: "all",
   relationsFilter: "all",
+  codeOpen: true,
+  codeFormat: "sql",
+  codeWidth: CODE_WIDTH,
   notice: null,
 };
 
@@ -127,14 +135,16 @@ export function createEditorStore(
       checkpoint: () => move(checkpoint),
       undo: () => move(undo),
       redo: () => move(redo),
-      // The filters are how the user likes to look at diagrams: they stay.
+      // The filters and the code panel are how the user likes to work: they stay.
       load: (next) =>
         set((state) => ({
           history: createHistory(next),
           view: {
-            ...EMPTY_VIEW,
-            columnsFilter: state.view.columnsFilter,
-            relationsFilter: state.view.relationsFilter,
+            ...state.view,
+            selection: [],
+            editingTableId: null,
+            selectedRelationId: null,
+            notice: null,
           },
         })),
       notify: (notice) => set((state) => ({ view: { ...state.view, notice } })),
