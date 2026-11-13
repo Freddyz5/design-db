@@ -1,6 +1,6 @@
 import { createDiagram } from "@design-db/core";
 import { useReactFlow, useStoreApi } from "@xyflow/react";
-import { Code, FilePlus, Plus } from "lucide-react";
+import { Code, FilePlus, LayoutGrid, Plus } from "lucide-react";
 import { ThemeSelect } from "../../../shared";
 import {
   TABLE_HEADER_HEIGHT,
@@ -8,6 +8,7 @@ import {
   TABLE_WIDTH,
 } from "../../constants/canvas";
 import { selectDiagram } from "../../hooks/EditorStore";
+import { useAutoLayout } from "../../hooks/useAutoLayout";
 import { editorStore, useEditorStore } from "../../hooks/useEditorStore";
 import { COLUMNS_FILTERS, RELATIONS_FILTERS } from "../../constants/filters";
 import { createDefaultTable, freePosition } from "../../utils/diagramEdits";
@@ -22,6 +23,10 @@ export function EditorBar() {
   const columnsFilter = useEditorStore((state) => state.view.columnsFilter);
   const relationsFilter = useEditorStore((state) => state.view.relationsFilter);
   const codeOpen = useEditorStore((state) => state.view.codeOpen);
+  const hasTables = useEditorStore(
+    (state) => selectDiagram(state).tables.length > 0,
+  );
+  const { arrange, busy } = useAutoLayout();
   const { screenToFlowPosition } = useReactFlow();
   const canvas = useStoreApi();
 
@@ -73,6 +78,15 @@ export function EditorBar() {
       <span className="mx-1 h-5 w-px flex-none bg-frame-line" />
       <BarButton icon={<Plus {...ICON} />} onClick={addTable}>
         Nueva tabla
+      </BarButton>
+      <BarButton
+        icon={<LayoutGrid {...ICON} />}
+        title="Ordenar automáticamente todas las tablas"
+        disabled={!hasTables || busy}
+        aria-busy={busy}
+        onClick={() => void arrange()}
+      >
+        {busy ? "Ordenando…" : "Ordenar"}
       </BarButton>
       <span className="mx-1 h-5 w-px flex-none bg-frame-line" />
       <BarSegment

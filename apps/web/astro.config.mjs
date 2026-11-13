@@ -17,6 +17,7 @@ export default defineConfig({
         "react-dom/client",
         "@xyflow/react",
         "codemirror",
+        "elkjs/lib/elk-api.js",
         "@codemirror/lang-javascript",
         "@codemirror/lang-sql",
         "@codemirror/language",

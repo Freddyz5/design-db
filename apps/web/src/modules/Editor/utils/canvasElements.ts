@@ -107,6 +107,19 @@ export function nodeSize(data: TableNodeData): Size {
   return sizeWithRows(data.columns.length + (data.hidden > 0 ? 1 : 0));
 }
 
+/** The size of every table as the canvas draws it under a columns filter. */
+export function drawnSizes(
+  diagram: Diagram,
+  columns: ColumnsFilter = "all",
+): Record<Id, Size> {
+  return Object.fromEntries(
+    tableNodes(diagram, [], { columns }).map((node) => [
+      node.id,
+      nodeSize(node.data),
+    ]),
+  );
+}
+
 /** The columns a table shows under a filter. Keys are primary keys, unique columns and foreign keys. */
 export function shownColumns(
   table: Table,
