@@ -5,26 +5,40 @@ type Props = {
   /** Classes for each character cell. */
   cellClassName?: string;
   className?: string;
+  /** Flip the characters when the text first appears too, not only when it changes. */
+  animateOnMount?: boolean;
+  title?: string;
 };
 
 /**
- * Text set in flap cells. When the text changes, its characters flip one
- * after another, like a departures board; under reduced motion it just changes.
+ * Text set in flap cells, like a departures board. When the text changes,
+ * its characters flip one after another; under reduced motion it just
+ * changes. Until then it renders as plain text, so a large diagram stays cheap.
  */
 export function FlapText({
   text,
   cellClassName = "inline-block",
   className = "",
+  animateOnMount = false,
+  title,
 }: Props) {
-  const version = useRef(0);
+  const version = useRef(animateOnMount ? 1 : 0);
   const last = useRef(text);
   if (last.current !== text) {
     last.current = text;
     version.current++;
   }
 
+  if (version.current === 0) {
+    return (
+      <span className={className} title={title}>
+        {text}
+      </span>
+    );
+  }
+
   return (
-    <span className={className} aria-label={text}>
+    <span className={className} title={title} aria-label={text}>
       {[...text].map((char, index) => (
         <span
           // A new key replays the flip for every character of the new text.
@@ -33,7 +47,7 @@ export function FlapText({
           className={`flap-cell ${cellClassName}`}
           style={{ animationDelay: `${index * 22}ms` }}
         >
-          {char === " " ? "\u00a0" : char}
+          {char === " " ? " " : char}
         </span>
       ))}
     </span>

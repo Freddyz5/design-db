@@ -25,12 +25,12 @@ export function BarButton({
   return (
     <button
       type="button"
-      className={`inline-flex h-[30px] flex-none cursor-pointer items-center gap-1.5 rounded-control border ${compact ? "px-[11px] max-[1439px]:px-[7px]" : "px-[11px]"} text-[13px] whitespace-nowrap focus-visible:outline-lamp disabled:cursor-default disabled:opacity-45 ${look} ${className ?? ""}`}
+      className={`inline-flex h-[30px] flex-none cursor-pointer items-center gap-1.5 rounded-control border ${compact ? "px-[11px] max-[1599px]:px-[7px]" : "px-[11px]"} text-[13px] whitespace-nowrap focus-visible:outline-lamp disabled:cursor-default disabled:opacity-45 ${look} ${className ?? ""}`}
       {...rest}
     >
       {icon}
       {compact ? (
-        <span className="max-[1439px]:sr-only">{children}</span>
+        <span className="max-[1599px]:sr-only">{children}</span>
       ) : (
         children
       )}

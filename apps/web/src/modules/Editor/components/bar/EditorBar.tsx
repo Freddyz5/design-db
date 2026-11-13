@@ -6,6 +6,7 @@ import { useAddTable } from "../../hooks/useAddTable";
 import { useAutoLayout } from "../../hooks/useAutoLayout";
 import { editorStore, useEditorStore } from "../../hooks/useEditorStore";
 import { COLUMNS_FILTERS, RELATIONS_FILTERS } from "../../constants/filters";
+import { useOverflowEnd } from "../../hooks/useOverflowEnd";
 import { BarButton } from "./BarButton";
 import { BarSegment } from "./BarSegment";
 import { BaseButton } from "./BaseButton";
@@ -29,6 +30,7 @@ export function EditorBar() {
   );
   const { arrange, busy } = useAutoLayout();
   const addTable = useAddTable();
+  const { tools, more, measure } = useOverflowEnd();
 
   /** Starts an empty diagram. It is one step, so undoing brings the old one back. */
   const startNew = () => {
@@ -57,8 +59,12 @@ export function EditorBar() {
       >
         Nuevo
       </BarButton>
-      {/* The tools scroll sideways when the window is too narrow for them. */}
-      <div className="relative flex min-w-0 flex-1 items-center gap-2 overflow-x-auto [scrollbar-width:none]">
+      {/* The tools scroll sideways when the window is too narrow for them; a fade says there is more. */}
+      <div
+        ref={tools}
+        onScroll={measure}
+        className={`relative flex min-w-0 flex-1 items-center gap-2 overflow-x-auto [scrollbar-width:none] ${more ? "[mask-image:linear-gradient(to_right,black_calc(100%-40px),transparent)]" : ""}`}
+      >
         <span className="mx-1 h-5 w-px flex-none bg-frame-line" />
         <BarButton
           primary

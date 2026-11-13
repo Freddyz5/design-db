@@ -75,7 +75,8 @@
   --color-on-group: #ffffff;
 
   /* Code. */
-  --color-code-keyword: light-dark(#8a5200, #ffb000);
+  /* Keywords in bold ink: amber stays the only lamp. */
+  --color-code-keyword: light-dark(#0b0b0d, #f2f2f2);
   --color-code-type: light-dark(#0b6b74, #6fd3dc);
   --color-code-string: light-dark(#2f6f37, #8fd694);
   --color-code-number: light-dark(#6a3fb0, #c4a7f5);

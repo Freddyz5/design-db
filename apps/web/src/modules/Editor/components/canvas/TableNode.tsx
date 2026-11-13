@@ -1,6 +1,7 @@
 import type { Column } from "@design-db/core";
 import { Handle, Position, type NodeProps } from "@xyflow/react";
 import { memo } from "react";
+import { FlapText } from "../../../shared";
 import {
   TABLE_HEADER_HEIGHT,
   TABLE_ROW_HEIGHT,
@@ -65,14 +66,13 @@ function ColumnRow({
             aria-label={CHANGE_LAMP[change].label}
           />
         )}
-        <span className="truncate">{column.name}</span>
+        <FlapText text={column.name} className="truncate" />
       </span>
-      <span
-        className="truncate border-l border-flap-seam px-[5px] text-flap-muted"
+      <FlapText
+        text={column.type}
         title={column.type}
-      >
-        {column.type}
-      </span>
+        className="truncate border-l border-flap-seam px-[5px] text-flap-muted"
+      />
       <span
         className={`flex min-w-0 items-center gap-1 self-stretch border-l border-flap-seam px-[5px] ${column.primaryKey ? "text-key-ink" : "text-flap-muted"}`}
         title={detail}
@@ -132,9 +132,7 @@ export const TableNodeView = memo(function TableNodeView({
           color: strip.ink,
         }}
       >
-        <span className="truncate" title={table.name}>
-          {table.name}
-        </span>
+        <FlapText text={table.name} title={table.name} className="truncate" />
         {marks?.table && (
           <span
             className={`ml-auto rounded-[2px] px-1 text-[10.5px] leading-4 tracking-[0.1em] text-panel uppercase ${marks.table === "added" ? "bg-added" : "bg-changed"}`}

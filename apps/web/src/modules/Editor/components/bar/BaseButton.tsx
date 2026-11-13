@@ -70,7 +70,7 @@ export function BaseButton({ at }: { at: string | undefined }) {
           setOpen((value) => !value);
         }}
       >
-        Base<span className="max-[1439px]:sr-only"> · {baseDate(at)}</span>
+        Base<span className="max-[1599px]:sr-only"> · {baseDate(at)}</span>
       </BarButton>
       {open && (
         <div

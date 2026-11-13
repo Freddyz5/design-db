@@ -1,6 +1,6 @@
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { DEMO_SQL, readDemo, type DemoTable } from "../utils/liveDemo";
-import { FlapText } from "./FlapText";
+import { FlapText } from "../../shared";
 
 export type DemoTexts = {
   headline: string;
@@ -132,6 +132,7 @@ export function DemoBoard({ texts }: { texts: DemoTexts }) {
                   <FlapText
                     text={table.name.toUpperCase()}
                     className="truncate"
+                    animateOnMount={isArriving}
                   />
                   <span className="font-mono text-[20px] tracking-normal max-[720px]:text-[16px]">
                     {table.rows.length}
