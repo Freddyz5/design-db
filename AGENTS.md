@@ -33,7 +33,10 @@ Intentional differences from the blueprint:
 
 - `src/pages/` holds thin routes: `/` composes `Landing`, `/app` mounts `Editor` as a client-only React island.
 - `src/modules/Landing` and `src/modules/Editor`: each exposes its public API in `index.ts`, with its components in `components/`. Pages import only from that file.
-- `Editor` is a single module. Its zones (canvas, table panel, code panel…) share one store, so they are subfolders of `components/`, not sibling modules.
+- `Editor` is a single module. Its zones (canvas, table panel, code panel…) share one store, so they are subfolders of `components/` (`bar`, `canvas`, `table-panel`, `code-panel`, `import`), not sibling modules.
+- Optional folders in use (variant rules): `hooks/` (the editor store in `EditorStore.ts` and React hooks), `utils/` (pure logic, each file with its `<File>.test.ts`), `constants/` (Spanish texts and fixed values). `Landing` has `utils/` for the live demo.
+- The editor changes the diagram only through the store: `dispatch(op)` for one core operation, `replace(diagram)` for several at once, both one undo step. What the user is looking at (selection, filters, panels) lives in `view` and never enters the history.
+- Keep pure logic out of components and test it with `bun test`; check the interface in the browser.
 - The site's text lives in `src/content/site.json`.
 - `src/modules/shared` holds what both modules use: the theme selector and its helpers.
 - The theme is one CSS file, `src/styles/global.css`: each color is written once with `light-dark()` and exposed to Tailwind through `@theme`. Use those tokens; the default Tailwind palette is turned off.

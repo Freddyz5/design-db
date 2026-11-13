@@ -1,0 +1,988 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-13T13:01:18+00:00",
+  "title": "Design System: Design DB",
+  "extensions": {
+    "colorMeta": {
+      "lamp": {
+        "role": "primary",
+        "displayName": "Concourse Amber",
+        "canonical": "#ffb000",
+        "cssVar": "--color-lamp",
+        "tonalRamp": [
+          "#1c0400",
+          "#441500",
+          "#6d2e00",
+          "#954d00",
+          "#ba7000",
+          "#da9600",
+          "#f6be68",
+          "#ffe8b5"
+        ]
+      },
+      "on-lamp": {
+        "role": "primary",
+        "displayName": "On-Lamp Black",
+        "canonical": "#0b0b0d",
+        "cssVar": "--color-on-lamp",
+        "tonalRamp": [
+          "#0b0b0c",
+          "#252526",
+          "#424244",
+          "#616163",
+          "#828285",
+          "#a5a5a7",
+          "#c9c9cb",
+          "#eeeef0"
+        ]
+      },
+      "lamp-ink": {
+        "role": "primary",
+        "displayName": "Lamp Ink",
+        "canonical": "light-dark(#8a5200, #ffb000)",
+        "cssVar": "--color-lamp-ink",
+        "light": "#8a5200",
+        "dark": "#ffb000",
+        "tonalRamp": [
+          "#180600",
+          "#3d1a00",
+          "#643400",
+          "#8a5204",
+          "#ae7433",
+          "#cf9860",
+          "#edbf93",
+          "#ffe9cd"
+        ]
+      },
+      "canvas": {
+        "role": "neutral",
+        "displayName": "Steel Hall",
+        "canonical": "light-dark(#dfe2e4, #1b1d20)",
+        "cssVar": "--color-canvas",
+        "light": "#dfe2e4",
+        "dark": "#1b1d20",
+        "tonalRamp": [
+          "#0a0b0c",
+          "#242526",
+          "#404244",
+          "#5f6263",
+          "#808384",
+          "#a3a5a7",
+          "#c7c9cb",
+          "#edefef"
+        ]
+      },
+      "canvas-dot": {
+        "role": "neutral",
+        "displayName": "Hall Dot",
+        "canonical": "light-dark(#b4b9be, #34383d)",
+        "cssVar": "--color-canvas-dot",
+        "light": "#b4b9be",
+        "dark": "#34383d",
+        "tonalRamp": [
+          "#0a0b0d",
+          "#232528",
+          "#3f4246",
+          "#5d6266",
+          "#7e8388",
+          "#a1a6aa",
+          "#c6cacd",
+          "#eceff1"
+        ]
+      },
+      "panel": {
+        "role": "neutral",
+        "displayName": "Panel Steel",
+        "canonical": "light-dark(#f6f7f8, #131517)",
+        "cssVar": "--color-panel",
+        "light": "#f6f7f8",
+        "dark": "#131517",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#252526",
+          "#414243",
+          "#606162",
+          "#818283",
+          "#a4a5a6",
+          "#c8c9ca",
+          "#eeeeef"
+        ]
+      },
+      "raised": {
+        "role": "neutral",
+        "displayName": "Raised Steel",
+        "canonical": "light-dark(#ffffff, #1e2124)",
+        "cssVar": "--color-raised",
+        "light": "#ffffff",
+        "dark": "#1e2124",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#252525",
+          "#424242",
+          "#616161",
+          "#828282",
+          "#a5a5a5",
+          "#c9c9c9",
+          "#eeeeee"
+        ]
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "Hairline",
+        "canonical": "light-dark(#c5c9cd, #2f3237)",
+        "cssVar": "--color-line",
+        "light": "#c5c9cd",
+        "dark": "#2f3237",
+        "tonalRamp": [
+          "#0a0b0c",
+          "#232527",
+          "#3f4245",
+          "#5e6265",
+          "#7f8386",
+          "#a2a5a9",
+          "#c7c9cc",
+          "#edeff0"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "canonical": "light-dark(#0b0b0d, #eceded)",
+        "cssVar": "--color-ink",
+        "light": "#0b0b0d",
+        "dark": "#eceded",
+        "tonalRamp": [
+          "#0b0b0c",
+          "#252526",
+          "#424244",
+          "#616163",
+          "#828285",
+          "#a5a5a7",
+          "#c9c9cb",
+          "#eeeef0"
+        ]
+      },
+      "ink-muted": {
+        "role": "neutral",
+        "displayName": "Muted Ink",
+        "canonical": "light-dark(#565b61, #9a9fa6)",
+        "cssVar": "--color-ink-muted",
+        "light": "#565b61",
+        "dark": "#9a9fa6",
+        "tonalRamp": [
+          "#0a0b0d",
+          "#222529",
+          "#3e4248",
+          "#5d6268",
+          "#7e8389",
+          "#a1a6ac",
+          "#c5cace",
+          "#eceff2"
+        ]
+      },
+      "frame": {
+        "role": "neutral",
+        "displayName": "Frame Black",
+        "canonical": "#16181b",
+        "cssVar": "--color-frame",
+        "tonalRamp": [
+          "#0a0b0c",
+          "#242527",
+          "#404245",
+          "#5f6165",
+          "#808286",
+          "#a3a5a9",
+          "#c7c9cc",
+          "#edeef0"
+        ]
+      },
+      "frame-deep": {
+        "role": "neutral",
+        "displayName": "Frame Deep",
+        "canonical": "#0b0b0d",
+        "cssVar": "--color-frame-deep",
+        "tonalRamp": [
+          "#0b0b0c",
+          "#252526",
+          "#424244",
+          "#616163",
+          "#828285",
+          "#a5a5a7",
+          "#c9c9cb",
+          "#eeeef0"
+        ]
+      },
+      "frame-well": {
+        "role": "neutral",
+        "displayName": "Frame Well",
+        "canonical": "#23262a",
+        "cssVar": "--color-frame-well",
+        "tonalRamp": [
+          "#0a0b0d",
+          "#232528",
+          "#3f4246",
+          "#5e6166",
+          "#7f8387",
+          "#a2a5aa",
+          "#c6c9cd",
+          "#edeff1"
+        ]
+      },
+      "frame-line": {
+        "role": "neutral",
+        "displayName": "Frame Line",
+        "canonical": "#3a3e44",
+        "cssVar": "--color-frame-line",
+        "tonalRamp": [
+          "#0a0b0d",
+          "#232529",
+          "#3f4248",
+          "#5d6268",
+          "#7e8389",
+          "#a1a5ac",
+          "#c6c9cf",
+          "#eceff2"
+        ]
+      },
+      "frame-ink": {
+        "role": "neutral",
+        "displayName": "Frame Ink",
+        "canonical": "#f2f2f2",
+        "cssVar": "--color-frame-ink",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#252525",
+          "#424242",
+          "#616161",
+          "#828282",
+          "#a5a5a5",
+          "#c9c9c9",
+          "#eeeeee"
+        ]
+      },
+      "frame-muted": {
+        "role": "neutral",
+        "displayName": "Frame Muted",
+        "canonical": "#a7aaaf",
+        "cssVar": "--color-frame-muted",
+        "tonalRamp": [
+          "#0a0b0d",
+          "#232528",
+          "#404246",
+          "#5f6166",
+          "#808287",
+          "#a2a5aa",
+          "#c7c9cd",
+          "#edeef1"
+        ]
+      },
+      "flap": {
+        "role": "neutral",
+        "displayName": "Flap Face",
+        "canonical": "light-dark(#fbfbf9, #0b0b0d)",
+        "cssVar": "--color-flap",
+        "light": "#fbfbf9",
+        "dark": "#0b0b0d",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#252524",
+          "#424241",
+          "#616160",
+          "#828281",
+          "#a5a5a3",
+          "#c9c9c8",
+          "#eeeeed"
+        ]
+      },
+      "flap-ink": {
+        "role": "neutral",
+        "displayName": "Flap Letter",
+        "canonical": "light-dark(#0b0b0d, #f2f2f2)",
+        "cssVar": "--color-flap-ink",
+        "light": "#0b0b0d",
+        "dark": "#f2f2f2",
+        "tonalRamp": [
+          "#0b0b0c",
+          "#252526",
+          "#424244",
+          "#616163",
+          "#828285",
+          "#a5a5a7",
+          "#c9c9cb",
+          "#eeeef0"
+        ]
+      },
+      "flap-muted": {
+        "role": "neutral",
+        "displayName": "Flap Muted",
+        "canonical": "light-dark(#565b61, #a7aaaf)",
+        "cssVar": "--color-flap-muted",
+        "light": "#565b61",
+        "dark": "#a7aaaf",
+        "tonalRamp": [
+          "#0a0b0d",
+          "#222529",
+          "#3e4248",
+          "#5d6268",
+          "#7e8389",
+          "#a1a6ac",
+          "#c5cace",
+          "#eceff2"
+        ]
+      },
+      "flap-seam": {
+        "role": "neutral",
+        "displayName": "Flap Seam",
+        "canonical": "light-dark(#d9dde0, #1f2226)",
+        "cssVar": "--color-flap-seam",
+        "light": "#d9dde0",
+        "dark": "#1f2226",
+        "tonalRamp": [
+          "#0a0b0c",
+          "#232527",
+          "#3f4245",
+          "#5e6264",
+          "#7f8385",
+          "#a2a5a8",
+          "#c7c9cc",
+          "#edeff0"
+        ]
+      },
+      "flap-edge": {
+        "role": "neutral",
+        "displayName": "Flap Edge",
+        "canonical": "light-dark(#0b0b0d, #3a3e44)",
+        "cssVar": "--color-flap-edge",
+        "light": "#0b0b0d",
+        "dark": "#3a3e44",
+        "tonalRamp": [
+          "#0b0b0c",
+          "#252526",
+          "#424244",
+          "#616163",
+          "#828285",
+          "#a5a5a7",
+          "#c9c9cb",
+          "#eeeef0"
+        ]
+      },
+      "key": {
+        "role": "secondary",
+        "displayName": "Key Yellow",
+        "canonical": "light-dark(#ffe680, #2a2408)",
+        "cssVar": "--color-key",
+        "light": "#ffe680",
+        "dark": "#2a2408",
+        "tonalRamp": [
+          "#120a00",
+          "#322300",
+          "#544000",
+          "#775f00",
+          "#998104",
+          "#baa54b",
+          "#dac985",
+          "#f9efc5"
+        ]
+      },
+      "key-ink": {
+        "role": "secondary",
+        "displayName": "Key Ink",
+        "canonical": "light-dark(#5c4a00, #ffd60a)",
+        "cssVar": "--color-key-ink",
+        "light": "#5c4a00",
+        "dark": "#ffd60a",
+        "tonalRamp": [
+          "#110a00",
+          "#2f2400",
+          "#504002",
+          "#726021",
+          "#948144",
+          "#b6a46d",
+          "#d7c99c",
+          "#f7eed2"
+        ]
+      },
+      "relation": {
+        "role": "neutral",
+        "displayName": "Relation Steel",
+        "canonical": "light-dark(#565b61, #8b9096)",
+        "cssVar": "--color-relation",
+        "light": "#565b61",
+        "dark": "#8b9096",
+        "tonalRamp": [
+          "#0a0b0d",
+          "#222529",
+          "#3e4248",
+          "#5d6268",
+          "#7e8389",
+          "#a1a6ac",
+          "#c5cace",
+          "#eceff2"
+        ]
+      },
+      "added": {
+        "role": "tertiary",
+        "displayName": "Added Green",
+        "canonical": "light-dark(#1b7f45, #4cc38a)",
+        "cssVar": "--color-added",
+        "light": "#1b7f45",
+        "dark": "#4cc38a",
+        "tonalRamp": [
+          "#001101",
+          "#00300c",
+          "#005221",
+          "#0a753c",
+          "#3c975c",
+          "#6aba82",
+          "#9cdbad",
+          "#d3fadc"
+        ]
+      },
+      "changed": {
+        "role": "tertiary",
+        "displayName": "Delay Amber",
+        "canonical": "light-dark(#8a5200, #ffb000)",
+        "cssVar": "--color-changed",
+        "light": "#8a5200",
+        "dark": "#ffb000",
+        "tonalRamp": [
+          "#180600",
+          "#3d1a00",
+          "#643400",
+          "#8a5204",
+          "#ae7433",
+          "#cf9860",
+          "#edbf93",
+          "#ffe9cd"
+        ]
+      },
+      "removed": {
+        "role": "tertiary",
+        "displayName": "Removed Red",
+        "canonical": "light-dark(#b3261e, #ff6b6b)",
+        "cssVar": "--color-removed",
+        "light": "#b3261e",
+        "dark": "#ff6b6b",
+        "tonalRamp": [
+          "#240000",
+          "#530000",
+          "#830000",
+          "#af241c",
+          "#d74d40",
+          "#f97969",
+          "#ffa899",
+          "#ffdbd0"
+        ]
+      },
+      "group-1": {
+        "role": "tertiary",
+        "displayName": "Group Blue",
+        "canonical": "#1f5fbf",
+        "cssVar": "--color-group-1",
+        "tonalRamp": [
+          "#000729",
+          "#001f5c",
+          "#003c8e",
+          "#1d5dbb",
+          "#4180e2",
+          "#6aa5ff",
+          "#9acbff",
+          "#d1f0ff"
+        ]
+      },
+      "group-2": {
+        "role": "tertiary",
+        "displayName": "Group Green",
+        "canonical": "#1b7f45",
+        "cssVar": "--color-group-2",
+        "tonalRamp": [
+          "#001101",
+          "#00300c",
+          "#005221",
+          "#0a753c",
+          "#3c975c",
+          "#6aba82",
+          "#9cdbad",
+          "#d3fadc"
+        ]
+      },
+      "group-3": {
+        "role": "tertiary",
+        "displayName": "Group Red",
+        "canonical": "#a8341f",
+        "cssVar": "--color-group-3",
+        "tonalRamp": [
+          "#210000",
+          "#4e0000",
+          "#7b1401",
+          "#a7341f",
+          "#ce5842",
+          "#ef816b",
+          "#ffae9b",
+          "#ffded1"
+        ]
+      },
+      "group-4": {
+        "role": "tertiary",
+        "displayName": "Group Purple",
+        "canonical": "#7446b8",
+        "cssVar": "--color-group-4",
+        "tonalRamp": [
+          "#110126",
+          "#2f0b57",
+          "#4f2487",
+          "#7043b3",
+          "#9166d9",
+          "#b28df8",
+          "#d4b7ff",
+          "#f5e4ff"
+        ]
+      },
+      "group-5": {
+        "role": "tertiary",
+        "displayName": "Group Teal",
+        "canonical": "#0f7f86",
+        "cssVar": "--color-group-5",
+        "tonalRamp": [
+          "#001012",
+          "#002d32",
+          "#004e54",
+          "#007077",
+          "#309299",
+          "#62b4ba",
+          "#97d6db",
+          "#d0f7fa"
+        ]
+      },
+      "group-6": {
+        "role": "tertiary",
+        "displayName": "Group Amber",
+        "canonical": "#a85a0a",
+        "cssVar": "--color-group-6",
+        "tonalRamp": [
+          "#1c0300",
+          "#441400",
+          "#6d2c00",
+          "#954a00",
+          "#ba6c28",
+          "#dc9158",
+          "#f8ba8d",
+          "#ffe6c9"
+        ]
+      },
+      "group-7": {
+        "role": "tertiary",
+        "displayName": "Group Magenta",
+        "canonical": "#b0307a",
+        "cssVar": "--color-group-7",
+        "tonalRamp": [
+          "#200010",
+          "#4c002e",
+          "#79004e",
+          "#a42570",
+          "#cb4c92",
+          "#ed77b4",
+          "#ffa6d6",
+          "#ffd9f7"
+        ]
+      },
+      "group-8": {
+        "role": "tertiary",
+        "displayName": "Group Slate",
+        "canonical": "#55606e",
+        "cssVar": "--color-group-8",
+        "tonalRamp": [
+          "#080b10",
+          "#1f262e",
+          "#3a434f",
+          "#576270",
+          "#788392",
+          "#9ba6b4",
+          "#c1cad6",
+          "#e9eff6"
+        ]
+      },
+      "on-group": {
+        "role": "tertiary",
+        "displayName": "On-Group White",
+        "canonical": "#ffffff",
+        "cssVar": "--color-on-group",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#252525",
+          "#424242",
+          "#616161",
+          "#828282",
+          "#a5a5a5",
+          "#c9c9c9",
+          "#eeeeee"
+        ]
+      },
+      "code-keyword": {
+        "role": "tertiary",
+        "displayName": "Code Keyword Ink",
+        "canonical": "light-dark(#0b0b0d, #f2f2f2)",
+        "cssVar": "--color-code-keyword",
+        "light": "#0b0b0d",
+        "dark": "#f2f2f2",
+        "tonalRamp": [
+          "#0b0b0c",
+          "#252526",
+          "#424244",
+          "#616163",
+          "#828285",
+          "#a5a5a7",
+          "#c9c9cb",
+          "#eeeef0"
+        ]
+      },
+      "code-type": {
+        "role": "tertiary",
+        "displayName": "Code Type Teal",
+        "canonical": "light-dark(#0b6b74, #6fd3dc)",
+        "cssVar": "--color-code-type",
+        "light": "#0b6b74",
+        "dark": "#6fd3dc",
+        "tonalRamp": [
+          "#000f12",
+          "#002c32",
+          "#004c54",
+          "#146e77",
+          "#3f9099",
+          "#6cb2bb",
+          "#9dd5db",
+          "#d4f6fa"
+        ]
+      },
+      "code-string": {
+        "role": "tertiary",
+        "displayName": "Code String Green",
+        "canonical": "light-dark(#2f6f37, #8fd694)",
+        "cssVar": "--color-code-string",
+        "light": "#2f6f37",
+        "dark": "#8fd694",
+        "tonalRamp": [
+          "#001001",
+          "#022e0a",
+          "#154f1f",
+          "#32713a",
+          "#54945a",
+          "#7cb680",
+          "#a9d7ab",
+          "#daf8db"
+        ]
+      },
+      "code-number": {
+        "role": "tertiary",
+        "displayName": "Code Number Violet",
+        "canonical": "light-dark(#6a3fb0, #c4a7f5)",
+        "cssVar": "--color-code-number",
+        "light": "#6a3fb0",
+        "dark": "#c4a7f5",
+        "tonalRamp": [
+          "#100126",
+          "#2e0c58",
+          "#4d2588",
+          "#6e44b4",
+          "#8f67da",
+          "#b08ef9",
+          "#d1b8ff",
+          "#f3e5ff"
+        ]
+      },
+      "code-selection": {
+        "role": "tertiary",
+        "displayName": "Code Selection",
+        "canonical": "light-dark(#ffe2a6, #4a3a10)",
+        "cssVar": "--color-code-selection",
+        "light": "#ffe2a6",
+        "dark": "#4a3a10",
+        "tonalRamp": [
+          "#120900",
+          "#322200",
+          "#543e05",
+          "#765d23",
+          "#997f46",
+          "#bba26e",
+          "#dbc79d",
+          "#faedd3"
+        ]
+      },
+      "code-error": {
+        "role": "tertiary",
+        "displayName": "Code Error Wash",
+        "canonical": "light-dark(#f9dedc, #4a1f1c)",
+        "cssVar": "--color-code-error",
+        "light": "#f9dedc",
+        "dark": "#4a1f1c",
+        "tonalRamp": [
+          "#100909",
+          "#2f2120",
+          "#503d3b",
+          "#715b59",
+          "#947c7a",
+          "#b69f9d",
+          "#d7c4c3",
+          "#f7ebea"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Landing section titles; dialog and empty-state titles at 22-24px. Uppercase."
+      },
+      "flap-headline": {
+        "displayName": "Flap Headline",
+        "purpose": "The landing board headline, one character per flap cell."
+      },
+      "board-row": {
+        "displayName": "Board Row",
+        "purpose": "Rows of the landing departures board. Uppercase."
+      },
+      "brand": {
+        "displayName": "Brand",
+        "purpose": "The DESIGN DB wordmark on the frame bar and footer. Uppercase."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Table name on its header strip, in real case."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Field labels, panel headings, code tabs, board column heads. Uppercase."
+      },
+      "lead": {
+        "displayName": "Lead",
+        "purpose": "Landing lead paragraph."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Application base text; tabular numerals on."
+      },
+      "control": {
+        "displayName": "Control",
+        "purpose": "Buttons and inputs; 600 on the primary."
+      },
+      "cell": {
+        "displayName": "Cell",
+        "purpose": "Column rows on a board."
+      },
+      "code": {
+        "displayName": "Code",
+        "purpose": "Code panel, import text area, landing code blocks."
+      }
+    },
+    "shadows": [
+      {
+        "name": "float",
+        "value": "0 1px 2px rgb(0 0 0 / 0.14), 0 10px 24px rgb(0 0 0 / 0.16)",
+        "cssVar": "--shadow-float",
+        "purpose": "The single drop shadow: boards, floating panels and bars, notice, popovers, dialogs, the narrow-screen code sheet."
+      },
+      {
+        "name": "bezel-ring",
+        "value": "0 0 0 6px var(--color-frame-well)",
+        "purpose": "Flat bezel around the landing departures board."
+      },
+      {
+        "name": "row-seam",
+        "value": "inset 0 1px 0 var(--color-flap-seam)",
+        "purpose": "Top seam of each landing board row."
+      },
+      {
+        "name": "active-tab-rule",
+        "value": "inset 0 -2px 0 var(--color-lamp-ink)",
+        "purpose": "Underline of the selected code tab."
+      }
+    ],
+    "motion": [
+      {
+        "name": "flap-cascade",
+        "value": "flap 160ms steps(4, end) both; stagger 22ms per character",
+        "purpose": "The only text motion: characters flip when a cell's text changes. Never on first render (except an arriving landing row); none under reduced motion."
+      },
+      {
+        "name": "viewport",
+        "value": "150ms zoom, 200ms fit",
+        "purpose": "Canvas zoom and Ver todo; 0ms under reduced motion."
+      },
+      {
+        "name": "reveal",
+        "value": "opacity 100-150ms",
+        "purpose": "Hover actions, drag points and dimmed boards. Everything else changes instantly."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "bar-compact",
+        "value": "1599px",
+        "purpose": "Bar button labels collapse to icons at or below."
+      },
+      {
+        "name": "bar-tight",
+        "value": "1439px",
+        "purpose": "Search and segment padding shrink."
+      },
+      {
+        "name": "landing-stack",
+        "value": "960px",
+        "purpose": "Landing pitch and SQL stack; format blocks stack."
+      },
+      {
+        "name": "code-sheet",
+        "value": "900px",
+        "purpose": "Code panel becomes a bottom sheet (55%)."
+      },
+      {
+        "name": "narrow",
+        "value": "720px",
+        "purpose": "Search hides; landing gutters 16px; board drops the references column."
+      },
+      {
+        "name": "phone",
+        "value": "560px",
+        "purpose": "Editor wordmark hides."
+      }
+    ],
+    "radii": [
+      {
+        "name": "control",
+        "value": "3px",
+        "cssVar": "--radius-control"
+      },
+      {
+        "name": "inner",
+        "value": "2px",
+        "purpose": "Literal in components; not a theme variable."
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The one amber action per surface (Importar, Abrir el editor).",
+      "html": "<button class=\"ds-btn-primary\"><svg width=\"15\" height=\"15\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 3v12\"/><path d=\"m8 11 4 4 4-4\"/><path d=\"M8 5H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-4\"/></svg>Importar</button>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 11px; border: 1px solid; border-radius: var(--radius-control); font-family: var(--font-sans); font-size: 13px; white-space: nowrap; cursor: pointer; background: var(--color-lamp); border-color: var(--color-lamp); color: var(--color-on-lamp); font-weight: 600; } .ds-btn-primary:hover { filter: brightness(1.05); } .ds-btn-primary:focus-visible { outline: 2px solid var(--color-lamp); outline-offset: 2px; } .ds-btn-primary:disabled { opacity: 0.45; cursor: default; }"
+    },
+    {
+      "name": "Bar Button",
+      "kind": "button",
+      "refersTo": "button-bar",
+      "description": "Secondary tool on the black frame bar; pressed toggles turn deep with amber text.",
+      "html": "<div class=\"ds-bar-demo\"><button class=\"ds-btn-bar\"><svg width=\"15\" height=\"15\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M5 12h14\"/><path d=\"M12 5v14\"/></svg>Nueva tabla</button><button class=\"ds-btn-bar\" aria-pressed=\"true\">Código</button></div>",
+      "css": ".ds-bar-demo { display: flex; gap: 8px; padding: 9px 16px; background: var(--color-frame); } .ds-btn-bar { display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 11px; border: 1px solid; border-radius: var(--radius-control); font-family: var(--font-sans); font-size: 13px; white-space: nowrap; cursor: pointer; background: var(--color-frame-well); border-color: var(--color-frame-line); color: var(--color-frame-ink); font-weight: 500; } .ds-btn-bar:hover { border-color: var(--color-frame-muted); } .ds-btn-bar[aria-pressed=\"true\"] { background: var(--color-frame-deep); border-color: var(--color-frame-deep); color: var(--color-lamp); } .ds-btn-bar:focus-visible { outline: 2px solid var(--color-lamp); outline-offset: 2px; }"
+    },
+    {
+      "name": "Panel Button",
+      "kind": "button",
+      "refersTo": "button-panel",
+      "description": "Buttons inside panels, dialogs and floating bars; destructive keeps the shape with red text.",
+      "html": "<div class=\"ds-panel-btns\"><button class=\"ds-btn-panel\">Agrupar</button><button class=\"ds-btn-panel ds-danger\">Eliminar</button></div>",
+      "css": ".ds-panel-btns { display: flex; gap: 6px; } .ds-btn-panel { display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 11px; border: 1px solid; border-radius: var(--radius-control); font-family: var(--font-sans); font-size: 13px; white-space: nowrap; cursor: pointer; background: var(--color-raised); border-color: var(--color-line); color: var(--color-ink); } .ds-btn-panel:hover { border-color: var(--color-ink-muted); } .ds-btn-panel:focus-visible { outline: 2px solid var(--color-lamp-ink); outline-offset: 2px; } .ds-danger { color: var(--color-removed); }"
+    },
+    {
+      "name": "Panel Field",
+      "kind": "input",
+      "refersTo": "input-panel",
+      "description": "Labelled input with a condensed caps label; problems listed under it, never blocking.",
+      "html": "<label class=\"ds-field\"><span class=\"ds-field-label\">Nombre</span><input class=\"ds-input\" value=\"users\" /></label>",
+      "css": ".ds-field { display: flex; flex-direction: column; gap: 4px; width: 240px; } .ds-field-label { font-family: var(--font-display); font-size: 11.5px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-ink-muted); } .ds-input { height: 30px; padding: 0 8px; border: 1px solid var(--color-line); border-radius: var(--radius-control); background: var(--color-raised); color: var(--color-ink); font-family: var(--font-sans); font-size: 13px; } .ds-input:focus-visible { outline: 2px solid var(--color-lamp-ink); outline-offset: 2px; } .ds-input[aria-invalid=\"true\"] { border-color: var(--color-removed); }"
+    },
+    {
+      "name": "Bar Segment",
+      "kind": "chip",
+      "refersTo": "segment-option-checked",
+      "description": "One-of-few choice on the frame bar; the checked option is deep with amber text.",
+      "html": "<div class=\"ds-seg-wrap\"><fieldset class=\"ds-seg\"><label class=\"ds-seg-opt ds-on\">Todo</label><label class=\"ds-seg-opt\">Claves</label><label class=\"ds-seg-opt\">Nombre</label></fieldset></div>",
+      "css": ".ds-seg-wrap { padding: 9px 16px; background: var(--color-frame); } .ds-seg { display: inline-flex; gap: 1px; margin: 0; padding: 1px; border: 1px solid var(--color-frame-line); border-radius: var(--radius-control); background: var(--color-frame-well); } .ds-seg-opt { display: flex; align-items: center; height: 28px; padding: 0 10px; border-radius: 2px; font-family: var(--font-sans); font-size: 12.5px; font-weight: 500; color: var(--color-frame-muted); cursor: pointer; } .ds-seg-opt:hover { color: var(--color-frame-ink); } .ds-seg-opt.ds-on { background: var(--color-frame-deep); color: var(--color-lamp); }"
+    },
+    {
+      "name": "Frame Bar",
+      "kind": "nav",
+      "refersTo": "frame-bar",
+      "description": "Black top bar in both themes: wordmark, diagram name chip, amber primary, tools, search.",
+      "html": "<header class=\"ds-frame\"><span class=\"ds-brand\">Design DB</span><span class=\"ds-name\">Blog</span><span class=\"ds-div\"></span><button class=\"ds-fb-primary\"><svg width=\"15\" height=\"15\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 3v12\"/><path d=\"m8 11 4 4 4-4\"/><path d=\"M8 5H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-4\"/></svg>Importar</button><span class=\"ds-grow\"></span><span class=\"ds-search\"><svg width=\"15\" height=\"15\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"11\" cy=\"11\" r=\"8\"/><path d=\"m21 21-4.3-4.3\"/></svg><input placeholder=\"Buscar tabla\" /></span></header>",
+      "css": ".ds-frame { display: flex; align-items: center; gap: 8px; height: 48px; padding: 0 16px; background: var(--color-frame); border-bottom: 1px solid var(--color-frame-deep); color: var(--color-frame-ink); } .ds-brand { margin-right: 4px; font-family: var(--font-display); font-size: 18px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; } .ds-name { padding: 4px 10px; border-radius: var(--radius-control); background: var(--color-frame-well); font-family: var(--font-display); font-size: 15px; font-weight: 600; letter-spacing: 0.025em; } .ds-div { width: 1px; height: 20px; margin: 0 4px; background: var(--color-frame-line); } .ds-fb-primary { display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 11px; border: 1px solid var(--color-lamp); border-radius: var(--radius-control); background: var(--color-lamp); color: var(--color-on-lamp); font-family: var(--font-sans); font-size: 13px; font-weight: 600; cursor: pointer; } .ds-fb-primary:hover { filter: brightness(1.05); } .ds-grow { flex: 1; } .ds-search { position: relative; display: flex; align-items: center; color: var(--color-frame-muted); } .ds-search svg { position: absolute; left: 8px; } .ds-search input { height: 30px; width: 160px; padding: 0 8px 0 28px; border: 1px solid var(--color-frame-line); border-radius: var(--radius-control); background: var(--color-frame-well); color: var(--color-frame-ink); font-family: var(--font-sans); font-size: 13px; } .ds-search input:focus-visible { outline: 2px solid var(--color-lamp); outline-offset: 2px; }"
+    },
+    {
+      "name": "Board (table)",
+      "kind": "card",
+      "refersTo": "table-board",
+      "description": "Signature: a table as a 300px flap face with group strip, mono rows and a yellow PK row.",
+      "html": "<div class=\"ds-board\"><div class=\"ds-strip\"><span>users</span><span class=\"ds-count\">4</span></div><ul class=\"ds-rows\"><li class=\"ds-row ds-pk\"><span>id</span><span class=\"ds-type\">int</span><span class=\"ds-detail\"><b>PK</b></span></li><li class=\"ds-row\"><span>email</span><span class=\"ds-type\">varchar(255)</span><span class=\"ds-detail\"><b>UQ</b></span></li><li class=\"ds-row\"><span>author_id</span><span class=\"ds-type\">int</span><span class=\"ds-detail\">→ users.id</span></li></ul></div>",
+      "css": ".ds-board { width: 300px; border: 1.5px solid var(--color-flap-edge); background: var(--color-flap); color: var(--color-flap-ink); box-shadow: var(--shadow-float); } .ds-strip { display: flex; align-items: center; justify-content: space-between; height: 30px; padding: 0 8px; background: var(--color-group-1); color: var(--color-on-group); font-family: var(--font-display); font-size: 15.5px; font-weight: 700; letter-spacing: 0.06em; } .ds-count { font-family: var(--font-mono); font-size: 11px; font-weight: 500; opacity: 0.8; } .ds-rows { margin: 0; padding: 0; list-style: none; } .ds-row { display: grid; grid-template-columns: 31% 31% 38%; align-items: center; height: 24px; border-top: 1px solid var(--color-flap-seam); font-family: var(--font-mono); font-size: 11px; } .ds-row > span { padding: 0 5px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; } .ds-row > span + span { border-left: 1px solid var(--color-flap-seam); align-self: stretch; display: flex; align-items: center; } .ds-type, .ds-detail { color: var(--color-flap-muted); } .ds-detail b { font-family: var(--font-display); font-weight: 600; letter-spacing: 0.08em; } .ds-pk { background: var(--color-key); } .ds-pk .ds-detail { color: var(--color-key-ink); }"
+    },
+    {
+      "name": "Flap Headline",
+      "kind": "custom",
+      "refersTo": "flap-headline",
+      "description": "A word set one character per flap cell, with a seam across the middle; flips on change.",
+      "html": "<div class=\"ds-flaps\"><span class=\"ds-cell\">D</span><span class=\"ds-cell\">I</span><span class=\"ds-cell\">S</span><span class=\"ds-cell\">E</span><span class=\"ds-cell\">Ñ</span><span class=\"ds-cell\">A</span></div>",
+      "css": ".ds-flaps { display: flex; gap: 3px; padding: 16px; background: var(--color-flap); } .ds-cell { position: relative; display: grid; place-items: center; width: 40px; height: 56px; border: 1px solid var(--color-flap-seam); border-radius: 2px; background: var(--color-raised); color: var(--color-flap-ink); font-family: var(--font-display); font-size: 38px; font-weight: 600; line-height: 1; animation: ds-flap 160ms steps(4, end) both; } .ds-cell:nth-child(2) { animation-delay: 22ms; } .ds-cell:nth-child(3) { animation-delay: 44ms; } .ds-cell:nth-child(4) { animation-delay: 66ms; } .ds-cell:nth-child(5) { animation-delay: 88ms; } .ds-cell:nth-child(6) { animation-delay: 110ms; } .ds-cell::after { content: ''; position: absolute; left: 0; right: 0; top: 50%; height: 1px; background: var(--color-flap-seam); } @keyframes ds-flap { from { transform: rotateX(90deg); opacity: 0.2; } to { transform: rotateX(0deg); opacity: 1; } } @media (prefers-reduced-motion: reduce) { .ds-cell { animation: none; } }"
+    }
+  ],
+  "narrative": {
+    "northStar": "Tablero de salidas",
+    "overview": "Every table is a departures board. Flap faces sit in fixed cells inside a steel hall, under a black frame bar, and the only thing that moves is the cell whose text changed. The developer reads the schema as a wall of boards and trusts that the diagram and the code say the same thing. The world comes from split-flap concourse signage: hard-edged faces, condensed capitals on the board's own labels, monospace identifiers, one amber lamp.\n\nDensity is high and calm. Boards are 300px wide with 24px rows, the canvas is a steel field with a 24px dot grid, and the chrome is thin and square-cornered. Day and night are the same object under different light: light flaps with black letters by day, black flaps (#0b0b0d) with white letters (#f2f2f2) at night. The frame bar stays black in both. Every color is written once with `light-dark()` in `apps/web/src/styles/global.css` and reaches Tailwind through `@theme static`; the default Tailwind palette is off.\n\nIt must not read as a generic SaaS panel (pastel rounded cards on a white dotted canvas with a blue accent) or as a toy.\n\nKnown gaps, deferred to a later polish phase. These are not rules, so do not copy their current state as the standard: landing board rows lack flap faces, the hall is flat steel rather than brushed steel, boards have no bezel depth, and text areas still show the browser's default resize grip.",
+    "keyCharacteristics": [
+      "Tables are technical sheets: a 1.5px edge, a header strip in the group colour, rows of name / type / detail, and the primary key row lit yellow.",
+      "One amber lamp (#ffb000) for the primary action, selection and focus.",
+      "A black frame bar (48px in the editor, 56px on the landing) in both themes.",
+      "Barlow Condensed for the board's labels and names, Barlow for controls and prose, JetBrains Mono for identifiers, cells and code.",
+      "Motion is the flap cascade only. Every other state change is instant.",
+      "Square-cornered: 3px on controls, 2px inside them, 0 on boards."
+    ],
+    "rules": [
+      {
+        "name": "The One Lamp Rule",
+        "body": "Amber means \"act here, this is selected, this has focus\". Nothing decorative is amber. The one cited exception is the board's delay amber (changed) in the changes view. On the landing, amber also marks the cursor and rows that are arriving.",
+        "section": "colors"
+      },
+      {
+        "name": "The Ink Keyword Rule",
+        "body": "Code keywords are bold ink (weight 600), never amber. Code colour stays out of the lamp's channel.",
+        "section": "colors"
+      },
+      {
+        "name": "The Written-Once Rule",
+        "body": "A colour is declared once as `light-dark(day, night)` in global.css and used through its token. No raw hex in components except the group-strip ink fallback for imported colours.",
+        "section": "colors"
+      },
+      {
+        "name": "The Real Case Rule",
+        "body": "Table and column names keep their real case wherever they appear in the editor: on the strip, in rows, in panel headers. SQL identifiers can be case-sensitive, so the board must not misstate the schema. Condensed caps belong to board-level labels: column heads, field labels, tabs, status words, the wordmark.",
+        "section": "typography"
+      },
+      {
+        "name": "The Fixed Cell Rule",
+        "body": "Identifiers, types, counts and zoom percentages are monospace or tabular, so a changed value flips in place and does not reflow its neighbours.",
+        "section": "typography"
+      },
+      {
+        "name": "The One Shadow Rule",
+        "body": "There is exactly one drop shadow (float). Do not add a second elevation step. Rank comes from the frame, hall and flap materials.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "**Do** keep tables as technical sheets: 1.5px edge, group-colour strip, name / type / detail rows, PK row in key yellow.",
+      "**Do** keep the frame bar black (#16181b) in both themes, and flip only the flaps and the hall between day and night.",
+      "**Do** use exactly one amber primary action per surface, and amber for selection and focus.",
+      "**Do** set table and column names in their real case and monospace in rows. Use condensed caps only for board-level labels.",
+      "**Do** declare every new colour once with `light-dark()` in global.css and use it through its token.",
+      "**Do** animate text changes with the flap cascade and nothing else. Honour reduced motion.",
+      "**Do** keep boards at 300px with 24px rows, so cells stay fixed."
+    ],
+    "donts": [
+      "**Don't** use amber for decoration, code keywords, headings or status. The only cited exception is the delay amber for \"changed\".",
+      "**Don't** let the interface drift into a generic SaaS panel (pastel rounded cards, white dotted canvas, blue accent) or into a toy.",
+      "**Don't** uppercase or restyle SQL identifiers in the editor.",
+      "**Don't** add easing-in entrances, slide-ins or a second drop shadow.",
+      "**Don't** round boards, or give controls more than 3px.",
+      "**Don't** use the default Tailwind palette. It is turned off."
+    ]
+  }
+}
