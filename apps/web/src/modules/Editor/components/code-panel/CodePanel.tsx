@@ -23,6 +23,7 @@ import {
   generateCode,
   type CodeFormat,
 } from "../../utils/codeFormats";
+import { dbmlLanguage } from "../../utils/dbmlLanguage";
 import { CodeEditor } from "./CodeEditor";
 
 const SQL_DIALECTS: Record<Dialect, SQLDialect> = {
@@ -40,10 +41,10 @@ const ICON_BUTTON =
 
 const ICON = { size: 16, strokeWidth: 1.75, "aria-hidden": true } as const;
 
-/** How the code of a format is highlighted. DBML has no language yet. */
+/** How the code of a format is highlighted. */
 function languageOf(format: CodeFormat, dialect: Dialect): Extension {
   if (format === "sql") return sql({ dialect: SQL_DIALECTS[dialect] });
-  return format === "drizzle" ? javascript({ typescript: true }) : [];
+  return format === "drizzle" ? javascript({ typescript: true }) : dbmlLanguage;
 }
 
 /** The diagram as code, next to the canvas: SQL, DBML or Drizzle, to copy or download. */

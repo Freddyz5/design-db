@@ -65,7 +65,12 @@ export const codeTheme: Extension = [
         fontWeight: "600",
       },
       {
-        tag: [tags.typeName, tags.className, tags.standard(tags.name)],
+        tag: [
+          tags.typeName,
+          tags.className,
+          tags.propertyName,
+          tags.standard(tags.name),
+        ],
         color: "var(--color-code-type)",
       },
       {
