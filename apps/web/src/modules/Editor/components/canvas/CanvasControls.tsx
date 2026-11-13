@@ -1,9 +1,8 @@
 import { Panel, useReactFlow, useViewport } from "@xyflow/react";
 import { Minus, Plus } from "lucide-react";
-import { useState } from "react";
 import { MAX_ZOOM, MIN_ZOOM } from "../../constants/canvas";
 import { selectDiagram } from "../../hooks/EditorStore";
-import { useEditorStore } from "../../hooks/useEditorStore";
+import { editorStore, useEditorStore } from "../../hooks/useEditorStore";
 import { CanvasLegend } from "./CanvasLegend";
 
 const BUTTON =
@@ -22,7 +21,7 @@ export function CanvasControls() {
   const { zoomIn, zoomOut, zoomTo, fitView } = useReactFlow();
   const { zoom } = useViewport();
   const diagram = useEditorStore(selectDiagram);
-  const [legend, setLegend] = useState(false);
+  const help = useEditorStore((state) => state.view.helpOpen);
 
   return (
     <>
@@ -68,10 +67,11 @@ export function CanvasControls() {
         <button
           type="button"
           className={BUTTON}
-          aria-pressed={legend}
-          onClick={() => setLegend((open) => !open)}
+          aria-pressed={help}
+          title="Leyenda y atajos (?)"
+          onClick={() => editorStore.getState().setView({ helpOpen: !help })}
         >
-          Leyenda
+          Ayuda
         </button>
         <span className="mx-1 h-4 w-px bg-line" />
         <span className="px-2 text-ink-muted">
@@ -79,7 +79,7 @@ export function CanvasControls() {
           {count(diagram.relations.length, "relación", "relaciones")}
         </span>
       </Panel>
-      {legend && <CanvasLegend />}
+      {help && <CanvasLegend />}
     </>
   );
 }

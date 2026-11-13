@@ -28,6 +28,7 @@ import {
 } from "../../utils/canvasElements";
 import { linkColumns } from "../../utils/relationEdits";
 import { useAddTable } from "../../hooks/useAddTable";
+import { useShortcuts } from "../../hooks/useShortcuts";
 import { CanvasControls } from "./CanvasControls";
 import { ChangesPanel } from "./ChangesPanel";
 import { EmptyCanvas } from "./EmptyCanvas";
@@ -112,6 +113,7 @@ export function Canvas() {
     [selection, selectedRelationId, columns, relations, showChanges],
   );
   const addTable = useAddTable();
+  useShortcuts();
   /** True while a relation is being dragged from a column. */
   const [linking, setLinking] = useState(false);
 

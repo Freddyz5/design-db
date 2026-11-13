@@ -34,6 +34,8 @@ export type EditorView = {
   codeOpen: boolean;
   codeFormat: CodeFormat;
   codeWidth: number;
+  /** The help panel: the legend and the shortcuts. */
+  helpOpen: boolean;
   /** Mark on the canvas what changed since the base, and list it. */
   showChanges: boolean;
   /** The text in the import dialog, or null while the dialog is closed. */
@@ -79,6 +81,7 @@ const EMPTY_VIEW: EditorView = {
   codeWidth: CODE_WIDTH,
   importText: null,
   showChanges: false,
+  helpOpen: false,
   notice: null,
 };
 
