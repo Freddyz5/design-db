@@ -56,12 +56,36 @@ describe("detectFormat", () => {
 });
 
 describe("importSchema", () => {
-  test("round trip through PostgreSQL keeps the schema", () => {
+  test("round trip through PostgreSQL keeps the schema and the groups", () => {
     const original = sampleDiagram();
     const result = importSchema(toSql(original, "postgres"));
     if (!result.ok) throw new Error(JSON.stringify(result.errors));
     expect(result.format).toBe("sql");
     expect(shape(result.diagram)).toEqual(shape(original));
+    expect(result.diagram.groups.map((g) => [g.name, g.color])).toEqual([
+      ["accounts", "#2c5f8e"],
+    ]);
+    const users = result.diagram.tables.find((t) => t.name === "users")!;
+    const posts = result.diagram.tables.find((t) => t.name === "posts")!;
+    expect(users.groupId).toBe(result.diagram.groups[0]!.id);
+    expect(posts.groupId).toBeUndefined();
+  });
+
+  test("round trip of the example through SQL keeps every group", () => {
+    const original = createExampleDiagram();
+    for (const dialect of ["postgres", "mysql", "sqlite"] as const) {
+      const result = importSchema(toSql(original, dialect));
+      if (!result.ok) throw new Error(JSON.stringify(result.errors));
+      const groupOf = (diagram: typeof original, name: string) => {
+        const table = diagram.tables.find((t) => t.name === name)!;
+        return diagram.groups.find((g) => g.id === table.groupId)?.name;
+      };
+      for (const table of original.tables) {
+        expect(groupOf(result.diagram, table.name)).toBe(
+          groupOf(original, table.name),
+        );
+      }
+    }
   });
 
   test("round trip through DBML keeps the schema and the groups", () => {

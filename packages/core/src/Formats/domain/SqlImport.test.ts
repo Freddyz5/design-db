@@ -12,6 +12,37 @@ const table = (doc: ReturnType<typeof read>["diagram"], name: string) =>
   doc.tables.find((t) => t.name === name)!;
 
 describe("readSql", () => {
+  test("groups come from the comments above the tables", () => {
+    const { diagram, warnings } = read(`
+      -- @group: Paso 1 · Catálogo
+      -- @color: green
+      -- @note: What the shop sells.
+      CREATE TABLE category (id int PRIMARY KEY);
+      CREATE TABLE product (id int PRIMARY KEY);
+
+      -- @group: -
+      CREATE TABLE loose (id int);
+
+      -- @group: paso 1 · catálogo
+      CREATE TABLE tag (id int);
+    `);
+    expect(warnings).toEqual([]);
+    expect(diagram.groups.map((g) => [g.name, g.color, g.note])).toEqual([
+      ["Paso 1 · Catálogo", "green", "What the shop sells."],
+    ]);
+    const group = diagram.groups[0]!.id;
+    const groupOf = (name: string) => table(diagram, name).groupId;
+    expect(groupOf("category")).toBe(group);
+    expect(groupOf("product")).toBe(group);
+    expect(groupOf("loose")).toBeUndefined();
+    expect(groupOf("tag")).toBe(group);
+  });
+
+  test("without group comments there are no groups", () => {
+    const { diagram } = read("-- just a comment\nCREATE TABLE t (id int);");
+    expect(diagram.groups).toEqual([]);
+  });
+
   test("PostgreSQL: types, constraints, enums, comments and foreign keys", () => {
     const { diagram } = read(`
       CREATE TYPE public.post_status AS ENUM ('draft', 'published');

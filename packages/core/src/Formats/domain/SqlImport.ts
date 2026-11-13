@@ -4,6 +4,7 @@ import {
   draftColumn,
   emptyDraft,
   type DraftColumn,
+  type DraftGroup,
   type DraftTable,
   type ImportIssue,
   type SchemaDraft,
@@ -14,6 +15,11 @@ import {
  * CREATE TABLE, ALTER TABLE … ADD (FOREIGN KEY, PRIMARY KEY, UNIQUE,
  * COLUMN), CREATE TYPE … AS ENUM and COMMENT ON. Other statements
  * (indexes, inserts, settings…) are ignored.
+ *
+ * Groups come from comments, as `toSql` writes them: a table is in the
+ * group of the last `-- @group: Name` above it, and `-- @group: -` leaves
+ * the tables below without one. `-- @color` and `-- @note` belong to the
+ * group above them.
  */
 export function readSql(text: string): {
   draft?: SchemaDraft;
@@ -34,11 +40,51 @@ export function readSql(text: string): {
     }
   }
   if (errors.length) return { errors, warnings: reader.warnings };
-  return {
-    draft: reader.finish(lexed.tokens),
-    errors,
-    warnings: reader.warnings,
-  };
+  const draft = reader.finish(lexed.tokens);
+  draft.groups = groupsOf(draft.tables, lexed.directives);
+  return { draft, errors, warnings: reader.warnings };
+}
+
+/** A `-- @group`, `-- @color` or `-- @note` comment. */
+type Directive = {
+  kind: "group" | "color" | "note";
+  value: string;
+  line: number;
+};
+
+const DIRECTIVE = /^(?:--|#)\s*@(group|color|note)\b\s*:?\s*(.*)$/i;
+
+/** The groups the comments describe, with the tables under each. */
+function groupsOf(
+  tables: readonly DraftTable[],
+  directives: readonly Directive[],
+): DraftGroup[] {
+  if (directives.length === 0) return [];
+  const byName = new Map<string, DraftGroup>();
+  const events = [
+    ...directives.map((directive) => ({ line: directive.line, directive })),
+    ...tables.map((table) => ({ line: table.line, table })),
+  ].sort((a, b) => a.line - b.line);
+  let current: DraftGroup | null = null;
+  for (const event of events) {
+    if ("table" in event) {
+      current?.tables.push(event.table.name);
+      continue;
+    }
+    const { kind, value, line } = event.directive;
+    if (kind === "group") {
+      if (value === "" || value === "-") {
+        current = null;
+        continue;
+      }
+      const key = value.toLowerCase();
+      current = byName.get(key) ?? { name: value, tables: [], line };
+      byName.set(key, current);
+    } else if (current && value !== "") {
+      current[kind] = value;
+    }
+  }
+  return [...byName.values()];
 }
 
 // --- Tokens ---------------------------------------------------------------
@@ -62,8 +108,11 @@ class SqlError extends Error {
   }
 }
 
-function tokenize(text: string): { tokens: Token[] } | { error: ImportIssue } {
+function tokenize(
+  text: string,
+): { tokens: Token[]; directives: Directive[] } | { error: ImportIssue } {
   const tokens: Token[] = [];
+  const directives: Directive[] = [];
   let i = 0;
   let line = 1;
   const push = (
@@ -81,7 +130,16 @@ function tokenize(text: string): { tokens: Token[] } | { error: ImportIssue } {
     } else if (/\s/.test(ch)) {
       i++;
     } else if (text.startsWith("--", i) || ch === "#") {
+      const start = i;
       while (i < text.length && text[i] !== "\n") i++;
+      const directive = DIRECTIVE.exec(text.slice(start, i));
+      if (directive) {
+        directives.push({
+          kind: directive[1]!.toLowerCase() as Directive["kind"],
+          value: directive[2]!.trim(),
+          line,
+        });
+      }
     } else if (text.startsWith("/*", i)) {
       const close = text.indexOf("*/", i + 2);
       if (close < 0) return { error: { message: "Unclosed comment", line } };
@@ -135,7 +193,7 @@ function tokenize(text: string): { tokens: Token[] } | { error: ImportIssue } {
       push("punct", text.slice(start, i), start);
     }
   }
-  return { tokens };
+  return { tokens, directives };
 }
 
 function splitStatements(tokens: Token[]): Token[][] {

@@ -16,7 +16,7 @@ export type MergeMode = "add" | "replace";
  *   enums, groups and relations that already existed (same name, ignoring
  *   case) keep their id, position, color and group. A column whose type is
  *   only spelled differently (`int` and `integer`) keeps its type. If the import has no
- *   groups (SQL never has), the current groups are kept.
+ *   groups (SQL without `-- @group` comments, Drizzle), the current groups are kept.
  * - `add`: the imported items are added with new ids. Tables whose name is
  *   taken are renamed (`users_2`), groups with the same name are merged and
  *   enums with the same name and values are reused. New tables get no

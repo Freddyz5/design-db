@@ -75,6 +75,8 @@ if (result.ok) {
 }
 ```
 
+SQL has no groups of its own, so `toSql` writes them as comments before their tables (`-- @group: Name`, then `-- @color` and `-- @note`; `-- @group: -` for the tables without a group), and the SQL reader reads them back.
+
 The Drizzle reader does not run the code: it reads the declarations (tables, columns, `references()`, keys, enums, `customType` with a fixed type, spreads of objects in the same file) and skips with a warning what only running the code would tell, such as own helper functions. `relations()` and indexes are ignored.
 
 Imported tables come without a position. `toLayoutGraph` builds the graph for elkjs (run by the editor in a Web Worker), `layoutPositions` reads its result and the `layout.place` operation applies it in one step.
