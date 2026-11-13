@@ -31,6 +31,11 @@ export const codeTheme: Extension = [
     ".cm-activeLine": {
       backgroundColor: "color-mix(in srgb, var(--color-ink) 5%, transparent)",
     },
+    // The lines of the selected table: the lamp, faint, with its edge lit.
+    ".cm-markedLine": {
+      backgroundColor: "color-mix(in srgb, var(--color-lamp) 14%, transparent)",
+      boxShadow: "inset 2px 0 0 var(--color-lamp-ink)",
+    },
     ".cm-activeLineGutter": {
       backgroundColor: "transparent",
       color: "var(--color-ink)",

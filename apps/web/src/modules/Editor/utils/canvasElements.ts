@@ -342,6 +342,28 @@ export function nextSelection(
   return same ? (selection as Id[]) : ids;
 }
 
+/** A box on the canvas, in canvas units. */
+export type Box = Position & Size;
+
+/**
+ * Whether a box shows whole on the screen: the canvas, of `screen` size,
+ * moved and zoomed as `viewport` says.
+ */
+export function inView(
+  box: Box,
+  viewport: Position & { zoom: number },
+  screen: Size,
+): boolean {
+  const left = box.x * viewport.zoom + viewport.x;
+  const top = box.y * viewport.zoom + viewport.y;
+  return (
+    left >= 0 &&
+    top >= 0 &&
+    left + box.width * viewport.zoom <= screen.width &&
+    top + box.height * viewport.zoom <= screen.height
+  );
+}
+
 /** The id of the canvas node of a group. Table nodes use the id of the table. */
 export const groupNodeId = (groupId: Id): string => `group:${groupId}`;
 

@@ -35,6 +35,7 @@ import {
 } from "../../utils/canvasElements";
 import { linkColumns } from "../../utils/relationEdits";
 import { useAddTable } from "../../hooks/useAddTable";
+import { useFollowCodeCursor } from "../../hooks/useFollowCodeCursor";
 import { useShortcuts } from "../../hooks/useShortcuts";
 import { CanvasControls } from "./CanvasControls";
 import { ChangesPanel } from "./ChangesPanel";
@@ -115,9 +116,13 @@ export function Canvas() {
     (state) =>
       state.view.showChanges && selectDiagram(state).base !== undefined,
   );
-  // The pinned table holds the focus; without one, the table under the pointer.
+  // The pinned table holds the focus; without one, the table under the
+  // pointer; without one, the table the cursor is in, in the code.
   const focusedTableId = useEditorStore(
-    (state) => state.view.pinnedTableId ?? state.view.hoveredTableId,
+    (state) =>
+      state.view.pinnedTableId ??
+      state.view.hoveredTableId ??
+      state.view.codeTableId,
   );
   const view = useMemo(
     () => ({
@@ -139,6 +144,7 @@ export function Canvas() {
   );
   const addTable = useAddTable();
   useShortcuts();
+  useFollowCodeCursor();
   /** True while a relation is being dragged from a column. */
   const [linking, setLinking] = useState(false);
   /** While something is dragged, the focus stays where it was. */
@@ -319,13 +325,18 @@ export function Canvas() {
       if (!isTable(node) || event.shiftKey || event.metaKey || event.ctrlKey) {
         return;
       }
-      const onColumn =
-        event.target instanceof Element &&
-        event.target.closest("[data-column-id]") !== null;
+      const columnId =
+        event.target instanceof Element
+          ? (event.target
+              .closest("[data-column-id]")
+              ?.getAttribute("data-column-id") ?? null)
+          : null;
       const { view, setView } = editorStore.getState();
       setView({
         pinnedTableId:
-          view.pinnedTableId === node.id && !onColumn ? null : node.id,
+          view.pinnedTableId === node.id && columnId === null ? null : node.id,
+        // The code shows the table, on the clicked column.
+        codeTarget: { tableId: node.id, columnId, focus: false },
       });
     },
     [],

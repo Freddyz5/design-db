@@ -10,7 +10,13 @@ import {
 import type { Extension } from "@codemirror/state";
 import type { Dialect } from "@design-db/core";
 import { Check, ChevronsRight, Copy, Download } from "lucide-react";
-import { useEffect, useMemo, useState, type KeyboardEvent } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type KeyboardEvent,
+} from "react";
 import { selectDiagram } from "../../hooks/EditorStore";
 import { useCodeDraft, type CodeStatus } from "../../hooks/useCodeDraft";
 import { editorStore, useEditorStore } from "../../hooks/useEditorStore";
@@ -24,8 +30,9 @@ import {
   generateCode,
   type CodeFormat,
 } from "../../utils/codeFormats";
+import { locateTable, tableAtLine } from "../../utils/codeBlocks";
 import { dbmlLanguage } from "../../utils/dbmlLanguage";
-import { CodeEditor } from "./CodeEditor";
+import { CodeEditor, type CodeReveal, type LineRange } from "./CodeEditor";
 
 const SQL_DIALECTS: Record<Dialect, SQLDialect> = {
   postgres: PostgreSQL,
@@ -85,6 +92,55 @@ export function CodePanel() {
     () => languageOf(format, dialect),
     [format, dialect],
   );
+
+  // The code and the canvas point at each other: the table asked for is
+  // marked and shown in the code, and the table the cursor is in stands out
+  // on the canvas.
+  const target = useEditorStore((state) => state.view.codeTarget);
+  const selection = useEditorStore((state) => state.view.selection);
+  const spotOf = (text: string) => {
+    const table = diagram.tables.find((t) => t.id === target?.tableId);
+    if (!target || !table) return null;
+    const column = table.columns.find((c) => c.id === target.columnId);
+    return locateTable(text, format, table.name, column?.name);
+  };
+  // Marked while its table stays selected; found again in the code as it changes.
+  const marked = useMemo<LineRange | null>(() => {
+    if (!target || !selection.includes(target.tableId)) return null;
+    return spotOf(code);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [code, format, target, selection, diagram]);
+  // Shown once each time it is asked for, and again when the format changes;
+  // only a new request moves the keyboard into the code.
+  // Starts empty: "Ver código" opens the panel and asks in the same step.
+  const revealed = useRef<typeof target>(null);
+  const reveal = useMemo<CodeReveal | null>(() => {
+    const fresh = revealed.current !== target;
+    revealed.current = target;
+    const spot = spotOf(code);
+    return spot && target
+      ? { line: spot.line, top: spot.start, focus: fresh && target.focus }
+      : null;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [target, format]);
+
+  const codeNow = useRef(code);
+  codeNow.current = code;
+  const onCursorLine = (line: number | null) => {
+    const state = editorStore.getState();
+    const name =
+      line === null ? null : tableAtLine(codeNow.current, format, line);
+    const table =
+      name === null
+        ? undefined
+        : selectDiagram(state).tables.find(
+            (t) => t.name.toLowerCase() === name.toLowerCase(),
+          );
+    const codeTableId = table?.id ?? null;
+    if (codeTableId !== state.view.codeTableId) {
+      state.setView({ codeTableId });
+    }
+  };
 
   useEffect(() => {
     if (!copied) return;
@@ -214,6 +270,9 @@ export function CodePanel() {
           issues={issues}
           onChange={onChange}
           onFocusChange={(focused) => void onFocusChange(focused)}
+          marked={marked}
+          reveal={reveal}
+          onCursorLine={onCursorLine}
           ariaLabel={`Código en ${formatLabel(format, dialect)}`}
         />
       </div>

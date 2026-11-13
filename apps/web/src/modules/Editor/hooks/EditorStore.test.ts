@@ -245,6 +245,17 @@ describe("view", () => {
     expect(state().view.pinnedTableId).toBeNull();
   });
 
+  test("the code lets go of a table that no longer exists", () => {
+    const { state } = setup();
+    state().setView({
+      codeTableId: "posts",
+      codeTarget: { tableId: "posts", columnId: null, focus: false },
+    });
+    state().dispatch({ type: "table.remove", tableId: "posts" });
+    expect(state().view.codeTableId).toBeNull();
+    expect(state().view.codeTarget).toBeNull();
+  });
+
   test("a notice lasts until the next change", () => {
     const { state } = setup();
     state().dispatch({ type: "table.remove", tableId: "posts" });

@@ -13,6 +13,7 @@ import {
   dragHandleId,
   groupNodes,
   handleId,
+  inView,
   nextSelection,
   nodeSize,
   relationEdges,
@@ -613,5 +614,20 @@ describe("dragging", () => {
     });
     expect(next[0]?.position).toEqual({ x: 90, y: 90 });
     expect(next[0]?.selected).toBe(true);
+  });
+});
+
+describe("inView", () => {
+  const screen = { width: 800, height: 600 };
+  const box = { x: 100, y: 100, width: 300, height: 200 };
+
+  test("a box inside the screen is in view", () => {
+    expect(inView(box, { x: 0, y: 0, zoom: 1 }, screen)).toBe(true);
+  });
+
+  test("a box moved or zoomed past an edge is not", () => {
+    expect(inView(box, { x: -150, y: 0, zoom: 1 }, screen)).toBe(false);
+    expect(inView(box, { x: 0, y: 0, zoom: 3 }, screen)).toBe(false);
+    expect(inView(box, { x: 0, y: 450, zoom: 1 }, screen)).toBe(false);
   });
 });

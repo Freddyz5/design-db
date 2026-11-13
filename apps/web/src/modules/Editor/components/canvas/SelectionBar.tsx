@@ -110,6 +110,21 @@ export function SelectionBar() {
           Editar
         </button>
       )}
+      {only && (
+        <button
+          type="button"
+          className={BUTTON}
+          title="Abre el código en esta tabla"
+          onClick={() =>
+            editorStore.getState().setView({
+              codeOpen: true,
+              codeTarget: { tableId: only.id, columnId: null, focus: true },
+            })
+          }
+        >
+          Ver código
+        </button>
+      )}
       {pair && (
         <button
           type="button"

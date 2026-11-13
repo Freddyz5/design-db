@@ -18,6 +18,9 @@ import { createStore, type StoreApi } from "zustand/vanilla";
 import type { ColumnsFilter, RelationsFilter } from "../utils/canvasElements";
 import { CODE_WIDTH, type CodeFormat } from "../utils/codeFormats";
 
+/** A table, or one of its columns, to show in the code. */
+export type CodeTarget = { tableId: Id; columnId: Id | null; focus: boolean };
+
 /** What the user is looking at. It is not part of the diagram, so it never enters the history. */
 export type EditorView = {
   /** Ids of the selected tables. */
@@ -30,6 +33,14 @@ export type EditorView = {
   hoveredTableId: Id | null;
   /** The table a click fixed the focus on. While set, it stands out instead of the hovered one. */
   pinnedTableId: Id | null;
+  /** The table the cursor is in while the user is in the code. It stands out when nothing else does. */
+  codeTableId: Id | null;
+  /**
+   * A table to show in the code: its lines are marked and scrolled into view,
+   * with the cursor on the column, if any. `focus` moves the keyboard there.
+   * A new object asks again.
+   */
+  codeTarget: CodeTarget | null;
   /** Which columns the tables show. */
   columnsFilter: ColumnsFilter;
   /** Which relations the canvas shows. */
@@ -80,6 +91,8 @@ const EMPTY_VIEW: EditorView = {
   selectedRelationId: null,
   hoveredTableId: null,
   pinnedTableId: null,
+  codeTableId: null,
+  codeTarget: null,
   columnsFilter: "all",
   relationsFilter: "all",
   codeOpen: true,
@@ -115,12 +128,22 @@ function viewFor(view: EditorView, diagram: Diagram): EditorView {
     view.pinnedTableId !== null && exists(view.pinnedTableId)
       ? view.pinnedTableId
       : null;
+  const codeTableId =
+    view.codeTableId !== null && exists(view.codeTableId)
+      ? view.codeTableId
+      : null;
+  const codeTarget =
+    view.codeTarget !== null && exists(view.codeTarget.tableId)
+      ? view.codeTarget
+      : null;
   if (
     selection.length === view.selection.length &&
     editingTableId === view.editingTableId &&
     selectedRelationId === view.selectedRelationId &&
     hoveredTableId === view.hoveredTableId &&
     pinnedTableId === view.pinnedTableId &&
+    codeTableId === view.codeTableId &&
+    codeTarget === view.codeTarget &&
     view.notice === null
   ) {
     return view;
@@ -132,6 +155,8 @@ function viewFor(view: EditorView, diagram: Diagram): EditorView {
     selectedRelationId,
     hoveredTableId,
     pinnedTableId,
+    codeTableId,
+    codeTarget,
     notice: null,
   };
 }
@@ -173,6 +198,8 @@ export function createEditorStore(
             selectedRelationId: null,
             hoveredTableId: null,
             pinnedTableId: null,
+            codeTableId: null,
+            codeTarget: null,
             notice: null,
           },
         })),
