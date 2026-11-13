@@ -96,6 +96,7 @@ export function DemoBoard({ texts }: { texts: DemoTexts }) {
               .map((word, index) => (
                 <FlapText
                   key={`${word}-${index}`}
+                  cells
                   text={word}
                   className="flex gap-[3px]"
                   cellClassName="relative grid h-[clamp(40px,6vw,64px)] w-[clamp(28px,4.2vw,46px)] place-items-center rounded-[2px] border border-flap-seam bg-raised font-display text-[clamp(26px,4.2vw,44px)] leading-none font-semibold text-flap-ink after:absolute after:inset-x-0 after:top-1/2 after:h-px after:bg-flap-seam"

@@ -78,12 +78,16 @@ function ColumnRow({
         title={detail}
       >
         {flags.length > 0 && (
-          <span className="font-display text-[11px] font-semibold tracking-[0.08em]">
-            {flags.join(" ")}
-          </span>
+          <FlapText
+            text={flags.join(" ")}
+            className="font-display text-[11px] font-semibold tracking-[0.08em]"
+          />
         )}
         {reference && (
-          <span className="truncate text-[10.5px]">→ {reference}</span>
+          <FlapText
+            text={`→ ${reference}`}
+            className="truncate text-[10.5px]"
+          />
         )}
       </span>
       <Handle

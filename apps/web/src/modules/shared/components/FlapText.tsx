@@ -7,6 +7,8 @@ type Props = {
   className?: string;
   /** Flip the characters when the text first appears too, not only when it changes. */
   animateOnMount?: boolean;
+  /** Always draw one cell per character, as a headline set in flaps does, even before any change. */
+  cells?: boolean;
   title?: string;
 };
 
@@ -20,6 +22,7 @@ export function FlapText({
   cellClassName = "inline-block",
   className = "",
   animateOnMount = false,
+  cells = false,
   title,
 }: Props) {
   const version = useRef(animateOnMount ? 1 : 0);
@@ -29,7 +32,8 @@ export function FlapText({
     version.current++;
   }
 
-  if (version.current === 0) {
+  const animated = version.current > 0;
+  if (!animated && !cells) {
     return (
       <span className={className} title={title}>
         {text}
@@ -44,8 +48,8 @@ export function FlapText({
           // A new key replays the flip for every character of the new text.
           key={`${version.current}-${index}`}
           aria-hidden
-          className={`flap-cell ${cellClassName}`}
-          style={{ animationDelay: `${index * 22}ms` }}
+          className={`${animated ? "flap-cell " : ""}${cellClassName}`}
+          style={animated ? { animationDelay: `${index * 22}ms` } : undefined}
         >
           {char === " " ? " " : char}
         </span>
