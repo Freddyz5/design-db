@@ -8,7 +8,12 @@ import {
   diffDiagram,
   type Diagram,
 } from "@design-db/core";
-import { changeCounts, changeMarks, describeChanges } from "./diagramChanges";
+import {
+  changeMarks,
+  describeChanges,
+  removedTables,
+  tableCounts,
+} from "./diagramChanges";
 
 const ids = (diagram: Diagram, table: string, column?: string) => {
   const t = diagram.tables.find((x) => x.name === table)!;
@@ -70,11 +75,39 @@ describe("changeMarks", () => {
   });
 });
 
-describe("changeCounts", () => {
-  test("counts added, modified and removed", () => {
-    const counts = changeCounts(diffDiagram(changed())!);
-    // likes; posts.headline; comments.body, tags and the relation posts_tags → tags.
-    expect(counts).toEqual({ added: 1, modified: 1, removed: 3 });
+describe("tableCounts", () => {
+  test("counts new, changed and removed tables", () => {
+    // likes is new; posts (a renamed column), comments (a removed column)
+    // and posts_tags (its relation to tags is gone) changed; tags is removed.
+    expect(tableCounts(changed())).toEqual({
+      added: 1,
+      modified: 3,
+      removed: 1,
+    });
+  });
+
+  test("without a base, nothing", () => {
+    expect(tableCounts(createExampleDiagram())).toEqual({
+      added: 0,
+      modified: 0,
+      removed: 0,
+    });
+  });
+});
+
+describe("removedTables", () => {
+  test("the tables gone since the base, where they stood", () => {
+    const diagram = changed();
+    const tags = diagram.base!.tables.find((t) => t.name === "tags")!;
+    expect(removedTables(diagram)).toEqual([
+      { table: tags, position: diagram.base!.positions![tags.id]! },
+    ]);
+  });
+
+  test("a base without positions draws none", () => {
+    const diagram = changed();
+    const { positions: _gone, ...base } = diagram.base!;
+    expect(removedTables({ ...diagram, base })).toEqual([]);
   });
 });
 

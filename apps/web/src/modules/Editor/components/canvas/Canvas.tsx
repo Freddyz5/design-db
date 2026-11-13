@@ -25,11 +25,13 @@ import { selectDiagram } from "../../hooks/EditorStore";
 import { editorStore, useEditorStore } from "../../hooks/useEditorStore";
 import {
   dragHandleColumn,
+  ghostNodes,
   groupNodes,
   nextSelection,
   relationEdges,
   tableNodes,
   type CanvasNode,
+  type GhostNode,
   type GroupNode,
   type RelationEdge,
   type TableNode,
@@ -41,6 +43,7 @@ import { useShortcuts } from "../../hooks/useShortcuts";
 import { CanvasControls } from "./CanvasControls";
 import { ChangesPanel } from "./ChangesPanel";
 import { EmptyCanvas } from "./EmptyCanvas";
+import { GhostNodeView } from "./GhostNode";
 import { GroupNodeView } from "./GroupNode";
 import { Notice } from "./Notice";
 import { RelationBar } from "./RelationBar";
@@ -49,7 +52,11 @@ import { SelectionBar } from "./SelectionBar";
 import { TablePanel } from "../table-panel/TablePanel";
 import { TableNodeView } from "./TableNode";
 
-const nodeTypes = { table: TableNodeView, zone: GroupNodeView };
+const nodeTypes = {
+  table: TableNodeView,
+  zone: GroupNodeView,
+  ghost: GhostNodeView,
+};
 const edgeTypes = { relation: RelationEdgeView };
 
 const FIT = { padding: 0.15, maxZoom: 1 };
@@ -180,9 +187,15 @@ export function Canvas() {
     lastGroups.current = groupNodes(diagram, nodes, lastGroups.current);
     return lastGroups.current;
   }, [diagram, nodes]);
+  // Tables removed since the base, where they stood, under the live ones.
+  const lastGhosts = useRef<GhostNode[]>([]);
+  const ghosts = useMemo(() => {
+    lastGhosts.current = ghostNodes(diagram, lastGhosts.current, view);
+    return lastGhosts.current;
+  }, [diagram, view]);
   const canvasNodes = useMemo<CanvasNode[]>(
-    () => [...groups, ...nodes],
-    [groups, nodes],
+    () => [...groups, ...ghosts, ...nodes],
+    [groups, ghosts, nodes],
   );
 
   const lastEdges = useRef<RelationEdge[]>([]);

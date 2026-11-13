@@ -3,8 +3,9 @@ import {
   type ChangeKind,
   type Column,
   type Diagram,
-  type DiagramChange,
   type Id,
+  type Position,
+  type Table,
 } from "@design-db/core";
 
 /** What the canvas marks on one table when the changes are shown. */
@@ -50,17 +51,52 @@ export function changeMarks(diagram: Diagram): ChangeMarks {
   return marks;
 }
 
-/** How many things were added, modified and removed. A table's own columns count with the table. */
-export function changeCounts(
-  changes: readonly DiagramChange[],
-): Record<ChangeKind, number> {
+/**
+ * How many tables are new, changed or removed since the base, as the zoom
+ * bar counts them. A table changes with its columns and with the relations
+ * that leave it.
+ */
+export function tableCounts(diagram: Diagram): Record<ChangeKind, number> {
   const counts: Record<ChangeKind, number> = {
     added: 0,
     modified: 0,
     removed: 0,
   };
-  for (const change of changes) counts[change.kind]++;
+  const changed = new Set<Id>();
+  const fresh = new Set<Id>();
+  for (const change of diffDiagram(diagram) ?? []) {
+    if (change.entity === "table" && change.kind !== "modified") {
+      counts[change.kind]++;
+      if (change.kind === "added") fresh.add(change.tableId);
+    } else if (change.entity === "table" || change.entity === "column") {
+      changed.add(change.tableId);
+    } else if (change.entity === "relation") {
+      const relation =
+        diagram.relations.find((r) => r.id === change.relationId) ??
+        diagram.base?.relations.find((r) => r.id === change.relationId);
+      if (relation) changed.add(relation.from.tableId);
+    }
+  }
+  // A table that is new or gone counts once, as new or removed.
+  const tableIds = new Set(diagram.tables.map((t) => t.id));
+  for (const id of changed) {
+    if (tableIds.has(id) && !fresh.has(id)) counts.modified++;
+  }
   return counts;
+}
+
+/** A table that was in the base and is gone, with where it stood. */
+export type RemovedTable = { table: Table; position: Position };
+
+/** The tables removed since the base that have a place to be drawn: the base knows where they were. */
+export function removedTables(diagram: Diagram): RemovedTable[] {
+  const base = diagram.base;
+  if (!base?.positions) return [];
+  const present = new Set(diagram.tables.map((t) => t.id));
+  return base.tables.flatMap((table) => {
+    const position = base.positions?.[table.id];
+    return !present.has(table.id) && position ? [{ table, position }] : [];
+  });
 }
 
 const FIELD_NAMES: Record<string, string> = {

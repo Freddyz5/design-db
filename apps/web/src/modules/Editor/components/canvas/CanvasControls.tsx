@@ -1,8 +1,10 @@
 import { Panel, useReactFlow, useViewport } from "@xyflow/react";
 import { Minus, Plus } from "lucide-react";
+import { useMemo } from "react";
 import { MAX_ZOOM, MIN_ZOOM } from "../../constants/canvas";
 import { selectDiagram } from "../../hooks/EditorStore";
 import { editorStore, useEditorStore } from "../../hooks/useEditorStore";
+import { tableCounts } from "../../utils/diagramChanges";
 import { CanvasLegend } from "./CanvasLegend";
 
 const BUTTON =
@@ -22,6 +24,14 @@ export function CanvasControls() {
   const { zoom } = useViewport();
   const diagram = useEditorStore(selectDiagram);
   const help = useEditorStore((state) => state.view.helpOpen);
+  const showChanges = useEditorStore(
+    (state) =>
+      state.view.showChanges && selectDiagram(state).base !== undefined,
+  );
+  const changes = useMemo(
+    () => (showChanges ? tableCounts(diagram) : null),
+    [showChanges, diagram],
+  );
 
   return (
     <>
@@ -78,6 +88,25 @@ export function CanvasControls() {
           {count(diagram.tables.length, "tabla", "tablas")} ·{" "}
           {count(diagram.relations.length, "relación", "relaciones")}
         </span>
+        {changes && (
+          <span
+            className="flex items-center gap-2.5 border-l border-line px-2 text-ink-muted tabular-nums max-[720px]:hidden"
+            aria-label="Cambios desde la base"
+          >
+            <span>
+              <b className="font-semibold text-added">{changes.added}</b>{" "}
+              {changes.added === 1 ? "nueva" : "nuevas"}
+            </span>
+            <span>
+              <b className="font-semibold text-changed">{changes.modified}</b>{" "}
+              {changes.modified === 1 ? "corregida" : "corregidas"}
+            </span>
+            <span>
+              <b className="font-semibold text-removed">{changes.removed}</b>{" "}
+              {changes.removed === 1 ? "eliminada" : "eliminadas"}
+            </span>
+          </span>
+        )}
       </Panel>
       {help && <CanvasLegend />}
     </>

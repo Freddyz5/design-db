@@ -11,6 +11,7 @@ import {
 import {
   dragHandleColumn,
   dragHandleId,
+  ghostNodes,
   groupNodes,
   handleId,
   inView,
@@ -671,5 +672,48 @@ describe("inView", () => {
     expect(inView(box, { x: -150, y: 0, zoom: 1 }, screen)).toBe(false);
     expect(inView(box, { x: 0, y: 0, zoom: 3 }, screen)).toBe(false);
     expect(inView(box, { x: 0, y: 450, zoom: 1 }, screen)).toBe(false);
+  });
+});
+
+describe("ghostNodes", () => {
+  const removed = () =>
+    apply(apply(blog(), { type: "base.set", at: "2026-11-13T10:00:00Z" }), {
+      type: "table.remove",
+      tableId: "posts",
+    });
+
+  test("a removed table stands where it was, only with the changes shown", () => {
+    const diagram = removed();
+    expect(ghostNodes(diagram)).toEqual([]);
+    const [posts, ...rest] = ghostNodes(diagram, [], { showChanges: true });
+    expect(rest).toEqual([]);
+    expect(posts).toMatchObject({
+      id: "ghost:posts",
+      type: "ghost",
+      position: { x: 400, y: 40 },
+      selectable: false,
+      draggable: false,
+    });
+    expect(posts!.data.columns.map((c) => c.name)).toEqual(["id", "author_id"]);
+  });
+
+  test("with only the names shown it has no rows, and it fades with a focus", () => {
+    const diagram = removed();
+    const [named] = ghostNodes(diagram, [], {
+      showChanges: true,
+      columns: "name",
+    });
+    expect(named!.data.columns).toEqual([]);
+    const [faded] = ghostNodes(diagram, [], {
+      showChanges: true,
+      focusedTableId: "users",
+    });
+    expect(faded!.data.dimmed).toBe(true);
+  });
+
+  test("a ghost that did not change is the same object", () => {
+    const diagram = removed();
+    const first = ghostNodes(diagram, [], { showChanges: true });
+    expect(ghostNodes(diagram, first, { showChanges: true })[0]).toBe(first[0]);
   });
 });

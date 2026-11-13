@@ -17,7 +17,7 @@ import {
   TABLE_ROW_HEIGHT,
   TABLE_WIDTH,
 } from "../constants/canvas";
-import { changeMarks, type TableMarks } from "./diagramChanges";
+import { changeMarks, removedTables, type TableMarks } from "./diagramChanges";
 import { stripColors, type Strip } from "./groupColor";
 import { columnFaces, noteHeight, type ColumnFace } from "./tableCard";
 
@@ -91,7 +91,17 @@ export type GroupNodeData = {
 /** The node type is "zone": React Flow styles its own "group" type. */
 export type GroupNode = Node<GroupNodeData, "zone">;
 
-export type CanvasNode = TableNode | GroupNode;
+export type GhostNodeData = {
+  /** The table as the base had it. */
+  table: Table;
+  /** The columns shown, by the columns filter. */
+  columns: Column[];
+  dimmed: boolean;
+};
+/** A table removed since the base, drawn where it stood. It cannot be picked or moved. */
+export type GhostNode = Node<GhostNodeData, "ghost">;
+
+export type CanvasNode = TableNode | GroupNode | GhostNode;
 
 export type RelationEdgeData = {
   cardinality: Cardinality;
@@ -412,6 +422,53 @@ export function inView(
     left + box.width * viewport.zoom <= screen.width &&
     top + box.height * viewport.zoom <= screen.height
   );
+}
+
+/** The id of the canvas node of a removed table. Table nodes use the id of the table. */
+export const ghostNodeId = (tableId: Id): string => `ghost:${tableId}`;
+
+/**
+ * The tables removed since the base, when the changes are shown: each one
+ * where it stood, struck through. A node that did not change is returned
+ * as the same object.
+ */
+export function ghostNodes(
+  diagram: Diagram,
+  previous: readonly GhostNode[] = [],
+  view: Partial<CanvasView> = {},
+): GhostNode[] {
+  const { columns, showChanges, focusedTableId } = { ...DEFAULT_VIEW, ...view };
+  if (!showChanges) return [];
+  const before = new Map(previous.map((node) => [node.id, node]));
+  const focus =
+    focusedTableId !== null &&
+    diagram.tables.some((table) => table.id === focusedTableId);
+  return removedTables(diagram).map(({ table, position }) => {
+    const id = ghostNodeId(table.id);
+    const shown = columns === "name" ? [] : table.columns;
+    const old = before.get(id);
+    if (
+      old &&
+      old.data.table === table &&
+      old.data.columns.length === shown.length &&
+      old.data.dimmed === focus &&
+      old.position.x === position.x &&
+      old.position.y === position.y
+    ) {
+      return old;
+    }
+    return {
+      id,
+      type: "ghost",
+      position: { x: position.x, y: position.y },
+      data: { table, columns: shown, dimmed: focus },
+      selectable: false,
+      draggable: false,
+      focusable: false,
+      connectable: false,
+      ariaLabel: `Tabla eliminada: ${table.name}`,
+    };
+  });
 }
 
 /** The id of the canvas node of a group. Table nodes use the id of the table. */

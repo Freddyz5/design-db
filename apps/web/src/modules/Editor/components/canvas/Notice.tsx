@@ -18,8 +18,9 @@ export function Notice() {
     return () => clearTimeout(timer);
   }, [notice]);
 
+  // Above the row of the zoom bar, which can be wide with the changes counted.
   return (
-    <Panel position="bottom-center" className="!mb-4">
+    <Panel position="bottom-center" className="!mb-14">
       <div role="status">
         {notice !== null && (
           <div className="flex items-center gap-3 rounded-control bg-frame py-1.5 pr-1.5 pl-3.5 text-[13px] text-frame-ink shadow-float">
