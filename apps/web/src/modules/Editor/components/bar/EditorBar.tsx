@@ -9,6 +9,7 @@ import { COLUMNS_FILTERS, RELATIONS_FILTERS } from "../../constants/filters";
 import { BarButton } from "./BarButton";
 import { BarSegment } from "./BarSegment";
 import { BaseButton } from "./BaseButton";
+import { TableSearch } from "./TableSearch";
 
 const ICON = { size: 15, strokeWidth: 1.75, "aria-hidden": true } as const;
 
@@ -125,6 +126,7 @@ export function EditorBar() {
           )}
         </BarButton>
       </div>
+      <TableSearch />
       <BarButton
         compact
         icon={<Code {...ICON} />}
