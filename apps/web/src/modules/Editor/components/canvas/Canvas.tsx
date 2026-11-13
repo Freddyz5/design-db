@@ -24,6 +24,7 @@ import { CanvasControls } from "./CanvasControls";
 import { Notice } from "./Notice";
 import { RelationEdgeView } from "./RelationEdge";
 import { SelectionBar } from "./SelectionBar";
+import { TablePanel } from "../table-panel/TablePanel";
 import { TableNodeView } from "./TableNode";
 
 const nodeTypes = { table: TableNodeView };
@@ -116,6 +117,11 @@ export function Canvas() {
       edgeTypes={edgeTypes}
       onNodesChange={onNodesChange}
       onNodeDragStop={onNodeDragStop}
+      onNodeDoubleClick={(_event, node) =>
+        editorStore
+          .getState()
+          .setView({ selection: [node.id], editingTableId: node.id })
+      }
       onSelectionDragStop={(_event, dragged) => place(dragged)}
       onSelectionChange={onSelectionChange}
       selectionMode={SelectionMode.Partial}
@@ -138,6 +144,7 @@ export function Canvas() {
         color="var(--color-canvas-dot)"
       />
       <SelectionBar />
+      <TablePanel />
       <CanvasControls />
       <Notice />
     </ReactFlow>

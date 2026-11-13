@@ -79,33 +79,54 @@ describe("dispatch", () => {
   });
 });
 
-describe("dragging", () => {
-  const moveTo = (x: number) =>
-    ({ type: "table.move", tableId: "users", position: { x, y: 0 } }) as const;
+describe("merging steps", () => {
+  const rename = (name: string) =>
+    ({ type: "table.update", tableId: "users", patch: { name } }) as const;
+  const key = { mergeKey: "table.name:users" };
 
-  test("a whole drag is one undo step", () => {
+  test("changes with the same merge key are one undo step", () => {
     const { state, present, initial } = setup();
-    state().beginDrag();
-    for (const x of [10, 20, 30]) state().dispatch(moveTo(x));
-    expect(present().layout.tables["users"]).toEqual({ x: 30, y: 0 });
+    for (const name of ["p", "pe", "people"])
+      state().dispatch(rename(name), key);
+    expect(present().tables[0]!.name).toBe("people");
 
     state().undo();
     expect(present()).toBe(initial);
   });
 
-  test("two drags of the same table are two steps", () => {
+  test("a checkpoint closes the step", () => {
     const { state, present } = setup();
-    state().beginDrag();
-    state().dispatch(moveTo(10));
-    state().dispatch(moveTo(20));
-    state().beginDrag();
-    state().dispatch(moveTo(30));
-    state().dispatch(moveTo(40));
+    state().dispatch(rename("people"), key);
+    state().checkpoint();
+    state().dispatch(rename("persons"), key);
 
     state().undo();
-    expect(present().layout.tables["users"]).toEqual({ x: 20, y: 0 });
+    expect(present().tables[0]!.name).toBe("people");
+  });
+
+  test("a change without a key in between closes the step too", () => {
+    const { state, present } = setup();
+    state().dispatch(rename("people"), key);
+    state().dispatch({ type: "table.remove", tableId: "posts" });
+    state().dispatch(rename("persons"), key);
+
     state().undo();
-    expect(present().layout.tables["users"]).toBeUndefined();
+    expect(present().tables[0]!.name).toBe("people");
+    expect(present().tables).toHaveLength(1);
+  });
+
+  test("moving the same table twice in a row is one step, as in the core", () => {
+    const { state, present, initial } = setup();
+    const moveTo = (x: number) =>
+      ({
+        type: "table.move",
+        tableId: "users",
+        position: { x, y: 0 },
+      }) as const;
+    state().dispatch(moveTo(10));
+    state().dispatch(moveTo(20));
+    state().undo();
+    expect(present()).toBe(initial);
   });
 });
 
@@ -175,6 +196,18 @@ describe("view", () => {
     expect(state().view.selection).toEqual(["users"]);
   });
 
+  test("the edit panel closes when its table no longer exists", () => {
+    const { state } = setup();
+    state().dispatch({ type: "table.add", table: table("tags") });
+    state().setView({ editingTableId: "tags" });
+    state().dispatch({ type: "table.remove", tableId: "posts" });
+    expect(state().view.editingTableId).toBe("tags");
+
+    state().undo();
+    state().undo();
+    expect(state().view.editingTableId).toBeNull();
+  });
+
   test("a notice lasts until the next change", () => {
     const { state } = setup();
     state().dispatch({ type: "table.remove", tableId: "posts" });
@@ -195,7 +228,7 @@ describe("view", () => {
     store.subscribe(() => calls++);
     state().undo();
     state().redo();
-    state().beginDrag();
+    state().checkpoint();
     expect(calls).toBe(0);
   });
 });

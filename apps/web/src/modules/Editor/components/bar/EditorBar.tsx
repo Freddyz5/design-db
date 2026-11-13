@@ -20,7 +20,7 @@ export function EditorBar() {
   const { screenToFlowPosition } = useReactFlow();
   const canvas = useStoreApi();
 
-  /** Adds a table in the middle of what the canvas shows, and selects it. */
+  /** Adds a table in the middle of what the canvas shows, and opens it to be edited. */
   const addTable = () => {
     const { dispatch, setView } = editorStore.getState();
     const diagram = selectDiagram(editorStore.getState());
@@ -39,7 +39,7 @@ export function EditorBar() {
     });
 
     dispatch({ type: "table.add", table, position });
-    setView({ selection: [table.id] });
+    setView({ selection: [table.id], editingTableId: table.id });
   };
 
   /** Starts an empty diagram. It is one step, so undoing brings the old one back. */

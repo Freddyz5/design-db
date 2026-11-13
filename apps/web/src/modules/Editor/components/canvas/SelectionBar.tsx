@@ -11,9 +11,11 @@ const BUTTON =
 export function SelectionBar() {
   const diagram = useEditorStore(selectDiagram);
   const selection = useEditorStore((state) => state.view.selection);
+  const editing = useEditorStore((state) => state.view.editingTableId);
 
   const tables = diagram.tables.filter((table) => selection.includes(table.id));
-  if (tables.length === 0) return null;
+  // While a table is being edited, its panel has these actions.
+  if (tables.length === 0 || editing !== null) return null;
   const [first] = tables;
   const only = tables.length === 1 ? first : undefined;
   const ids = tables.map((table) => table.id);
@@ -69,6 +71,17 @@ export function SelectionBar() {
           onClick={() => moveToGroup(undefined)}
         >
           Quitar del grupo
+        </button>
+      )}
+      {only && (
+        <button
+          type="button"
+          className={BUTTON}
+          onClick={() =>
+            editorStore.getState().setView({ editingTableId: only.id })
+          }
+        >
+          Editar
         </button>
       )}
       <button
