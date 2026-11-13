@@ -1,4 +1,4 @@
-import type { Column } from "../../Columns";
+import { isSameColumnType, type Column } from "../../Columns";
 import type { Relation, RelationEnd } from "../../Relations";
 import type { Id } from "../../shared";
 import { isUniqueKey, type Table } from "../../Tables";
@@ -247,7 +247,7 @@ function checkRelation(doc: Diagram, relation: Relation): Issue[] {
 
   from.columns.forEach((source, i) => {
     const target = to.columns[i]!;
-    if (normalizeType(source.type) !== normalizeType(target.type)) {
+    if (!isSameColumnType(source.type, target.type)) {
       issues.push({
         ...ref,
         code: "relation-type-mismatch",
@@ -312,21 +312,6 @@ function duplicates<T extends { name: string }>(items: T[]): T[][] {
     byName.set(key, [...(byName.get(key) ?? []), item]);
   }
   return [...byName.values()].filter((group) => group.length > 1);
-}
-
-/** Types that store the same value under another name. */
-const SAME_TYPE: Readonly<Record<string, string>> = {
-  int: "integer",
-  // An auto-numbered key and the foreign key that points at it.
-  serial: "integer",
-  bigserial: "bigint",
-  smallserial: "smallint",
-};
-
-/** The type as stored, so `serial` and the `integer` that references it compare equal. */
-function normalizeType(type: string): string {
-  const text = type.trim().toLowerCase().replace(/\s+/g, " ");
-  return SAME_TYPE[text] ?? text;
 }
 
 function isBlank(name: string): boolean {

@@ -147,6 +147,38 @@ describe("mergeDiagram replace", () => {
   });
 });
 
+describe("mergeDiagram replace keeps equivalent types", () => {
+  test("a column keeps its type when the import spells it differently", () => {
+    const current = blogDiagram();
+    const imported = {
+      ...current,
+      tables: current.tables.map((table) => ({
+        ...table,
+        columns: table.columns.map((column) =>
+          column.type === "int" ? { ...column, type: "INTEGER" } : column,
+        ),
+      })),
+    };
+    const merged = mergeDiagram(current, imported, "replace");
+    expect(merged.tables).toEqual(current.tables);
+  });
+
+  test("a real change of type is applied", () => {
+    const current = blogDiagram();
+    const imported = {
+      ...current,
+      tables: current.tables.map((table) => ({
+        ...table,
+        columns: table.columns.map((column) =>
+          column.type === "int" ? { ...column, type: "bigint" } : column,
+        ),
+      })),
+    };
+    const merged = mergeDiagram(current, imported, "replace");
+    expect(merged.tables[0]!.columns[0]!.type).toBe("bigint");
+  });
+});
+
 describe("mergeDiagram add", () => {
   test("adds the imported tables with new ids, renaming taken names", () => {
     const current = deepFreeze(blogDiagram());

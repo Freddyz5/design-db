@@ -1,4 +1,4 @@
-import type { Column } from "../../Columns";
+import { isSameColumnType, type Column } from "../../Columns";
 import { isEnumType, type Enum } from "../../Enums";
 import type { Group } from "../../Groups";
 import type { Relation, RelationEnd } from "../../Relations";
@@ -14,7 +14,8 @@ export type MergeMode = "add" | "replace";
  *
  * - `replace`: the result has the imported schema, but tables, columns,
  *   enums, groups and relations that already existed (same name, ignoring
- *   case) keep their id, position, color and group. If the import has no
+ *   case) keep their id, position, color and group. A column whose type is
+ *   only spelled differently (`int` and `integer`) keeps its type. If the import has no
  *   groups (SQL never has), the current groups are kept.
  * - `add`: the imported items are added with new ids. Tables whose name is
  *   taken are renamed (`users_2`), groups with the same name are merged and
@@ -66,7 +67,12 @@ function replaceDiagram(current: Diagram, imported: Diagram): Diagram {
       const oldColumn = old ? findByName(old.columns, c.name) : undefined;
       const columnId = oldColumn?.id ?? c.id;
       columnIds.set(c.id, columnId);
-      return { ...c, id: columnId };
+      // An equivalent type (int and integer) keeps the name it had.
+      const type =
+        oldColumn && isSameColumnType(oldColumn.type, c.type)
+          ? oldColumn.type
+          : c.type;
+      return { ...c, id: columnId, type };
     });
 
     const groupId = keepGroups

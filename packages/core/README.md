@@ -87,7 +87,7 @@ Organized with the repo-blueprints preset `ts-hexagonal`, variant `core` (see `.
 src/
 ├── index.ts        re-exports every module
 ├── shared/         used by two or more modules: Id, Dialect, DomainError/OperationError, applyPatch
-├── Columns/        Column: shape, createColumn, patchColumn, suggestedColumnTypes
+├── Columns/        Column: shape, createColumn, patchColumn, suggestedColumnTypes, isSameColumnType
 ├── Tables/         Table: shape, createTable, patchTable, column list changes, isUniqueKey
 ├── Relations/      Relation (a foreign key), getCardinality, planManyToMany
 ├── Groups/         Group of tables: shape, createGroup, patchGroup
@@ -102,15 +102,15 @@ Dependencies go one way: `shared` ← `Columns` ← `Tables` ← `Relations` ←
 
 ## API
 
-| Area        | Exports                                                                                                                                                        |
-| ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Format      | `Diagram`, `Table`, `Column`, `Relation`, `Group`, `Enum`, `Layout`, `Base`, zod schemas, `parseDiagram`                                                       |
-| Create      | `createDiagram`, `createTable`, `createColumn`, `createRelation`, `createGroup`, `createEnum`, `createExampleDiagram`                                          |
-| Edit        | `apply`, `applyAll`, `Op`, `createManyToMany`, `mergeDiagram`, `OperationError`                                                                                |
-| Read        | `getTable`, `getColumn`, `getRelation`, `getGroup`, `getEnum`, `findEnum`, `getCardinality`, `validate`, `diffDiagram`, `searchTables`, `suggestedColumnTypes` |
-| Layout      | `toLayoutGraph`, `layoutPositions`, `estimateTableSize`, `unplacedTableIds`, `placementOrigin`                                                                 |
-| Code        | `toSql`, `toDbml`, `toDrizzle`, `importSchema`, `detectFormat`                                                                                                 |
-| Undo / redo | `createHistory`, `push`, `pushOp`, `undo`, `redo`, `canUndo`, `canRedo`, `checkpoint`                                                                          |
+| Area        | Exports                                                                                                                                                                            |
+| ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Format      | `Diagram`, `Table`, `Column`, `Relation`, `Group`, `Enum`, `Layout`, `Base`, zod schemas, `parseDiagram`                                                                           |
+| Create      | `createDiagram`, `createTable`, `createColumn`, `createRelation`, `createGroup`, `createEnum`, `createExampleDiagram`                                                              |
+| Edit        | `apply`, `applyAll`, `Op`, `createManyToMany`, `mergeDiagram`, `OperationError`                                                                                                    |
+| Read        | `getTable`, `getColumn`, `getRelation`, `getGroup`, `getEnum`, `findEnum`, `getCardinality`, `validate`, `diffDiagram`, `searchTables`, `suggestedColumnTypes`, `isSameColumnType` |
+| Layout      | `toLayoutGraph`, `layoutPositions`, `estimateTableSize`, `unplacedTableIds`, `placementOrigin`                                                                                     |
+| Code        | `toSql`, `toDbml`, `toDrizzle`, `importSchema`, `detectFormat`                                                                                                                     |
+| Undo / redo | `createHistory`, `push`, `pushOp`, `undo`, `redo`, `canUndo`, `canRedo`, `checkpoint`                                                                                              |
 
 Each entity module also exports its own pure helpers (`patchTable`, `addColumn`, `usesColumn`, `planManyToMany`…). They work on a single entity and do not keep the diagram consistent; the editor should use `apply`.
 
