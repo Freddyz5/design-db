@@ -1,5 +1,11 @@
 import { describe, expect, test } from "bun:test";
-import { childMark, parentMarks, relationCurve } from "./relationGeometry";
+import {
+  childMark,
+  dimensionLabel,
+  dimensionPoint,
+  parentMarks,
+  relationCurve,
+} from "./relationGeometry";
 
 describe("relationCurve", () => {
   test("between facing sides it bends with the distance", () => {
@@ -42,5 +48,28 @@ describe("marks", () => {
       path: "M94 -6 V6",
       circle: { cx: 86, cy: 0 },
     });
+  });
+});
+
+describe("dimensionLabel", () => {
+  test("many to one, one to one, and an optional parent", () => {
+    expect(dimensionLabel({ kind: "1:N", optional: false })).toBe("N : 1");
+    expect(dimensionLabel({ kind: "1:1", optional: false })).toBe("1 : 1");
+    expect(dimensionLabel({ kind: "1:N", optional: true })).toBe("N : 0..1");
+  });
+});
+
+describe("dimensionPoint", () => {
+  test("sits halfway between the ends", () => {
+    expect(
+      dimensionPoint({ x: 0, y: 10, out: 1 }, { x: 101, y: 30, out: -1 }),
+    ).toEqual({ x: 50.5, y: 20 });
+  });
+
+  test("follows the loop when both ends leave the same side", () => {
+    // Reach 46 to the right: the middle of the curve is 3·46·2/8 = 34.5 out.
+    expect(
+      dimensionPoint({ x: 100, y: 0, out: 1 }, { x: 100, y: 40, out: 1 }),
+    ).toEqual({ x: 134.5, y: 20 });
   });
 });
