@@ -33,6 +33,7 @@ import {
 import { locateTable, tableAtLine } from "../../utils/codeBlocks";
 import { dbmlLanguage } from "../../utils/dbmlLanguage";
 import { CodeEditor, type CodeReveal, type LineRange } from "./CodeEditor";
+import { downloadText } from "../../utils/downloadText";
 
 const SQL_DIALECTS: Record<Dialect, SQLDialect> = {
   postgres: PostgreSQL,
@@ -174,14 +175,7 @@ export function CodePanel() {
     }
   };
 
-  const download = () => {
-    const url = URL.createObjectURL(new Blob([code], { type: "text/plain" }));
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = codeFileName(diagram, format);
-    link.click();
-    URL.revokeObjectURL(url);
-  };
+  const download = () => downloadText(codeFileName(diagram, format), code);
 
   return (
     <aside

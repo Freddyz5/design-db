@@ -4,6 +4,8 @@ import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { selectDiagram } from "../../hooks/EditorStore";
 import { getDiagramStorage } from "../../hooks/useDiagramStorage";
 import { editorStore, useEditorStore } from "../../hooks/useEditorStore";
+import { downloadText } from "../../utils/downloadText";
+import { projectFile } from "../../utils/projectFile";
 import { savedAt } from "../../utils/savedAt";
 
 const MENU_ITEM =
@@ -135,6 +137,18 @@ export function DiagramsMenu() {
             onClick={act(() => getDiagramStorage().duplicate())}
           >
             Duplicar este diagrama
+          </button>
+          <button
+            type="button"
+            role="menuitem"
+            className={MENU_ITEM}
+            title="El diagrama completo como archivo; se abre otra vez con Importar"
+            onClick={act(async () => {
+              const file = projectFile(selectDiagram(editorStore.getState()));
+              downloadText(file.name, file.text, "application/json");
+            })}
+          >
+            Descargar proyecto (.json)
           </button>
           {confirming ? (
             <div className="flex items-center gap-2 px-2.5 py-1.5 text-[13px] text-removed">

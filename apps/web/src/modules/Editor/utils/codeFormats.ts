@@ -50,16 +50,21 @@ const EXTENSION: Record<CodeFormat, string> = {
   drizzle: "ts",
 };
 
-/** A file name for the code: the name of the diagram in lowercase with dashes, and the extension of the format. */
-export function codeFileName(diagram: Diagram, format: CodeFormat): string {
+/** The name of the diagram for a file: lowercase, without accents, with dashes. */
+export function fileBaseName(diagram: Diagram): string {
   const slug = diagram.name
     .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
+    .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
-  const base = slug || "diagrama";
-  return `${format === "drizzle" ? "schema" : base}.${EXTENSION[format]}`;
+  return slug || "diagrama";
+}
+
+/** A file name for the code: the name of the diagram and the extension of the format. */
+export function codeFileName(diagram: Diagram, format: CodeFormat): string {
+  const base = format === "drizzle" ? "schema" : fileBaseName(diagram);
+  return `${base}.${EXTENSION[format]}`;
 }
 
 /** The width of the code panel when the editor opens. */
