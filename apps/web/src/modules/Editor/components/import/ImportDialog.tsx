@@ -153,7 +153,7 @@ function ImportDialogBody({ initial }: { initial: string }) {
               <input
                 type="radio"
                 name="import-mode"
-                className="accent-accent-ink"
+                className="accent-relation-focus"
                 checked={mode === value}
                 onChange={() => setMode(value)}
               />
