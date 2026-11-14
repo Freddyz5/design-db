@@ -75,7 +75,7 @@ describe("tableNodes", () => {
       position: { x: 0, y: 0 },
       ariaLabel: "Tabla users",
     });
-    expect(users!.data.strip.background).toBe("var(--color-group-1)");
+    expect(users!.data.strip.background).toContain("var(--color-group-1)");
     expect(users!.data.references).toEqual({});
 
     expect(posts!.position).toEqual({ x: 400, y: 40 });
@@ -89,7 +89,7 @@ describe("tableNodes", () => {
       tableId: "users",
       patch: { color: "#ffe680" },
     });
-    expect(tableNodes(diagram)[0]!.data.strip.background).toBe("#ffe680");
+    expect(tableNodes(diagram)[0]!.data.strip.background).toContain("#ffe680");
   });
 
   test("a node that did not change is the same object", () => {

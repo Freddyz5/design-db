@@ -18,7 +18,7 @@ import {
   TABLE_WIDTH,
 } from "../constants/canvas";
 import { changeMarks, removedTables, type TableMarks } from "./diagramChanges";
-import { stripColors, type Strip } from "./groupColor";
+import { groupColor, stripColors, type Strip } from "./groupColor";
 import { columnFaces, noteHeight, type ColumnFace } from "./tableCard";
 
 /** Which columns the tables show: all, only the keys, or none (just the name). */
@@ -513,7 +513,7 @@ export function groupNodes(
     const y = top - above;
     const width = right - left + GROUP_PADDING.side * 2;
     const height = bottom - top + above + GROUP_PADDING.bottom;
-    const color = stripColors(group.color).background;
+    const color = groupColor(group.color);
 
     const id = groupNodeId(group.id);
     const old = before.get(id);

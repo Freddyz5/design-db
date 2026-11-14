@@ -3,7 +3,7 @@ import { memo, useState } from "react";
 import { GROUP_COLOR_NAMES } from "../../constants/groupColors";
 import { editorStore } from "../../hooks/useEditorStore";
 import type { GroupNode } from "../../utils/canvasElements";
-import { GROUP_COLOR_KEYS, stripColors } from "../../utils/groupColor";
+import { GROUP_COLOR_KEYS, groupColor } from "../../utils/groupColor";
 import { groupStep } from "../../utils/groupStep";
 
 const ACTION =
@@ -109,7 +109,7 @@ export const GroupNodeView = memo(function GroupNodeView({
                 key={key}
                 type="button"
                 className="size-4 cursor-pointer rounded-[2px] border border-sheet-edge aria-pressed:outline-2 aria-pressed:outline-offset-1 aria-pressed:outline-ink"
-                style={{ backgroundColor: stripColors(key).background }}
+                style={{ backgroundColor: groupColor(key) }}
                 aria-label={`Color ${GROUP_COLOR_NAMES[key]}`}
                 title={`Color ${GROUP_COLOR_NAMES[key]}`}
                 aria-pressed={group.color === key}

@@ -1,7 +1,6 @@
 import type { Column } from "@design-db/core";
 import { Handle, Position, type NodeProps } from "@xyflow/react";
 import { memo } from "react";
-import { FlapText } from "../../../shared";
 import {
   TABLE_HEADER_HEIGHT,
   TABLE_NOTE_GAP,
@@ -75,7 +74,7 @@ function ColumnRow({
             aria-label={CHANGE_LAMP[change].label}
           />
         )}
-        <FlapText text={column.name} className="truncate" />
+        <span className="truncate">{column.name}</span>
       </span>
       <span
         className="flex min-w-0 items-center self-stretch border-l border-sheet-rule px-[5px] text-sheet-muted"
@@ -83,24 +82,24 @@ function ColumnRow({
           enumValues ? `${column.type}: ${enumValues.join(" · ")}` : column.type
         }
       >
-        <FlapText
-          text={column.type}
+        <span
           className={`truncate ${enumValues ? "cursor-help border-b border-dotted border-current" : ""}`}
-        />
+        >
+          {column.type}
+        </span>
       </span>
       <span
         className={`flex min-w-0 items-center gap-1 self-stretch border-l border-sheet-rule px-[5px] ${column.primaryKey ? "text-key-ink" : "text-sheet-muted"}`}
         title={detail}
       >
-        <FlapText
-          text={reference ? `${rules},` : rules}
+        <span
           className={`min-w-0 shrink truncate ${column.primaryKey ? "font-semibold" : ""}`}
-        />
-        {/* Always mounted, empty without a reference, so a first relation flips too. */}
-        <FlapText
-          text={pointsAt}
-          className="flex-none font-semibold text-sheet-ink empty:hidden"
-        />
+        >
+          {reference ? `${rules},` : rules}
+        </span>
+        <span className="flex-none font-semibold text-relation-focus empty:hidden">
+          {pointsAt}
+        </span>
         {reference?.group != null && (
           <span
             className="flex-none rounded-[2px] bg-sheet-rule px-1 leading-4 text-sheet-muted"
@@ -135,7 +134,7 @@ function ColumnRow({
   );
 }
 
-/** A table on the canvas: a strip with its name in the group color, and one row per column. */
+/** A table on the canvas, as a technical sheet: its name on a tint of the group color, and one ruled row per column. */
 export const TableNodeView = memo(function TableNodeView({
   data,
   selected,
@@ -153,10 +152,11 @@ export const TableNodeView = memo(function TableNodeView({
     dimmed,
     marks,
   } = data;
+  // Selected: the orange pencil with a soft halo. Focused: the cyan of the grid, stronger.
   const outline = selected
-    ? "outline-[3px] outline-accent"
+    ? "outline-2 outline-offset-[3px] outline-accent shadow-[0_0_0_7px_color-mix(in_srgb,var(--color-accent)_16%,transparent)]"
     : focused
-      ? "outline-2 outline-offset-2 outline-accent-ink"
+      ? "outline-[2.5px] outline-offset-2 outline-relation-focus"
       : "";
 
   return (
@@ -166,17 +166,19 @@ export const TableNodeView = memo(function TableNodeView({
       data-table-id={table.id}
     >
       <div
-        className={`relative border-[1.5px] border-sheet-edge bg-sheet text-sheet-ink shadow-float ${outline}`}
+        className={`relative border-[1.5px] border-sheet-edge bg-sheet text-sheet-ink ${outline}`}
       >
         <div
-          className="relative flex items-center justify-between gap-2 px-2 font-display text-[15.5px] font-bold tracking-[0.06em]"
+          className="relative flex items-center justify-between gap-2 border-b-[1.5px] border-sheet-edge px-2 font-display text-[15.5px] font-bold tracking-[0.04em]"
           style={{
             height: TABLE_HEADER_HEIGHT,
             backgroundColor: strip.background,
             color: strip.ink,
           }}
         >
-          <FlapText text={table.name} title={table.name} className="truncate" />
+          <span title={table.name} className="truncate">
+            {table.name}
+          </span>
           {marks?.table && (
             <span
               className={`ml-auto rounded-[2px] px-1 text-[10.5px] leading-4 tracking-[0.1em] text-panel uppercase ${marks.table === "added" ? "bg-added" : "bg-changed"}`}
@@ -209,7 +211,7 @@ export const TableNodeView = memo(function TableNodeView({
         <ul>
           {header && (
             <li
-              className={`${ROW_GRID} border-t border-sheet-rule font-display text-[11px] font-semibold tracking-[0.08em] text-sheet-muted uppercase`}
+              className={`${ROW_GRID} bg-sheet-head font-display text-[10.5px] font-semibold tracking-[0.1em] text-sheet-head-ink uppercase`}
               style={{ height: TABLE_ROW_HEIGHT }}
               aria-hidden
             >
