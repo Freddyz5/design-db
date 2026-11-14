@@ -49,6 +49,11 @@ export type {
   LayoutNode,
   Size,
 } from "./domain/DiagramLayout";
+export { summarizeDiagram } from "./domain/DiagramRepository";
+export type {
+  DiagramRepository,
+  DiagramSummary,
+} from "./domain/DiagramRepository";
 export { validate } from "./domain/DiagramValidation";
 export type { Issue, IssueCode, Severity } from "./domain/DiagramValidation";
 export * from "./application";

@@ -29,6 +29,10 @@ export default defineConfig({
         "zustand",
         "zustand/vanilla",
       ],
+      // SQLite loads its .wasm next to its own module: pre-bundled, it can't find it.
+      exclude: ["@sqlite.org/sqlite-wasm"],
     },
+    // The SQLite worker imports modules.
+    worker: { format: "es" },
   },
 });
