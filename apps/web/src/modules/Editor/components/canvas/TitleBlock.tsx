@@ -63,7 +63,7 @@ export function TitleBlock() {
     <Panel position="bottom-right">
       <section
         aria-label="Cajetín"
-        className="group/block relative grid w-64 grid-cols-[auto_minmax(0,1fr)] border-[1.5px] border-sheet-edge bg-sheet text-sheet-ink"
+        className="group/block relative grid w-64 max-[720px]:hidden grid-cols-[auto_minmax(0,1fr)] border-[1.5px] border-sheet-edge bg-sheet text-sheet-ink"
       >
         <span className={`${LABEL} border-b`}>Plano</span>
         <span
