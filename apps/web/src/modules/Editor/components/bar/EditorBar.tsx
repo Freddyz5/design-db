@@ -1,6 +1,6 @@
 import { diffDiagram } from "@design-db/core";
 import { Code, FilePlus, Import, LayoutGrid, Plus } from "lucide-react";
-import { ThemeSelect } from "../../../shared";
+import { BrandMark, ThemeSelect } from "../../../shared";
 import { selectDiagram } from "../../hooks/EditorStore";
 import { useAddTable } from "../../hooks/useAddTable";
 import { useAutoLayout } from "../../hooks/useAutoLayout";
@@ -36,8 +36,9 @@ export function EditorBar() {
 
   return (
     <header className="flex h-12 items-center gap-2 border-b border-bar-deep bg-bar px-4 text-bar-ink max-[560px]:px-2">
-      <span className="mr-1 flex-none font-display text-lg font-bold tracking-[0.14em] whitespace-nowrap uppercase max-[560px]:hidden">
-        Design DB
+      <span className="mr-1 flex flex-none items-center gap-2 font-display text-lg font-bold tracking-[0.14em] whitespace-nowrap uppercase">
+        <BrandMark />
+        <span className="max-[560px]:hidden">Design DB</span>
       </span>
       <DiagramName />
       <DiagramsMenu />
@@ -110,7 +111,7 @@ export function EditorBar() {
               ? "Fija una base para ver qué cambió desde entonces"
               : "Marcar lo nuevo, lo que cambió y lo eliminado desde la base"
           }
-          className="aria-pressed:border-bar-deep aria-pressed:bg-bar-deep aria-pressed:text-accent"
+          className="aria-pressed:border-bar-deep aria-pressed:bg-bar-deep aria-pressed:text-bar-active"
           onClick={() =>
             editorStore.getState().setView({ showChanges: !showChanges })
           }
@@ -129,7 +130,7 @@ export function EditorBar() {
         icon={<Code {...ICON} />}
         aria-pressed={codeOpen}
         title={codeOpen ? "Ocultar el código" : "Mostrar el código"}
-        className="aria-pressed:border-bar-deep aria-pressed:bg-bar-deep aria-pressed:text-accent"
+        className="aria-pressed:border-bar-deep aria-pressed:bg-bar-deep aria-pressed:text-bar-active"
         onClick={() => editorStore.getState().setView({ codeOpen: !codeOpen })}
       >
         Código

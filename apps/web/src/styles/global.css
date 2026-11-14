@@ -45,6 +45,8 @@
   --color-bar-line: light-dark(#2d5f66, #1f4a50);
   --color-bar-ink: light-dark(#edf3f2, #dcedef);
   --color-bar-muted: light-dark(#a9c6c9, #8db4b9);
+  /* What is on in the bar (a pressed toggle, the chosen filter): the cyan of the grid. */
+  --color-bar-active: light-dark(#7fe0e8, #4fd8e3);
   /* An error on the bar, readable on petroleum in both themes. */
   --color-bar-danger: #ff8f80;
 

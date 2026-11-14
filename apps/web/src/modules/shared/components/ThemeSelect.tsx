@@ -18,7 +18,7 @@ export function ThemeSelect() {
         <label
           key={value}
           title={label}
-          className="grid size-7 cursor-pointer place-items-center rounded-[2px] text-bar-muted hover:text-bar-ink has-checked:bg-bar-deep has-checked:text-accent has-focus-visible:outline-2 has-focus-visible:outline-offset-1 has-focus-visible:outline-accent"
+          className="grid size-7 cursor-pointer place-items-center rounded-[2px] text-bar-muted hover:text-bar-ink has-checked:bg-bar-deep has-checked:text-bar-active has-focus-visible:outline-2 has-focus-visible:outline-offset-1 has-focus-visible:outline-accent"
         >
           <input
             type="radio"

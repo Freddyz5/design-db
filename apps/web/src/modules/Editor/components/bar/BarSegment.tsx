@@ -22,7 +22,7 @@ export function BarSegment<T extends string>({
         <label
           key={option.value}
           title={option.title}
-          className="flex h-7 cursor-pointer items-center rounded-[2px] px-2.5 text-[12.5px] max-[1439px]:px-2 font-medium whitespace-nowrap text-bar-muted hover:text-bar-ink has-checked:bg-bar-deep has-checked:text-accent has-focus-visible:outline-2 has-focus-visible:outline-offset-1 has-focus-visible:outline-accent"
+          className="flex h-7 cursor-pointer items-center rounded-[2px] px-2.5 text-[12.5px] max-[1439px]:px-2 font-medium whitespace-nowrap text-bar-muted hover:text-bar-ink has-checked:bg-bar-deep has-checked:text-bar-active has-focus-visible:outline-2 has-focus-visible:outline-offset-1 has-focus-visible:outline-accent"
         >
           <input
             type="radio"
