@@ -87,7 +87,7 @@ export function TableSearch() {
         size={14}
         strokeWidth={1.75}
         aria-hidden
-        className="pointer-events-none absolute top-1/2 left-2 -translate-y-1/2 text-frame-muted"
+        className="pointer-events-none absolute top-1/2 left-2 -translate-y-1/2 text-bar-muted"
       />
       <input
         ref={input}
@@ -104,7 +104,7 @@ export function TableSearch() {
         title="Buscar tabla (/)"
         autoComplete="off"
         spellCheck={false}
-        className="h-[30px] w-40 rounded-control border border-frame-line bg-frame-well pr-2 pl-7 text-[13px] text-frame-ink placeholder:text-frame-muted max-[1599px]:w-32 max-[1439px]:w-28 [&::-webkit-search-cancel-button]:appearance-none"
+        className="h-[30px] w-40 rounded-control border border-bar-line bg-bar-well pr-2 pl-7 text-[13px] text-bar-ink placeholder:text-bar-muted max-[1599px]:w-32 max-[1439px]:w-28 [&::-webkit-search-cancel-button]:appearance-none"
         value={query}
         onChange={(event) => {
           setQuery(event.target.value);

@@ -11,7 +11,7 @@ export const BUTTON =
   "h-[30px] cursor-pointer rounded-control border border-line bg-raised px-2.5 text-[13px] whitespace-nowrap hover:border-ink-muted disabled:cursor-default disabled:opacity-45 disabled:hover:border-line";
 
 export const CHECKBOX =
-  "size-4 cursor-pointer accent-lamp-ink disabled:cursor-default";
+  "size-4 cursor-pointer accent-relation-focus disabled:cursor-default";
 
 /** The problems of a field, each in its own line. Errors in red, warnings in amber. */
 export function IssueList({

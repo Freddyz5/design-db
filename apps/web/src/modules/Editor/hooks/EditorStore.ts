@@ -64,6 +64,10 @@ export type EditorView = {
   saveStatus: SaveStatus;
   /** Whether what is saved survives closing the page; null until the storage says. */
   persistent: boolean | null;
+  /** When the diagram open was last saved (ISO date), or null if it is not saved yet. */
+  savedAt: string | null;
+  /** Whether the title block shows in the corner of the canvas. */
+  titleBlockOpen: boolean;
 };
 
 export type EditorState = {
@@ -112,6 +116,8 @@ const EMPTY_VIEW: EditorView = {
   notice: null,
   saveStatus: "idle",
   persistent: null,
+  savedAt: null,
+  titleBlockOpen: true,
 };
 
 /**

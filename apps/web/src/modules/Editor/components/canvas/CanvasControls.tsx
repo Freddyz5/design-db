@@ -8,7 +8,7 @@ import { tableCounts } from "../../utils/diagramChanges";
 import { CanvasLegend } from "./CanvasLegend";
 
 const BUTTON =
-  "grid h-7 min-w-7 cursor-pointer place-items-center rounded-[2px] px-2 hover:bg-canvas disabled:cursor-default disabled:opacity-40 disabled:hover:bg-transparent aria-pressed:bg-frame aria-pressed:text-frame-ink";
+  "grid h-7 min-w-7 cursor-pointer place-items-center rounded-[2px] px-2 hover:bg-canvas disabled:cursor-default disabled:opacity-40 disabled:hover:bg-transparent aria-pressed:bg-bar aria-pressed:text-bar-ink";
 
 /** How long a zoom or a fit takes. Nothing when the system asks for reduced motion. */
 function motion(ms: number): number {
@@ -24,6 +24,10 @@ export function CanvasControls() {
   const { zoom } = useViewport();
   const diagram = useEditorStore(selectDiagram);
   const help = useEditorStore((state) => state.view.helpOpen);
+  // The title block says how much the diagram holds; here only when it does not show.
+  const titleBlock = useEditorStore(
+    (state) => state.view.titleBlockOpen && !state.view.helpOpen,
+  );
   const showChanges = useEditorStore(
     (state) =>
       state.view.showChanges && selectDiagram(state).base !== undefined,
@@ -83,11 +87,15 @@ export function CanvasControls() {
         >
           Ayuda
         </button>
-        <span className="mx-1 h-4 w-px bg-line" />
-        <span className="px-2 text-ink-muted">
-          {count(diagram.tables.length, "tabla", "tablas")} ·{" "}
-          {count(diagram.relations.length, "relación", "relaciones")}
-        </span>
+        {!titleBlock && (
+          <>
+            <span className="mx-1 h-4 w-px bg-line" />
+            <span className="px-2 text-ink-muted">
+              {count(diagram.tables.length, "tabla", "tablas")} ·{" "}
+              {count(diagram.relations.length, "relación", "relaciones")}
+            </span>
+          </>
+        )}
         {changes && (
           <span
             className="flex items-center gap-2.5 border-l border-line px-2 text-ink-muted tabular-nums max-[720px]:hidden"

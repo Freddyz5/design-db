@@ -18,7 +18,7 @@ export const GhostNodeView = memo(function GhostNodeView({
   const { table, columns, dimmed } = data;
   return (
     <figure
-      className={`m-0 cursor-default border-[1.5px] border-dashed border-removed bg-flap/60 text-removed transition-opacity duration-150 motion-reduce:transition-none ${dimmed ? "opacity-25" : "opacity-85"}`}
+      className={`m-0 cursor-default border-[1.5px] border-dashed border-removed bg-sheet/60 text-removed transition-opacity duration-150 motion-reduce:transition-none ${dimmed ? "opacity-25" : "opacity-85"}`}
       style={{ width: TABLE_WIDTH }}
     >
       <figcaption

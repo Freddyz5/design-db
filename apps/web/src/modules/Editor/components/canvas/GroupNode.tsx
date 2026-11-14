@@ -3,7 +3,7 @@ import { memo, useState } from "react";
 import { GROUP_COLOR_NAMES } from "../../constants/groupColors";
 import { editorStore } from "../../hooks/useEditorStore";
 import type { GroupNode } from "../../utils/canvasElements";
-import { GROUP_COLOR_KEYS, stripColors } from "../../utils/groupColor";
+import { GROUP_COLOR_KEYS, groupColor } from "../../utils/groupColor";
 import { groupStep } from "../../utils/groupStep";
 
 const ACTION =
@@ -44,10 +44,11 @@ export const GroupNodeView = memo(function GroupNodeView({
 
   return (
     <div
-      className="size-full rounded-[4px] border"
+      className="size-full rounded-[2px] border-[1.5px] border-dashed"
       style={{
-        borderColor: `color-mix(in srgb, ${color} 60%, transparent)`,
-        backgroundColor: `color-mix(in srgb, ${color} 9%, transparent)`,
+        // A dashed outline in its color, as a zone on a plan; faint enough to keep the grid.
+        borderColor: `color-mix(in srgb, ${color} 75%, transparent)`,
+        backgroundColor: `color-mix(in srgb, ${color} 5%, transparent)`,
       }}
     >
       <div className="group-handle group/label pointer-events-auto relative flex cursor-grab items-start gap-3 px-4 pt-3 pb-1 active:cursor-grabbing">
@@ -108,8 +109,8 @@ export const GroupNodeView = memo(function GroupNodeView({
               <button
                 key={key}
                 type="button"
-                className="size-4 cursor-pointer rounded-[2px] border border-flap-edge aria-pressed:outline-2 aria-pressed:outline-offset-1 aria-pressed:outline-ink"
-                style={{ backgroundColor: stripColors(key).background }}
+                className="size-4 cursor-pointer rounded-[2px] border border-sheet-edge aria-pressed:outline-2 aria-pressed:outline-offset-1 aria-pressed:outline-ink"
+                style={{ backgroundColor: groupColor(key) }}
                 aria-label={`Color ${GROUP_COLOR_NAMES[key]}`}
                 title={`Color ${GROUP_COLOR_NAMES[key]}`}
                 aria-pressed={group.color === key}

@@ -8,21 +8,11 @@
     "cta": "Abrir el editor",
     "repositoryLink": "Ver el código en GitHub",
     "lead": "Design DB es un editor de diagramas entidad-relación de código abierto. El diagrama y el código son el mismo esquema.",
-    "try": "Escribe una tabla en el SQL y mira cómo entra al tablero. Funciona en tu navegador: sin cuenta y sin enviar tu esquema a ningún servidor.",
-    "board": {
-      "label": "Tablero del esquema",
-      "table": "Tabla",
-      "columns": "Columnas",
-      "references": "Referencias",
-      "status": "Estado",
-      "onBoard": "En tablero",
-      "arriving": "Llegando",
-      "empty": "Escribe un CREATE TABLE para empezar."
-    },
+    "try": "Escribe una tabla en el SQL y mira cómo se dibuja en el plano. Funciona en tu navegador: sin cuenta y sin enviar tu esquema a ningún servidor.",
     "sql": {
-      "label": "Escribe SQL · el tablero se actualiza",
-      "ok": "El tablero está al día.",
-      "error": "Línea {line}: {message}. El tablero no cambió."
+      "label": "Escribe SQL · el plano se dibuja solo",
+      "ok": "El plano está al día.",
+      "error": "Línea {line}: {message}. El plano no cambió."
     },
     "formats": {
       "title": "El mismo esquema, en otros formatos",
@@ -32,7 +22,19 @@
       "title": "Tu esquema, a la vista",
       "lead": "Tablas, columnas, relaciones y grupos en un lienzo, con el código al lado. Importa un esquema que ya tienes, ordénalo con un clic y compara los cambios con una base."
     },
-    "footer": "Design DB es de código abierto."
+    "footer": "Design DB es de código abierto.",
+    "plan": {
+      "label": "Plano del esquema",
+      "name": "Demo",
+      "added": "Nueva",
+      "empty": "Escribe un CREATE TABLE para empezar.",
+      "titleBlock": {
+        "plan": "Plano",
+        "scale": "Escala",
+        "content": "Contenido",
+        "state": "Estado"
+      }
+    }
   },
   "editor": {
     "title": "Editor"

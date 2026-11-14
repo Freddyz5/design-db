@@ -1,17 +1,20 @@
 @import "tailwindcss";
-@import "@fontsource/barlow/400.css";
-@import "@fontsource/barlow/500.css";
-@import "@fontsource/barlow/600.css";
-@import "@fontsource/barlow-condensed/500.css";
-@import "@fontsource/barlow-condensed/600.css";
-@import "@fontsource/barlow-condensed/700.css";
-@import "@fontsource-variable/jetbrains-mono/index.css";
+@import "@fontsource/ibm-plex-sans/400.css";
+@import "@fontsource/ibm-plex-sans/500.css";
+@import "@fontsource/ibm-plex-sans/600.css";
+@import "@fontsource/ibm-plex-sans-condensed/500.css";
+@import "@fontsource/ibm-plex-sans-condensed/600.css";
+@import "@fontsource/ibm-plex-sans-condensed/700.css";
+@import "@fontsource/ibm-plex-mono/400.css";
+@import "@fontsource/ibm-plex-mono/500.css";
+@import "@fontsource/ibm-plex-mono/600.css";
 
 /*
  * Theme of Design DB, shared by the landing and the editor.
  *
- * Every table is a departures board: flap faces with letters in fixed cells,
- * in a steel hall under a black frame bar. Amber is the only lamp.
+ * A technical drawing: petroleum ink on paper with a cyan grid by day, the
+ * same ink family glowing cyan on a dark sheet at night. Tables are technical
+ * sheets. Orange is the only pencil mark: primary action, selection and focus.
  *
  * Each color is written once as light-dark(light, dark). The system preference
  * decides which one applies; <html data-theme="light|dark"> forces one.
@@ -20,73 +23,81 @@
 @theme static {
   --color-*: initial;
 
-  --font-sans: "Barlow", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Barlow Condensed", "Arial Narrow", sans-serif;
+  --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "IBM Plex Sans Condensed", "Arial Narrow", sans-serif;
   --font-mono:
-    "JetBrains Mono Variable", ui-monospace, "SFMono-Regular", Menlo, monospace;
+    "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
 
-  /* The hall: the canvas and the panels around it. */
-  --color-canvas: light-dark(#dfe2e4, #1b1d20);
-  --color-canvas-dot: light-dark(#b4b9be, #34383d);
-  --color-panel: light-dark(#f6f7f8, #131517);
-  --color-raised: light-dark(#ffffff, #1e2124);
-  --color-line: light-dark(#c5c9cd, #2f3237);
-  --color-ink: light-dark(#0b0b0d, #eceded);
-  --color-ink-muted: light-dark(#565b61, #9a9fa6);
+  /* The drawing: the canvas, its grid and the panels around it. */
+  --color-canvas: light-dark(#edf3f2, #0e1a1c);
+  --color-grid: light-dark(#d2e6e6, #14292c);
+  --color-grid-major: light-dark(#a6cdd0, #1d4a50);
+  --color-panel: light-dark(#f6f9f9, #0f1f22);
+  --color-raised: light-dark(#ffffff, #132a2e);
+  --color-line: light-dark(#cfdedf, #1f4146);
+  --color-ink: light-dark(#123c42, #dcedef);
+  --color-ink-muted: light-dark(#4a6f74, #8db4b9);
 
-  /* The frame: the top bar. Black in both themes. */
-  --color-frame: #16181b;
-  --color-frame-deep: #0b0b0d;
-  --color-frame-well: #23262a;
-  --color-frame-line: #3a3e44;
-  --color-frame-ink: #f2f2f2;
-  --color-frame-muted: #a7aaaf;
-  /* An error on the frame, readable on black in both themes. */
-  --color-frame-danger: #ff6b6b;
+  /* The bar on top: petroleum, the same ink as the drawing. */
+  --color-bar: light-dark(#123c42, #0b2a2f);
+  --color-bar-deep: light-dark(#0c2e33, #071e22);
+  --color-bar-well: light-dark(#1b4a51, #12373d);
+  --color-bar-line: light-dark(#2d5f66, #1f4a50);
+  --color-bar-ink: light-dark(#edf3f2, #dcedef);
+  --color-bar-muted: light-dark(#a9c6c9, #8db4b9);
+  /* What is on in the bar (a pressed toggle, the chosen filter): the cyan of the grid. */
+  --color-bar-active: light-dark(#7fe0e8, #4fd8e3);
+  /* An error on the bar, readable on petroleum in both themes. */
+  --color-bar-danger: #ff8f80;
 
-  /* The lamp: primary action, selection and focus. Nothing else is amber. */
-  --color-lamp: #ffb000;
-  --color-on-lamp: #0b0b0d;
-  /* Amber as text or a thin line on the hall, dark enough to read in the light theme. */
-  --color-lamp-ink: light-dark(#8a5200, #ffb000);
+  /* The pencil: primary action, selection and focus. Nothing else is orange. */
+  --color-accent: light-dark(#e8590c, #ff8a3d);
+  --color-on-accent: light-dark(#ffffff, #0b2a2f);
+  /* Orange as text or a thin line, dark enough to read on paper. */
+  --color-accent-ink: light-dark(#c2410c, #ffa066);
 
-  /* The flaps: the tables. Light flaps by day, black flaps at night. */
-  --color-flap: light-dark(#fbfbf9, #0b0b0d);
-  --color-flap-ink: light-dark(#0b0b0d, #f2f2f2);
-  --color-flap-muted: light-dark(#565b61, #a7aaaf);
-  --color-flap-seam: light-dark(#d9dde0, #1f2226);
-  --color-flap-edge: light-dark(#0b0b0d, #3a3e44);
-  --color-key: light-dark(#ffe680, #2a2408);
-  --color-key-ink: light-dark(#5c4a00, #ffd60a);
-  --color-relation: light-dark(#565b61, #8b9096);
+  /* The sheets: the tables. */
+  --color-sheet: light-dark(#ffffff, #11272a);
+  --color-sheet-ink: light-dark(#123c42, #dcedef);
+  --color-sheet-muted: light-dark(#4a6f74, #8db4b9);
+  --color-sheet-rule: light-dark(#cfdedf, #1f4146);
+  --color-sheet-edge: light-dark(#123c42, #8fc9cf);
+  --color-sheet-head: light-dark(#e0eeee, #14434a);
+  --color-sheet-head-ink: light-dark(#123c42, #9fe7ee);
+  /* The primary key: a highlighter stroke. */
+  --color-key: light-dark(#fdeeb0, #3a4030);
+  --color-key-ink: light-dark(#6b4f00, #f6d36a);
+  --color-relation: light-dark(#3c6a70, #8db4b9);
+  /* A relation or table that stands out: the cyan of the grid, stronger. */
+  --color-relation-focus: light-dark(#0e8c99, #4fd8e3);
 
   /* Changes compared with the base. */
   --color-added: light-dark(#1b7f45, #4cc38a);
-  --color-changed: light-dark(#8a5200, #ffb000);
-  --color-removed: light-dark(#b3261e, #ff6b6b);
+  --color-changed: light-dark(#a16207, #e8b84a);
+  --color-removed: light-dark(#b3261e, #ff7b72);
 
-  /* Group strips. White text reads on all of them, in both themes. */
-  --color-group-1: #1f5fbf;
-  --color-group-2: #1b7f45;
-  --color-group-3: #a8341f;
-  --color-group-4: #7446b8;
-  --color-group-5: #0f7f86;
-  --color-group-6: #a85a0a;
-  --color-group-7: #b0307a;
-  --color-group-8: #55606e;
-  --color-on-group: #ffffff;
+  /* Group colors: muted inks of the same drawing, darker on paper, lighter at night. */
+  --color-group-1: light-dark(#2f5f98, #7fb0e6);
+  --color-group-2: light-dark(#2e7a4f, #78c99a);
+  --color-group-3: light-dark(#a34a3a, #ec9a88);
+  --color-group-4: light-dark(#6a4fa3, #b9a3ec);
+  --color-group-5: light-dark(#0f7a84, #5fd0da);
+  --color-group-6: light-dark(#946318, #e3b45f);
+  --color-group-7: light-dark(#9c3f78, #e597c6);
+  --color-group-8: light-dark(#4f6268, #a3b7bc);
+  --color-on-group: light-dark(#ffffff, #0e1a1c);
 
-  /* Code. */
-  /* Keywords in bold ink: amber stays the only lamp. */
-  --color-code-keyword: light-dark(#0b0b0d, #f2f2f2);
+  /* Code. Keywords in bold ink: orange stays the only pencil mark. */
+  --color-code-keyword: light-dark(#123c42, #dcedef);
   --color-code-type: light-dark(#0b6b74, #6fd3dc);
   --color-code-string: light-dark(#2f6f37, #8fd694);
   --color-code-number: light-dark(#6a3fb0, #c4a7f5);
-  --color-code-selection: light-dark(#ffe2a6, #4a3a10);
+  --color-code-selection: light-dark(#cdeaec, #1d4a50);
   --color-code-error: light-dark(#f9dedc, #4a1f1c);
 
   --radius-control: 3px;
-  --shadow-float: 0 1px 2px rgb(0 0 0 / 0.14), 0 10px 24px rgb(0 0 0 / 0.16);
+  --shadow-float:
+    0 1px 2px rgb(18 60 66 / 0.12), 0 10px 24px rgb(18 60 66 / 0.14);
 }
 
 @layer base {
@@ -107,7 +118,7 @@
     font-size: 14px;
     line-height: 1.45;
     font-variant-numeric: tabular-nums;
-    caret-color: var(--color-lamp-ink);
+    caret-color: var(--color-accent-ink);
     scrollbar-color: var(--color-ink-muted) transparent;
   }
 
@@ -117,7 +128,7 @@
   }
 
   :focus-visible {
-    outline: 2px solid var(--color-lamp-ink);
+    outline: 2px solid var(--color-accent-ink);
     outline-offset: 2px;
   }
 }
@@ -127,13 +138,13 @@
   --xy-background-color: transparent;
   --xy-edge-stroke: var(--color-relation);
   --xy-edge-stroke-width: 1.4;
-  --xy-edge-stroke-selected: var(--color-lamp-ink);
+  --xy-edge-stroke-selected: var(--color-accent-ink);
   --xy-selection-background-color: color-mix(
     in srgb,
-    var(--color-lamp) 14%,
+    var(--color-accent) 14%,
     transparent
   );
-  --xy-selection-border: 1px solid var(--color-lamp-ink);
+  --xy-selection-border: 1px solid var(--color-accent-ink);
   --xy-attribution-background-color: transparent;
 }
 
@@ -143,35 +154,16 @@
 
 /* While a relation is dragged, the row or table under the pointer lights up. */
 .react-flow.linking [data-table-id]:hover {
-  outline: 2px dashed var(--color-lamp-ink);
+  outline: 2px dashed var(--color-accent-ink);
   outline-offset: 3px;
 }
 
 .react-flow.linking [data-column-id]:hover {
-  outline: 2px solid var(--color-lamp-ink);
+  outline: 2px solid var(--color-accent-ink);
   outline-offset: -2px;
 }
 
-/* The flap cascade: a character of the board flips when its text changes. */
-@layer components {
-  .flap-cell {
-    transform-origin: 50% 50%;
-    animation: flap 160ms steps(4, end) both;
-  }
-}
-
-@keyframes flap {
-  from {
-    transform: rotateX(90deg);
-    opacity: 0.2;
-  }
-  to {
-    transform: rotateX(0deg);
-    opacity: 1;
-  }
-}
-
-/* "Here it is": a ring of the lamp that closes in on a table the search lands on. */
+/* "Here it is": a ring of the pencil that closes in on a table the search lands on. */
 @layer components {
   .table-flash {
     position: absolute;
@@ -183,7 +175,7 @@
 
 @keyframes table-flash {
   from {
-    outline: 6px solid var(--color-lamp);
+    outline: 6px solid var(--color-accent);
     outline-offset: 6px;
   }
   to {
@@ -193,7 +185,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .flap-cell,
   .table-flash {
     animation: none;
   }

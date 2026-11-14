@@ -1,7 +1,6 @@
 import type { Column } from "@design-db/core";
 import { Handle, Position, type NodeProps } from "@xyflow/react";
 import { memo } from "react";
-import { FlapText } from "../../../shared";
 import {
   TABLE_HEADER_HEIGHT,
   TABLE_NOTE_GAP,
@@ -22,9 +21,9 @@ const ANCHOR =
 
 /** The point to drag a relation from. It shows when the pointer is over the table. */
 const DRAG_POINT =
-  "!size-[11px] !border-[1.5px] !border-lamp-ink !bg-raised opacity-0 transition-opacity duration-100 group-hover:opacity-100 hover:!bg-lamp [.linking_&]:opacity-100";
+  "!size-[11px] !border-[1.5px] !border-accent-ink !bg-raised opacity-0 transition-opacity duration-100 group-hover:opacity-100 hover:!bg-accent [.linking_&]:opacity-100";
 
-/** The lamp of a changed column: a small square before its name. */
+/** The mark of a changed column: a small square before its name. */
 const CHANGE_LAMP: Record<
   "added" | "modified",
   { className: string; label: string }
@@ -58,7 +57,7 @@ function ColumnRow({
 
   return (
     <li
-      className={`relative ${ROW_GRID} border-t border-flap-seam font-mono text-[11px] ${column.primaryKey ? "bg-key" : ""}`}
+      className={`relative ${ROW_GRID} border-t border-sheet-rule font-mono text-[11px] ${column.primaryKey ? "bg-key" : ""}`}
       style={{ height: TABLE_ROW_HEIGHT }}
       data-column-id={column.id}
     >
@@ -75,35 +74,35 @@ function ColumnRow({
             aria-label={CHANGE_LAMP[change].label}
           />
         )}
-        <FlapText text={column.name} className="truncate" />
+        <span className="truncate">{column.name}</span>
       </span>
       <span
-        className="flex min-w-0 items-center self-stretch border-l border-flap-seam px-[5px] text-flap-muted"
+        className="flex min-w-0 items-center self-stretch border-l border-sheet-rule px-[5px] text-sheet-muted"
         title={
           enumValues ? `${column.type}: ${enumValues.join(" · ")}` : column.type
         }
       >
-        <FlapText
-          text={column.type}
+        <span
           className={`truncate ${enumValues ? "cursor-help border-b border-dotted border-current" : ""}`}
-        />
+        >
+          {column.type}
+        </span>
       </span>
       <span
-        className={`flex min-w-0 items-center gap-1 self-stretch border-l border-flap-seam px-[5px] ${column.primaryKey ? "text-key-ink" : "text-flap-muted"}`}
+        className={`flex min-w-0 items-center gap-1 self-stretch border-l border-sheet-rule px-[5px] ${column.primaryKey ? "text-key-ink" : "text-sheet-muted"}`}
         title={detail}
       >
-        <FlapText
-          text={reference ? `${rules},` : rules}
+        <span
           className={`min-w-0 shrink truncate ${column.primaryKey ? "font-semibold" : ""}`}
-        />
-        {/* Always mounted, empty without a reference, so a first relation flips too. */}
-        <FlapText
-          text={pointsAt}
-          className="flex-none font-semibold text-flap-ink empty:hidden"
-        />
+        >
+          {reference ? `${rules},` : rules}
+        </span>
+        <span className="flex-none font-semibold text-relation-focus empty:hidden">
+          {pointsAt}
+        </span>
         {reference?.group != null && (
           <span
-            className="flex-none rounded-[2px] bg-flap-seam px-1 leading-4 text-flap-muted"
+            className="flex-none rounded-[2px] bg-sheet-rule px-1 leading-4 text-sheet-muted"
             title={`Tabla del grupo ${reference.group}`}
           >
             {reference.group}
@@ -135,7 +134,7 @@ function ColumnRow({
   );
 }
 
-/** A table on the canvas: a strip with its name in the group color, and one row per column. */
+/** A table on the canvas, as a technical sheet: its name on a tint of the group color, and one ruled row per column. */
 export const TableNodeView = memo(function TableNodeView({
   data,
   selected,
@@ -153,10 +152,11 @@ export const TableNodeView = memo(function TableNodeView({
     dimmed,
     marks,
   } = data;
+  // Selected: the orange pencil with a soft halo. Focused: the cyan of the grid, stronger.
   const outline = selected
-    ? "outline-[3px] outline-lamp"
+    ? "outline-2 outline-offset-[3px] outline-accent shadow-[0_0_0_7px_color-mix(in_srgb,var(--color-accent)_16%,transparent)]"
     : focused
-      ? "outline-2 outline-offset-2 outline-lamp-ink"
+      ? "outline-[2.5px] outline-offset-2 outline-relation-focus"
       : "";
 
   return (
@@ -166,17 +166,19 @@ export const TableNodeView = memo(function TableNodeView({
       data-table-id={table.id}
     >
       <div
-        className={`relative border-[1.5px] border-flap-edge bg-flap text-flap-ink shadow-float ${outline}`}
+        className={`relative border-[1.5px] border-sheet-edge bg-sheet text-sheet-ink ${outline}`}
       >
         <div
-          className="relative flex items-center justify-between gap-2 px-2 font-display text-[15.5px] font-bold tracking-[0.06em]"
+          className="relative flex items-center justify-between gap-2 border-b-[1.5px] border-sheet-edge px-2 font-display text-[15.5px] font-bold tracking-[0.04em]"
           style={{
             height: TABLE_HEADER_HEIGHT,
             backgroundColor: strip.background,
             color: strip.ink,
           }}
         >
-          <FlapText text={table.name} title={table.name} className="truncate" />
+          <span title={table.name} className="truncate">
+            {table.name}
+          </span>
           {marks?.table && (
             <span
               className={`ml-auto rounded-[2px] px-1 text-[10.5px] leading-4 tracking-[0.1em] text-panel uppercase ${marks.table === "added" ? "bg-added" : "bg-changed"}`}
@@ -209,15 +211,15 @@ export const TableNodeView = memo(function TableNodeView({
         <ul>
           {header && (
             <li
-              className={`${ROW_GRID} border-t border-flap-seam font-display text-[11px] font-semibold tracking-[0.08em] text-flap-muted uppercase`}
+              className={`${ROW_GRID} bg-sheet-head font-display text-[10.5px] font-semibold tracking-[0.1em] text-sheet-head-ink uppercase`}
               style={{ height: TABLE_ROW_HEIGHT }}
               aria-hidden
             >
               <span className="truncate px-[5px]">Atributo</span>
-              <span className="self-stretch truncate border-l border-flap-seam px-[5px] leading-6">
+              <span className="self-stretch truncate border-l border-sheet-rule px-[5px] leading-6">
                 Tipo de dato
               </span>
-              <span className="self-stretch truncate border-l border-flap-seam px-[5px] leading-6">
+              <span className="self-stretch truncate border-l border-sheet-rule px-[5px] leading-6">
                 Restricción
               </span>
             </li>
@@ -235,24 +237,24 @@ export const TableNodeView = memo(function TableNodeView({
           {marks?.removed.map((column) => (
             <li
               key={column.id}
-              className={`${ROW_GRID} border-t border-flap-seam font-mono text-[11px] text-removed`}
+              className={`${ROW_GRID} border-t border-sheet-rule font-mono text-[11px] text-removed`}
               style={{ height: TABLE_ROW_HEIGHT }}
               aria-label={`Columna eliminada: ${column.name}`}
             >
               <span className="truncate px-[5px] line-through">
                 {column.name}
               </span>
-              <span className="truncate border-l border-flap-seam px-[5px] line-through">
+              <span className="truncate border-l border-sheet-rule px-[5px] line-through">
                 {column.type}
               </span>
-              <span className="border-l border-flap-seam px-[5px] font-display text-[11px] font-semibold tracking-[0.08em] uppercase">
+              <span className="border-l border-sheet-rule px-[5px] font-display text-[11px] font-semibold tracking-[0.08em] uppercase">
                 Eliminada
               </span>
             </li>
           ))}
           {hidden > 0 && (
             <li
-              className="flex items-center border-t border-flap-seam px-[5px] text-[11px] text-flap-muted"
+              className="flex items-center border-t border-sheet-rule px-[5px] text-[11px] text-sheet-muted"
               style={{ height: TABLE_ROW_HEIGHT }}
             >
               {hidden === 1 ? "1 columna más" : `${hidden} columnas más`}

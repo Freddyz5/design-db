@@ -35,7 +35,7 @@ The pilot succeeds when someone can build a diagram of three or four tables with
 - Automatic layout, changes compared with a saved base, table search, undo and redo.
 - The Drizzle reader reads declarations and never runs the code.
 - Problems such as duplicate names are reported next to the affected field and do not block editing.
-- Local only is the scope of the pilot, not a lasting principle: accounts and cloud saving are expected later as a normal part of the product.
+- Local only is the scope of the pilot, not a lasting principle: accounts and cloud saving are expected later as a normal part of the product. Today diagrams are saved in the browser (SQLite in OPFS) and can be downloaded as a project file.
 - Interface terms (Spanish): tabla, columna, relación, grupo, enum, base, cambios.
 - Undecided: license, and the public repository URL the landing page links to.
 
@@ -43,7 +43,8 @@ The pilot succeeds when someone can build a diagram of three or four tables with
 
 - Name: **Design DB**.
 - The interface is in Spanish.
-- The mockup "Taller ER" is the reference for layout and behavior. Its name is not used and its colors are not final.
+- The mockup "Taller ER" is the reference for layout and behavior. Its name and colors are not used.
+- Visual direction (2026-11-14): an architectural blueprint of the database, palette «Tinta petróleo» (petroleum ink on paper with a cyan grid; cyan-tinted dark theme), IBM Plex type, orange only for the primary action, selection and focus. Details in `DESIGN.md`.
 - Unconfirmed: voice. The mockup addresses the user as "tú", in short direct sentences.
 
 ## Evidence on Hand

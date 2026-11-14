@@ -17,45 +17,36 @@ export type GroupColorKey = (typeof GROUP_COLOR_KEYS)[number];
 /** The header strip of a table: its background and the text on it, as CSS colors. */
 export type Strip = { background: string; ink: string };
 
-const DARK_INK = "#0b0b0d";
-const LIGHT_INK = "#ffffff";
 const HEX = /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i;
 
-/** Relative luminance of a hex color, from 0 (black) to 1 (white). */
-function luminance(hex: string): number {
-  const digits = hex.slice(1);
-  const full =
-    digits.length === 3
-      ? [...digits].map((digit) => digit + digit).join("")
-      : digits;
-  const [red, green, blue] = [0, 2, 4].map((at) => {
-    const channel = parseInt(full.slice(at, at + 2), 16) / 255;
-    return channel <= 0.03928
-      ? channel / 12.92
-      : ((channel + 0.055) / 1.055) ** 2.4;
-  });
-  return 0.2126 * red! + 0.7152 * green! + 0.0722 * blue!;
+/**
+ * The color of a group or table, as a CSS color: a palette key uses the
+ * theme token, a hex color is used as is, and no color (or one that is not
+ * understood) gives the ink of the sheets.
+ */
+export function groupColor(color: string | undefined): string {
+  const key = GROUP_COLOR_KEYS.indexOf(color as GroupColorKey);
+  if (key !== -1) return `var(--color-group-${key + 1})`;
+  if (color !== undefined && HEX.test(color)) return color;
+  return "var(--color-sheet-edge)";
 }
 
 /**
- * The strip for a group or table color. A palette key uses the theme token,
- * a hex color is used as is with the ink that reads best on it, and no
- * color (or one that is not understood) gives the neutral strip.
+ * The header strip of a table, as on a technical sheet: a light tint of its
+ * color with the name in that color. The name mixes in the sheet's ink, so it
+ * reads in both themes whatever the color: darker on paper, lighter at night.
+ * Without a color, the neutral header of the sheets.
  */
 export function stripColors(color: string | undefined): Strip {
-  const key = GROUP_COLOR_KEYS.indexOf(color as GroupColorKey);
-  if (key !== -1) {
+  const base = groupColor(color);
+  if (base === "var(--color-sheet-edge)") {
     return {
-      background: `var(--color-group-${key + 1})`,
-      ink: "var(--color-on-group)",
+      background: "var(--color-sheet-head)",
+      ink: "var(--color-sheet-head-ink)",
     };
   }
-  if (color !== undefined && HEX.test(color)) {
-    // White reads better than black on anything darker than this.
-    return {
-      background: color,
-      ink: luminance(color) > 0.3 ? DARK_INK : LIGHT_INK,
-    };
-  }
-  return { background: "var(--color-flap-edge)", ink: "var(--color-on-group)" };
+  return {
+    background: `color-mix(in srgb, ${base} 16%, var(--color-sheet))`,
+    ink: `color-mix(in srgb, ${base} 70%, var(--color-sheet-ink))`,
+  };
 }

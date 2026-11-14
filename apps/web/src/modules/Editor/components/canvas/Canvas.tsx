@@ -20,7 +20,12 @@ import {
   useState,
   type MouseEvent as ReactMouseEvent,
 } from "react";
-import { MAX_ZOOM, MIN_ZOOM } from "../../constants/canvas";
+import {
+  GRID_MAJOR_EVERY,
+  GRID_MINOR,
+  MAX_ZOOM,
+  MIN_ZOOM,
+} from "../../constants/canvas";
 import { selectDiagram } from "../../hooks/EditorStore";
 import { editorStore, useEditorStore } from "../../hooks/useEditorStore";
 import {
@@ -46,6 +51,7 @@ import { EmptyCanvas } from "./EmptyCanvas";
 import { GhostNodeView } from "./GhostNode";
 import { GroupNodeView } from "./GroupNode";
 import { Notice } from "./Notice";
+import { TitleBlock } from "./TitleBlock";
 import { RelationBar } from "./RelationBar";
 import { RelationEdgeView } from "./RelationEdge";
 import { SelectionBar } from "./SelectionBar";
@@ -69,7 +75,7 @@ const PAN_BUTTONS_SELECTING = [1];
 
 /** The line that follows the pointer while a relation is dragged. */
 const LINK_LINE = {
-  stroke: "var(--color-lamp-ink)",
+  stroke: "var(--color-accent-ink)",
   strokeWidth: 2,
   strokeDasharray: "6 4",
 };
@@ -423,11 +429,20 @@ export function Canvas() {
       fitViewOptions={FIT}
       ariaLabelConfig={ARIA_LABELS}
     >
+      {/* Drawing paper: a fine grid and a bolder one every five squares. Both scale with the zoom. */}
       <Background
-        variant={BackgroundVariant.Dots}
-        gap={24}
-        size={1.6}
-        color="var(--color-canvas-dot)"
+        id="grid-minor"
+        variant={BackgroundVariant.Lines}
+        gap={GRID_MINOR}
+        lineWidth={1}
+        color="var(--color-grid)"
+      />
+      <Background
+        id="grid-major"
+        variant={BackgroundVariant.Lines}
+        gap={GRID_MINOR * GRID_MAJOR_EVERY}
+        lineWidth={1}
+        color="var(--color-grid-major)"
       />
       <EmptyCanvas onAddTable={addTable} />
       <ChangesPanel />
@@ -435,6 +450,7 @@ export function Canvas() {
       <RelationBar />
       <TablePanel />
       <CanvasControls />
+      <TitleBlock />
       <Notice />
     </ReactFlow>
   );

@@ -58,8 +58,9 @@ export function createDiagramStorage(
   const lastOpened = options.lastOpened;
   const autosave = createAutosave<Diagram>({
     save: async (diagram) => {
-      await repository.save(diagram);
+      const { updatedAt } = await repository.save(diagram);
       lastOpened?.set(diagram.id);
+      setView({ savedAt: updatedAt });
     },
     onStatus: (saveStatus) => setView({ saveStatus }),
     schedule: options.schedule,
@@ -72,14 +73,19 @@ export function createDiagramStorage(
     store.getState().load(diagram);
     autosave.reset(diagram, stored);
     if (stored) lastOpened?.set(diagram.id);
+    const summary = stored
+      ? (await repository.list()).find((item) => item.id === diagram.id)
+      : undefined;
+    setView({ savedAt: summary?.updatedAt ?? null });
   };
 
   /** Opens a diagram that is not stored yet and stores it. */
   const openNew = async (diagram: Diagram) => {
     await open(diagram, false);
-    await repository.save(diagram);
+    const { updatedAt } = await repository.save(diagram);
     autosave.reset(diagram, true);
     lastOpened?.set(diagram.id);
+    setView({ savedAt: updatedAt });
   };
 
   const current = () => selectDiagram(store.getState());

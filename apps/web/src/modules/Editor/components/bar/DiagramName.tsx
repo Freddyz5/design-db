@@ -27,7 +27,7 @@ export function DiagramName() {
 
   return (
     <input
-      className="max-w-60 min-w-12 flex-none truncate rounded-control bg-frame-well px-2.5 py-1 font-display text-[15px] font-semibold tracking-wide text-frame-ink [field-sizing:content] focus-visible:outline-2 focus-visible:outline-lamp max-[560px]:max-w-28"
+      className="max-w-60 min-w-12 flex-none truncate rounded-control bg-bar-well px-2.5 py-1 font-display text-[15px] font-semibold tracking-wide text-bar-ink [field-sizing:content] focus-visible:outline-2 focus-visible:outline-accent max-[560px]:max-w-28"
       aria-label="Nombre del diagrama"
       title={name}
       spellCheck={false}

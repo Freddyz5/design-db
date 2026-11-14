@@ -8,7 +8,7 @@ const BUTTON =
 
 /** The one primary action: amber. */
 const PRIMARY =
-  "inline-flex h-[30px] cursor-pointer items-center rounded-control border px-3 text-[13px] whitespace-nowrap border-lamp bg-lamp font-semibold text-on-lamp hover:brightness-105";
+  "inline-flex h-[30px] cursor-pointer items-center rounded-control border px-3 text-[13px] whitespace-nowrap border-accent bg-accent font-semibold text-on-accent hover:brightness-105";
 
 /** What the canvas shows while the diagram has no tables: how to start. */
 export function EmptyCanvas({ onAddTable }: { onAddTable: () => void }) {
