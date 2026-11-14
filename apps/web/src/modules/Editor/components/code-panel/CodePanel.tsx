@@ -198,7 +198,7 @@ export function CodePanel() {
               data-format={item}
               aria-selected={item === format}
               tabIndex={item === format ? 0 : -1}
-              className="h-7 cursor-pointer rounded-[2px] px-2.5 font-display text-[13px] font-semibold tracking-[0.06em] whitespace-nowrap text-ink-muted uppercase hover:text-ink aria-selected:bg-canvas aria-selected:text-ink aria-selected:shadow-[inset_0_-2px_0_var(--color-lamp-ink)]"
+              className="h-7 cursor-pointer rounded-[2px] px-2.5 font-display text-[13px] font-semibold tracking-[0.06em] whitespace-nowrap text-ink-muted uppercase hover:text-ink aria-selected:bg-canvas aria-selected:text-ink aria-selected:shadow-[inset_0_-2px_0_var(--color-accent-ink)]"
               onClick={() => pick(item)}
             >
               {FORMAT_NAMES[item]}

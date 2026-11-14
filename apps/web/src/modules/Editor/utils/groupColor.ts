@@ -57,5 +57,8 @@ export function stripColors(color: string | undefined): Strip {
       ink: luminance(color) > 0.3 ? DARK_INK : LIGHT_INK,
     };
   }
-  return { background: "var(--color-flap-edge)", ink: "var(--color-on-group)" };
+  return {
+    background: "var(--color-sheet-edge)",
+    ink: "var(--color-on-group)",
+  };
 }

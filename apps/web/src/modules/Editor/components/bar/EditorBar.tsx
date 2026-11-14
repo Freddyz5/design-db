@@ -35,7 +35,7 @@ export function EditorBar() {
   const { tools, more, measure } = useOverflowEnd();
 
   return (
-    <header className="flex h-12 items-center gap-2 border-b border-frame-deep bg-frame px-4 text-frame-ink max-[560px]:px-2">
+    <header className="flex h-12 items-center gap-2 border-b border-bar-deep bg-bar px-4 text-bar-ink max-[560px]:px-2">
       <span className="mr-1 flex-none font-display text-lg font-bold tracking-[0.14em] whitespace-nowrap uppercase max-[560px]:hidden">
         Design DB
       </span>
@@ -56,7 +56,7 @@ export function EditorBar() {
         onScroll={measure}
         className={`relative flex min-w-0 flex-1 items-center gap-2 overflow-x-auto [scrollbar-width:none] ${more ? "[mask-image:linear-gradient(to_right,black_calc(100%-40px),transparent)]" : ""}`}
       >
-        <span className="mx-1 h-5 w-px flex-none bg-frame-line" />
+        <span className="mx-1 h-5 w-px flex-none bg-bar-line" />
         <BarButton
           primary
           icon={<Import {...ICON} />}
@@ -83,7 +83,7 @@ export function EditorBar() {
         >
           {busy ? "Ordenando…" : "Ordenar"}
         </BarButton>
-        <span className="mx-1 h-5 w-px flex-none bg-frame-line" />
+        <span className="mx-1 h-5 w-px flex-none bg-bar-line" />
         <BarSegment
           legend="Columnas visibles"
           options={COLUMNS_FILTERS}
@@ -100,7 +100,7 @@ export function EditorBar() {
             editorStore.getState().setView({ relationsFilter: value })
           }
         />
-        <span className="mx-1 h-5 w-px flex-none bg-frame-line" />
+        <span className="mx-1 h-5 w-px flex-none bg-bar-line" />
         <BaseButton at={baseAt} />
         <BarButton
           aria-pressed={showChanges}
@@ -110,7 +110,7 @@ export function EditorBar() {
               ? "Fija una base para ver qué cambió desde entonces"
               : "Marcar lo nuevo, lo que cambió y lo eliminado desde la base"
           }
-          className="aria-pressed:border-frame-deep aria-pressed:bg-frame-deep aria-pressed:text-lamp"
+          className="aria-pressed:border-bar-deep aria-pressed:bg-bar-deep aria-pressed:text-accent"
           onClick={() =>
             editorStore.getState().setView({ showChanges: !showChanges })
           }
@@ -129,7 +129,7 @@ export function EditorBar() {
         icon={<Code {...ICON} />}
         aria-pressed={codeOpen}
         title={codeOpen ? "Ocultar el código" : "Mostrar el código"}
-        className="aria-pressed:border-frame-deep aria-pressed:bg-frame-deep aria-pressed:text-lamp"
+        className="aria-pressed:border-bar-deep aria-pressed:bg-bar-deep aria-pressed:text-accent"
         onClick={() => editorStore.getState().setView({ codeOpen: !codeOpen })}
       >
         Código

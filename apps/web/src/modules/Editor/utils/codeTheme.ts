@@ -13,14 +13,14 @@ export const codeTheme: Extension = [
       backgroundColor: "var(--color-panel)",
     },
     "&.cm-focused": {
-      outline: "2px solid var(--color-lamp-ink)",
+      outline: "2px solid var(--color-accent-ink)",
       outlineOffset: "-2px",
     },
     ".cm-scroller": {
       fontFamily: "var(--font-mono)",
       lineHeight: "1.55",
     },
-    ".cm-content": { caretColor: "var(--color-lamp-ink)", padding: "8px 0" },
+    ".cm-content": { caretColor: "var(--color-accent-ink)", padding: "8px 0" },
     ".cm-cursor, .cm-dropCursor": { borderLeftColor: "var(--color-ink)" },
     ".cm-gutters": {
       backgroundColor: "var(--color-panel)",
@@ -31,10 +31,11 @@ export const codeTheme: Extension = [
     ".cm-activeLine": {
       backgroundColor: "color-mix(in srgb, var(--color-ink) 5%, transparent)",
     },
-    // The lines of the selected table: the lamp, faint, with its edge lit.
+    // The lines of the selected table: the pencil, faint, with its edge lit.
     ".cm-markedLine": {
-      backgroundColor: "color-mix(in srgb, var(--color-lamp) 14%, transparent)",
-      boxShadow: "inset 2px 0 0 var(--color-lamp-ink)",
+      backgroundColor:
+        "color-mix(in srgb, var(--color-accent) 14%, transparent)",
+      boxShadow: "inset 2px 0 0 var(--color-accent-ink)",
     },
     ".cm-activeLineGutter": {
       backgroundColor: "transparent",
@@ -43,7 +44,8 @@ export const codeTheme: Extension = [
     "&.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection":
       { backgroundColor: "var(--color-code-selection)" },
     ".cm-matchingBracket, &.cm-focused .cm-matchingBracket": {
-      backgroundColor: "color-mix(in srgb, var(--color-lamp) 30%, transparent)",
+      backgroundColor:
+        "color-mix(in srgb, var(--color-accent) 30%, transparent)",
       outline: "none",
     },
     ".cm-foldPlaceholder": {

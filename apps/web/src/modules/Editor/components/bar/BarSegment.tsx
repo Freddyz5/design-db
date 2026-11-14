@@ -16,13 +16,13 @@ export function BarSegment<T extends string>({
   onChange,
 }: Props<T>) {
   return (
-    <fieldset className="flex min-w-0 flex-none gap-px rounded-control border border-frame-line bg-frame-well p-px">
+    <fieldset className="flex min-w-0 flex-none gap-px rounded-control border border-bar-line bg-bar-well p-px">
       <legend className="sr-only">{legend}</legend>
       {options.map((option) => (
         <label
           key={option.value}
           title={option.title}
-          className="flex h-7 cursor-pointer items-center rounded-[2px] px-2.5 text-[12.5px] max-[1439px]:px-2 font-medium whitespace-nowrap text-frame-muted hover:text-frame-ink has-checked:bg-frame-deep has-checked:text-lamp has-focus-visible:outline-2 has-focus-visible:outline-offset-1 has-focus-visible:outline-lamp"
+          className="flex h-7 cursor-pointer items-center rounded-[2px] px-2.5 text-[12.5px] max-[1439px]:px-2 font-medium whitespace-nowrap text-bar-muted hover:text-bar-ink has-checked:bg-bar-deep has-checked:text-accent has-focus-visible:outline-2 has-focus-visible:outline-offset-1 has-focus-visible:outline-accent"
         >
           <input
             type="radio"

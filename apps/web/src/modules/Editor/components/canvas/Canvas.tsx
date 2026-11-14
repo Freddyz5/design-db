@@ -69,7 +69,7 @@ const PAN_BUTTONS_SELECTING = [1];
 
 /** The line that follows the pointer while a relation is dragged. */
 const LINK_LINE = {
-  stroke: "var(--color-lamp-ink)",
+  stroke: "var(--color-accent-ink)",
   strokeWidth: 2,
   strokeDasharray: "6 4",
 };
@@ -427,7 +427,7 @@ export function Canvas() {
         variant={BackgroundVariant.Dots}
         gap={24}
         size={1.6}
-        color="var(--color-canvas-dot)"
+        color="var(--color-grid)"
       />
       <EmptyCanvas onAddTable={addTable} />
       <ChangesPanel />

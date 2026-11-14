@@ -50,7 +50,7 @@ export function Editor() {
         aria-busy="true"
         aria-label="Abriendo el diagrama"
       >
-        <div className="border-b border-frame-deep bg-frame" />
+        <div className="border-b border-bar-deep bg-bar" />
         <div className="bg-canvas" />
       </div>
     );
@@ -104,7 +104,7 @@ export function Editor() {
               </button>
             )}
             {dropping && (
-              <div className="pointer-events-none absolute inset-2.5 z-20 grid place-items-center rounded-[4px] border-2 border-dashed border-lamp-ink bg-canvas/85 font-display text-[22px] font-bold tracking-[0.06em] text-lamp-ink uppercase">
+              <div className="pointer-events-none absolute inset-2.5 z-20 grid place-items-center rounded-[4px] border-2 border-dashed border-accent-ink bg-canvas/85 font-display text-[22px] font-bold tracking-[0.06em] text-accent-ink uppercase">
                 Suelta el archivo para importarlo
               </div>
             )}

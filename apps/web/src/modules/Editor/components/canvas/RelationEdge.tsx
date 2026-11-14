@@ -47,13 +47,13 @@ export const RelationEdgeView = memo(function RelationEdgeView({
   // A relation of the table in focus is lit; with a table in focus, the rest fade.
   const lit = selected || data?.emphasis === "high";
   const stroke = selected
-    ? "stroke-lamp-ink"
+    ? "stroke-accent-ink"
     : data?.change === "added"
       ? "stroke-added"
       : data?.change === "modified"
         ? "stroke-changed"
         : lit
-          ? "stroke-lamp-ink"
+          ? "stroke-accent-ink"
           : "stroke-relation";
   const width = lit ? 2.2 : 1.4;
 

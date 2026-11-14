@@ -12,13 +12,13 @@ export function ThemeSelect() {
   const [theme, setTheme] = useTheme();
 
   return (
-    <fieldset className="flex min-w-0 gap-px rounded-control border border-frame-line bg-frame-well p-px">
+    <fieldset className="flex min-w-0 gap-px rounded-control border border-bar-line bg-bar-well p-px">
       <legend className="sr-only">Tema</legend>
       {OPTIONS.map(({ value, label, Icon }) => (
         <label
           key={value}
           title={label}
-          className="grid size-7 cursor-pointer place-items-center rounded-[2px] text-frame-muted hover:text-frame-ink has-checked:bg-frame-deep has-checked:text-lamp has-focus-visible:outline-2 has-focus-visible:outline-offset-1 has-focus-visible:outline-lamp"
+          className="grid size-7 cursor-pointer place-items-center rounded-[2px] text-bar-muted hover:text-bar-ink has-checked:bg-bar-deep has-checked:text-accent has-focus-visible:outline-2 has-focus-visible:outline-offset-1 has-focus-visible:outline-accent"
         >
           <input
             type="radio"

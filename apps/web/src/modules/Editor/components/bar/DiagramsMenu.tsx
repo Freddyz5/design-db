@@ -79,7 +79,7 @@ export function DiagramsMenu() {
     <div ref={box} className="relative flex-none">
       <button
         type="button"
-        className="grid size-7 cursor-pointer place-items-center rounded-control text-frame-muted hover:bg-frame-well hover:text-frame-ink focus-visible:outline-2 focus-visible:outline-lamp"
+        className="grid size-7 cursor-pointer place-items-center rounded-control text-bar-muted hover:bg-bar-well hover:text-bar-ink focus-visible:outline-2 focus-visible:outline-accent"
         aria-label="Mis diagramas"
         aria-haspopup="menu"
         aria-expanded={open}

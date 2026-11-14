@@ -15,7 +15,7 @@ const BUTTON =
 
 /** The one primary action: amber. */
 const PRIMARY =
-  "inline-flex h-[30px] cursor-pointer items-center rounded-control border px-3 text-[13px] whitespace-nowrap disabled:cursor-default disabled:opacity-45 border-lamp bg-lamp font-semibold text-on-lamp hover:brightness-105";
+  "inline-flex h-[30px] cursor-pointer items-center rounded-control border px-3 text-[13px] whitespace-nowrap disabled:cursor-default disabled:opacity-45 border-accent bg-accent font-semibold text-on-accent hover:brightness-105";
 
 const count = (n: number, one: string, many: string) =>
   `${n} ${n === 1 ? one : many}`;
@@ -89,7 +89,7 @@ function ImportDialogBody({ initial }: { initial: string }) {
     <dialog
       ref={dialog}
       aria-labelledby={titleId}
-      className="m-auto flex max-h-[calc(100dvh-32px)] w-[min(760px,calc(100vw-32px))] flex-col rounded-control border border-line bg-panel text-ink shadow-float backdrop:bg-frame-deep/50"
+      className="m-auto flex max-h-[calc(100dvh-32px)] w-[min(760px,calc(100vw-32px))] flex-col rounded-control border border-line bg-panel text-ink shadow-float backdrop:bg-bar-deep/50"
       onClose={close}
       onCancel={(event) => {
         event.preventDefault();
@@ -153,7 +153,7 @@ function ImportDialogBody({ initial }: { initial: string }) {
               <input
                 type="radio"
                 name="import-mode"
-                className="accent-lamp-ink"
+                className="accent-accent-ink"
                 checked={mode === value}
                 onChange={() => setMode(value)}
               />

@@ -23,7 +23,7 @@ describe("stripColors", () => {
 
   test("no color, or one that is not understood, gives the neutral strip", () => {
     const neutral = {
-      background: "var(--color-flap-edge)",
+      background: "var(--color-sheet-edge)",
       ink: "var(--color-on-group)",
     };
     expect(stripColors(undefined)).toEqual(neutral);

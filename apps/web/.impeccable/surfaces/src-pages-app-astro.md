@@ -17,25 +17,25 @@ A developer builds or changes a schema: tables on a canvas, relations between th
 
 ## Constraints
 
-- Tables are technical sheets: dark border, header in the group color, rows of name / type / detail, primary key highlighted in yellow. Pinned by the user.
+- Tables are technical sheets: ink border, tinted header, rows of name / type / detail, primary key highlighted in yellow. Pinned by the user.
 - Eight group colors. Light and dark themes with a selector: light, dark or system.
 - Must not read as a generic SaaS dashboard or as a toy.
 - Interface in Spanish. Controls are standard web controls.
 
 ## Direction contract
 
-THESIS: Every table is a departures board: black flap faces, white letters in fixed cells, and nothing moves except the cell that changed. It refuses the category default of pastel rounded cards on a white dotted canvas with a blue accent.
+THESIS: The schema is a technical drawing. Tables are technical sheets inked on drawing paper with a cyan grid, under a title block, so the diagram reads like an architect's plan of the database. It refuses the category defaults seen in the references (dbdiagram's white SaaS with a blue accent, ChartDB's colorful cards, Liam's dark neon) and the previous split-flap board, which the user rejected on 2026-11-14.
 
-OWN-WORLD: Flap boards in fixed cells: light flaps with black letters by day, flap black `#0b0b0d` with letter white `#f2f2f2` at night (the user chose light flaps for the light theme), on a steel hall (light steel by day, dark steel at night) under a black frame bar. Amber `#ffb000` is the only lamp: primary action, selection, focus; the one other use is the board's delay amber for "changed" in the changes view. Yellow marks primary keys, red cancels what was deleted, green marks what is new. Group headers are deep line-color strips with white condensed type; table and column names keep their real case, because SQL identifiers can be case-sensitive and the board must not misstate the schema. Barlow Condensed for names and labels, Barlow for controls, JetBrains Mono for identifiers and code.
+OWN-WORLD: Petroleum ink `#123c42` on paper `#edf3f2` with a cyan grid (minor `#d2e6e6` every 20px, major `#a6cdd0` every 100px) by day; at night the same ink family on a dark sheet `#0e1a1c`, with cyan and petroleum tints for the bar, table headers, rules and lines, never graphite greys. Orange `#e8590c` (night `#ff8a3d`) is the only pencil mark: primary action, selection, focus. Yellow highlighter marks primary keys, green what is new, red what was deleted, amber what changed. Tables: ink border, tinted header, rows of name / type / detail in a ruled grid; names keep their real case. Groups: dashed outline in the group color with a big step number. A hideable title block (cajetín) in the corner holds name, scale (zoom), size and save date. Relations: ink lines with crow's feet, dashed across groups, cyan when focused; the focused table's relations show a dimension mark with their cardinality. IBM Plex Sans Condensed in uppercase with tracking for labels and titles (title-block lettering), IBM Plex Sans for controls, IBM Plex Mono for identifiers, types and code.
 
-STORY: The developer sees their schema as a wall of boards they can read from across the room, changes one thing, and watches only that cell flip. They trust that the diagram and the code say the same thing.
+STORY: The developer opens their schema and reads it like a plan: sheets, groups numbered as steps, a title block saying what and when. They change one thing and the drawing and the code still agree.
 
-FIRST VIEWPORT: Black frame bar (48px) across the top with the name, diagram title and tools, amber primary action at the left of the tools; on narrower windows tool labels collapse to icons and the tool row scrolls with an edge fade. Below it the steel canvas takes the left 70%, with the boards (300px wide, 24px rows) inside outlined group zones; relations are thin steel lines with crow's feet. The code panel takes the right 30%. Zoom controls float bottom-left; the selection toolbar floats top-center.
+FIRST VIEWPORT: Petroleum bar (48px) across the top with the name, diagram title with «Mis diagramas», save state and tools; orange primary action. Below it the gridded canvas takes the left 70%, the code panel the right 30%. Zoom controls float bottom-left; the title block bottom-right; the selection toolbar top-center.
 
-FORM: split-flap departures board, adopted by the user from the dealt challengers (catalog `signals-instruments-split-flap-concourse`); it was not on the grounded list. seed:704b7581522daa7a. Signature interaction: the flap cascade. When a cell's text changes (an edit, a code update, undo), its characters flip one after another; never on first render, and under reduced motion the text just changes. Motion grammar: instant state changes everywhere else; no easing-in entrances.
+FORM: architectural blueprint applied to the reference mockup's structure (user's direction, 2026-11-14; palette «Tinta petróleo» chosen from https://claude.ai/artifact/WuFfJB5dfnEmDTExmBBZGr). Motion grammar: instant state changes; no flap cascade, no easing-in entrances.
 
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance
 
 ## Unresolved
 
-- None. Resolved: light flaps by day (user, 2026-11-12); boards 300px wide so type and detail fit.
+- None. Resolved on 2026-11-14: title block wanted and hideable; dimension marks only on the focused table's relations.

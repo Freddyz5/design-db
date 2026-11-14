@@ -79,7 +79,7 @@ describe("tableNodes", () => {
     expect(users!.data.references).toEqual({});
 
     expect(posts!.position).toEqual({ x: 400, y: 40 });
-    expect(posts!.data.strip.background).toBe("var(--color-flap-edge)");
+    expect(posts!.data.strip.background).toBe("var(--color-sheet-edge)");
     expect(posts!.data.references).toEqual({ "posts.author_id": "users.id" });
   });
 

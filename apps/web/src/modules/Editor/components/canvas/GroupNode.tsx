@@ -108,7 +108,7 @@ export const GroupNodeView = memo(function GroupNodeView({
               <button
                 key={key}
                 type="button"
-                className="size-4 cursor-pointer rounded-[2px] border border-flap-edge aria-pressed:outline-2 aria-pressed:outline-offset-1 aria-pressed:outline-ink"
+                className="size-4 cursor-pointer rounded-[2px] border border-sheet-edge aria-pressed:outline-2 aria-pressed:outline-offset-1 aria-pressed:outline-ink"
                 style={{ backgroundColor: stripColors(key).background }}
                 aria-label={`Color ${GROUP_COLOR_NAMES[key]}`}
                 title={`Color ${GROUP_COLOR_NAMES[key]}`}

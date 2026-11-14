@@ -8,7 +8,7 @@ import { tableCounts } from "../../utils/diagramChanges";
 import { CanvasLegend } from "./CanvasLegend";
 
 const BUTTON =
-  "grid h-7 min-w-7 cursor-pointer place-items-center rounded-[2px] px-2 hover:bg-canvas disabled:cursor-default disabled:opacity-40 disabled:hover:bg-transparent aria-pressed:bg-frame aria-pressed:text-frame-ink";
+  "grid h-7 min-w-7 cursor-pointer place-items-center rounded-[2px] px-2 hover:bg-canvas disabled:cursor-default disabled:opacity-40 disabled:hover:bg-transparent aria-pressed:bg-bar aria-pressed:text-bar-ink";
 
 /** How long a zoom or a fit takes. Nothing when the system asks for reduced motion. */
 function motion(ms: number): number {

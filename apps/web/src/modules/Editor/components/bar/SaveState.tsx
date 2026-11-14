@@ -23,7 +23,7 @@ export function SaveState() {
     <span
       role="status"
       title={text ? title : undefined}
-      className={`flex-none text-xs whitespace-nowrap max-[720px]:hidden ${danger ? "text-frame-danger" : "text-frame-muted"}`}
+      className={`flex-none text-xs whitespace-nowrap max-[720px]:hidden ${danger ? "text-bar-danger" : "text-bar-muted"}`}
     >
       {text}
     </span>

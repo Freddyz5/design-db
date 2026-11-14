@@ -86,7 +86,7 @@ export function DemoBoard({ texts }: { texts: DemoTexts }) {
     <>
       <section
         aria-label={texts.board.label}
-        className="border-2 border-frame-deep bg-flap text-flap-ink shadow-[0_0_0_6px_var(--color-frame-well)]"
+        className="border-2 border-bar-deep bg-sheet text-sheet-ink shadow-[0_0_0_6px_var(--color-bar-well)]"
       >
         <div className="flex flex-wrap items-center gap-x-6 gap-y-4 px-5 pt-5 pb-4 max-[720px]:px-3">
           <h1 className="flex flex-wrap gap-x-5 gap-y-2">
@@ -99,21 +99,21 @@ export function DemoBoard({ texts }: { texts: DemoTexts }) {
                   cells
                   text={word}
                   className="flex gap-[3px]"
-                  cellClassName="relative grid h-[clamp(40px,6vw,64px)] w-[clamp(28px,4.2vw,46px)] place-items-center rounded-[2px] border border-flap-seam bg-raised font-display text-[clamp(26px,4.2vw,44px)] leading-none font-semibold text-flap-ink after:absolute after:inset-x-0 after:top-1/2 after:h-px after:bg-flap-seam"
+                  cellClassName="relative grid h-[clamp(40px,6vw,64px)] w-[clamp(28px,4.2vw,46px)] place-items-center rounded-[2px] border border-sheet-rule bg-raised font-display text-[clamp(26px,4.2vw,44px)] leading-none font-semibold text-sheet-ink after:absolute after:inset-x-0 after:top-1/2 after:h-px after:bg-sheet-rule"
                 />
               ))}
           </h1>
           <span className="flex-1" />
           <a
             href="/app"
-            className="inline-flex h-12 items-center rounded-control bg-lamp px-5 text-[17px] font-semibold text-on-lamp hover:brightness-105"
+            className="inline-flex h-12 items-center rounded-control bg-accent px-5 text-[17px] font-semibold text-on-accent hover:brightness-105"
           >
             {texts.cta}
           </a>
         </div>
 
         <div
-          className={`${ROW} bg-frame py-1.5 font-display text-[12px] font-semibold tracking-[0.14em] text-frame-muted uppercase`}
+          className={`${ROW} bg-bar py-1.5 font-display text-[12px] font-semibold tracking-[0.14em] text-bar-muted uppercase`}
           aria-hidden
         >
           <span>{texts.board.table}</span>
@@ -128,7 +128,7 @@ export function DemoBoard({ texts }: { texts: DemoTexts }) {
               return (
                 <li
                   key={table.id}
-                  className={`${ROW} h-[52px] border-t border-frame-deep font-display text-[26px] font-semibold tracking-[0.12em] uppercase shadow-[inset_0_1px_0_var(--color-flap-seam)] max-[720px]:h-11 max-[720px]:text-[19px]`}
+                  className={`${ROW} h-[52px] border-t border-bar-deep font-display text-[26px] font-semibold tracking-[0.12em] uppercase shadow-[inset_0_1px_0_var(--color-sheet-rule)] max-[720px]:h-11 max-[720px]:text-[19px]`}
                 >
                   <FlapText
                     text={table.name.toUpperCase()}
@@ -138,7 +138,7 @@ export function DemoBoard({ texts }: { texts: DemoTexts }) {
                   <span className="font-mono text-[20px] tracking-normal max-[720px]:text-[16px]">
                     {table.rows.length}
                   </span>
-                  <span className="truncate text-[20px] text-flap-muted max-[720px]:hidden">
+                  <span className="truncate text-[20px] text-sheet-muted max-[720px]:hidden">
                     {references(table)
                       ? `→ ${references(table).toUpperCase()}`
                       : "—"}
@@ -148,14 +148,14 @@ export function DemoBoard({ texts }: { texts: DemoTexts }) {
                       ? texts.board.arriving
                       : texts.board.onBoard
                     ).toUpperCase()}
-                    className={`truncate ${isArriving ? "text-lamp-ink" : "text-flap-muted"}`}
+                    className={`truncate ${isArriving ? "text-accent-ink" : "text-sheet-muted"}`}
                   />
                 </li>
               );
             })
           ) : (
             <li
-              className={`${ROW} h-[52px] border-t border-frame-deep text-flap-muted`}
+              className={`${ROW} h-[52px] border-t border-bar-deep text-sheet-muted`}
             >
               {texts.board.empty}
             </li>
@@ -169,7 +169,7 @@ export function DemoBoard({ texts }: { texts: DemoTexts }) {
           <p className="max-w-[56ch] text-[17px] text-ink-muted">{texts.try}</p>
           <a
             href={texts.repository}
-            className="mt-1 self-start text-[15px] underline underline-offset-4 hover:text-lamp-ink"
+            className="mt-1 self-start text-[15px] underline underline-offset-4 hover:text-accent-ink"
           >
             {texts.repositoryLink}
           </a>
@@ -231,7 +231,7 @@ export function DemoBoard({ texts }: { texts: DemoTexts }) {
                 key={name}
                 className={`flex min-w-0 flex-col bg-panel ${index > 0 ? "border-l border-line max-[960px]:border-t max-[960px]:border-l-0" : ""}`}
               >
-                <figcaption className="border-b border-line bg-frame px-4 py-2 font-display text-[15px] font-bold tracking-[0.12em] text-frame-ink uppercase">
+                <figcaption className="border-b border-line bg-bar px-4 py-2 font-display text-[15px] font-bold tracking-[0.12em] text-bar-ink uppercase">
                   {name}
                 </figcaption>
                 <pre className="max-h-96 overflow-auto p-4 font-mono text-[12.5px] leading-relaxed text-ink">

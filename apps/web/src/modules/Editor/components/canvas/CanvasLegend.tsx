@@ -89,7 +89,7 @@ export function CanvasLegend() {
           va a otro grupo
         </li>
         <li className="flex items-center gap-2.5">
-          <span className="h-3.5 w-11 flex-none border border-flap-edge bg-key" />
+          <span className="h-3.5 w-11 flex-none border border-sheet-edge bg-key" />
           clave primaria
         </li>
       </ul>
