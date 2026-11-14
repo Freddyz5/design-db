@@ -41,6 +41,8 @@
   --color-frame-line: #3a3e44;
   --color-frame-ink: #f2f2f2;
   --color-frame-muted: #a7aaaf;
+  /* An error on the frame, readable on black in both themes. */
+  --color-frame-danger: #ff6b6b;
 
   /* The lamp: primary action, selection and focus. Nothing else is amber. */
   --color-lamp: #ffb000;

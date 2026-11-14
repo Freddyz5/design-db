@@ -11,6 +11,7 @@ import { BarButton } from "./BarButton";
 import { BarSegment } from "./BarSegment";
 import { BaseButton } from "./BaseButton";
 import { DiagramName } from "./DiagramName";
+import { SaveState } from "./SaveState";
 import { TableSearch } from "./TableSearch";
 
 const ICON = { size: 15, strokeWidth: 1.75, "aria-hidden": true } as const;
@@ -46,6 +47,7 @@ export function EditorBar() {
         Design DB
       </span>
       <DiagramName />
+      <SaveState />
       <BarButton
         compact
         icon={<FilePlus {...ICON} />}

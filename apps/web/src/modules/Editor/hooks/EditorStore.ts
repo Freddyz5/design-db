@@ -16,6 +16,7 @@ import {
 } from "@design-db/core";
 import { createStore, type StoreApi } from "zustand/vanilla";
 import type { ColumnsFilter, RelationsFilter } from "../utils/canvasElements";
+import type { SaveStatus } from "../utils/autosave";
 import { CODE_WIDTH, type CodeFormat } from "../utils/codeFormats";
 
 /** A table, or one of its columns, to show in the code. */
@@ -59,6 +60,10 @@ export type EditorView = {
   importText: string | null;
   /** A short message about the last change, shown with a way to undo it. Gone on the next change. */
   notice: string | null;
+  /** Whether the diagram is saved, being saved or failed to save. */
+  saveStatus: SaveStatus;
+  /** Whether what is saved survives closing the page; null until the storage says. */
+  persistent: boolean | null;
 };
 
 export type EditorState = {
@@ -105,6 +110,8 @@ const EMPTY_VIEW: EditorView = {
   showChanges: false,
   helpOpen: false,
   notice: null,
+  saveStatus: "idle",
+  persistent: null,
 };
 
 /**

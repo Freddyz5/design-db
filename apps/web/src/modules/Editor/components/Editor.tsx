@@ -1,6 +1,7 @@
 import { ReactFlowProvider } from "@xyflow/react";
 import { Code } from "lucide-react";
 import { useEffect, useState, type DragEvent } from "react";
+import { useDiagramStorage } from "../hooks/useDiagramStorage";
 import { editorStore, useEditorStore } from "../hooks/useEditorStore";
 import { readTextFile } from "../utils/readTextFile";
 import { EditorBar } from "./bar/EditorBar";
@@ -25,6 +26,7 @@ const hasFiles = (event: DragEvent) =>
 export function Editor() {
   const codeOpen = useEditorStore((state) => state.view.codeOpen);
   const [dropping, setDropping] = useState(false);
+  useDiagramStorage();
 
   // Pasting a schema anywhere outside a field opens it in the import dialog.
   useEffect(() => {
