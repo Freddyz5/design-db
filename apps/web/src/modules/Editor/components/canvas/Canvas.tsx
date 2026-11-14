@@ -51,6 +51,7 @@ import { EmptyCanvas } from "./EmptyCanvas";
 import { GhostNodeView } from "./GhostNode";
 import { GroupNodeView } from "./GroupNode";
 import { Notice } from "./Notice";
+import { TitleBlock } from "./TitleBlock";
 import { RelationBar } from "./RelationBar";
 import { RelationEdgeView } from "./RelationEdge";
 import { SelectionBar } from "./SelectionBar";
@@ -449,6 +450,7 @@ export function Canvas() {
       <RelationBar />
       <TablePanel />
       <CanvasControls />
+      <TitleBlock />
       <Notice />
     </ReactFlow>
   );

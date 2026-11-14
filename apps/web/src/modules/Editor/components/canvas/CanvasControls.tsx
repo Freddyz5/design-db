@@ -24,6 +24,10 @@ export function CanvasControls() {
   const { zoom } = useViewport();
   const diagram = useEditorStore(selectDiagram);
   const help = useEditorStore((state) => state.view.helpOpen);
+  // The title block says how much the diagram holds; here only when it does not show.
+  const titleBlock = useEditorStore(
+    (state) => state.view.titleBlockOpen && !state.view.helpOpen,
+  );
   const showChanges = useEditorStore(
     (state) =>
       state.view.showChanges && selectDiagram(state).base !== undefined,
@@ -83,11 +87,15 @@ export function CanvasControls() {
         >
           Ayuda
         </button>
-        <span className="mx-1 h-4 w-px bg-line" />
-        <span className="px-2 text-ink-muted">
-          {count(diagram.tables.length, "tabla", "tablas")} ·{" "}
-          {count(diagram.relations.length, "relación", "relaciones")}
-        </span>
+        {!titleBlock && (
+          <>
+            <span className="mx-1 h-4 w-px bg-line" />
+            <span className="px-2 text-ink-muted">
+              {count(diagram.tables.length, "tabla", "tablas")} ·{" "}
+              {count(diagram.relations.length, "relación", "relaciones")}
+            </span>
+          </>
+        )}
         {changes && (
           <span
             className="flex items-center gap-2.5 border-l border-line px-2 text-ink-muted tabular-nums max-[720px]:hidden"

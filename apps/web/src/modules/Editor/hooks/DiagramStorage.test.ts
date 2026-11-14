@@ -74,6 +74,7 @@ describe("DiagramStorage", () => {
     await storage.flush();
     expect(saves.map((d) => d.name)).toEqual(["Tienda"]);
     expect(store.getState().view.saveStatus).toBe("saved");
+    expect(store.getState().view.savedAt).not.toBeNull();
   });
 
   test("opening a stored diagram does not save it again", async () => {
@@ -112,6 +113,10 @@ describe("DiagramStorage", () => {
     await storage.restore();
     expect(selectDiagram(store.getState()).name).toBe("Primero");
     expect(store.getState().view.saveStatus).toBe("saved");
+    // The title block says when it was saved, as the list does.
+    expect(store.getState().view.savedAt).toBe(
+      (await storage.list()).find((d) => d.id === first.id)?.updatedAt ?? "",
+    );
   });
 
   test("without a last one, restores the most recent", async () => {
