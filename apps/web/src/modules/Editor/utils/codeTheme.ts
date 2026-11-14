@@ -31,11 +31,11 @@ export const codeTheme: Extension = [
     ".cm-activeLine": {
       backgroundColor: "color-mix(in srgb, var(--color-ink) 5%, transparent)",
     },
-    // The lines of the selected table: the pencil, faint, with its edge lit.
+    // The lines of the table in focus: the cyan it has on the canvas, faint, with its edge lit.
     ".cm-markedLine": {
       backgroundColor:
-        "color-mix(in srgb, var(--color-accent) 14%, transparent)",
-      boxShadow: "inset 2px 0 0 var(--color-accent-ink)",
+        "color-mix(in srgb, var(--color-relation-focus) 12%, transparent)",
+      boxShadow: "inset 2px 0 0 var(--color-relation-focus)",
     },
     ".cm-activeLineGutter": {
       backgroundColor: "transparent",
@@ -45,7 +45,7 @@ export const codeTheme: Extension = [
       { backgroundColor: "var(--color-code-selection)" },
     ".cm-matchingBracket, &.cm-focused .cm-matchingBracket": {
       backgroundColor:
-        "color-mix(in srgb, var(--color-accent) 30%, transparent)",
+        "color-mix(in srgb, var(--color-relation-focus) 28%, transparent)",
       outline: "none",
     },
     ".cm-foldPlaceholder": {
