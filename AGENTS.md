@@ -24,7 +24,7 @@ This repo follows the repo-blueprints preset `ts-hexagonal`, recorded in `.bluep
 
 Intentional differences from the blueprint:
 
-- No `DiagramRepository` port or `infrastructure/` folder until persistence is added (SQLite, phase 3).
+- The `DiagramRepository` port (`list`, `load`, `save`, `remove`) lives in `Diagrams/domain`, but core has no `infrastructure/` folder: the only adapter is SQLite in the browser, so it lives in `apps/web` (see below).
 - A single `Id` in `shared` instead of one per entity, since all ids are the same kind.
 - `Tables`, `Columns`, `Relations`, `Groups` and `Enums` have no `application/` folder: they have no actions of their own.
 - `Formats` (SQL, DBML and Drizzle export and import) is not a business concept; it is a module by decision of the project, so formats stay out of `Diagrams`.
@@ -34,8 +34,9 @@ Intentional differences from the blueprint:
 - `src/pages/` holds thin routes: `/` composes `Landing`, `/app` mounts `Editor` as a client-only React island.
 - `src/modules/Landing` and `src/modules/Editor`: each exposes its public API in `index.ts`, with its components in `components/`. Pages import only from that file.
 - `Editor` is a single module. Its zones (canvas, table panel, code panel…) share one store, so they are subfolders of `components/` (`bar`, `canvas`, `table-panel`, `code-panel`, `import`), not sibling modules.
-- Optional folders in use (variant rules): `hooks/` (the editor store in `EditorStore.ts` and React hooks), `utils/` (pure logic, each file with its `<File>.test.ts`), `constants/` (Spanish texts and fixed values). `Landing` has `utils/` for the live demo.
+- Optional folders in use (variant rules): `hooks/` (the editor store in `EditorStore.ts`, the save controller in `DiagramStorage.ts` and React hooks), `services/` (the `DiagramRepository` adapter: SQLite WASM in a Web Worker with the `opfs-sahpool` VFS, through Drizzle `sqlite-proxy`; its tests run the same Drizzle code on `bun:sqlite`), `utils/` (pure logic, each file with its `<File>.test.ts`), `constants/` (Spanish texts and fixed values). `Landing` has `utils/` for the live demo.
 - The editor changes the diagram only through the store: `dispatch(op)` for one core operation, `replace(diagram)` for several at once, both one undo step. What the user is looking at (selection, filters, panels) lives in `view` and never enters the history.
+- Saving is automatic: `DiagramStorage` watches the store and saves each change. Open, create, duplicate or delete diagrams only through it (`getDiagramStorage()`), never with the store's `load`, so nothing unsaved is lost and the example is not saved until it changes.
 - Keep pure logic out of components and test it with `bun test`; check the interface in the browser.
 - The site's text lives in `src/content/site.json`.
 - `src/modules/shared` holds what both modules use: the theme selector and its helpers.
