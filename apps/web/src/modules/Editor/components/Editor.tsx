@@ -1,6 +1,7 @@
 import { ReactFlowProvider } from "@xyflow/react";
 import { Code } from "lucide-react";
 import { useEffect, useState, type DragEvent } from "react";
+import { useDiagramStorage } from "../hooks/useDiagramStorage";
 import { editorStore, useEditorStore } from "../hooks/useEditorStore";
 import { readTextFile } from "../utils/readTextFile";
 import { EditorBar } from "./bar/EditorBar";
@@ -25,6 +26,7 @@ const hasFiles = (event: DragEvent) =>
 export function Editor() {
   const codeOpen = useEditorStore((state) => state.view.codeOpen);
   const [dropping, setDropping] = useState(false);
+  const ready = useDiagramStorage();
 
   // Pasting a schema anywhere outside a field opens it in the import dialog.
   useEffect(() => {
@@ -39,6 +41,20 @@ export function Editor() {
     document.addEventListener("paste", onPaste);
     return () => document.removeEventListener("paste", onPaste);
   }, []);
+
+  // A moment while the last diagram opens: the frame bar and an empty canvas, no example that jumps.
+  if (!ready) {
+    return (
+      <div
+        className="grid h-dvh grid-rows-[3rem_minmax(0,1fr)]"
+        aria-busy="true"
+        aria-label="Abriendo el diagrama"
+      >
+        <div className="border-b border-frame-deep bg-frame" />
+        <div className="bg-canvas" />
+      </div>
+    );
+  }
 
   return (
     // The provider wraps the bar too: its tools need to know what the canvas shows.
