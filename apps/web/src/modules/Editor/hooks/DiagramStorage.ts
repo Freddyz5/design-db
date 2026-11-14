@@ -13,21 +13,47 @@ export type DiagramStorage = {
    * is already in the repository, so it is not saved again until it changes.
    */
   open: (diagram: Diagram, stored: boolean) => Promise<void>;
+  /**
+   * Opens the diagram the user was last on, or the most recent one. With
+   * nothing saved, the editor keeps what it has (the example).
+   */
+  restore: () => Promise<void>;
+};
+
+/** Remembers which diagram was open last, for the next visit. */
+export type LastOpened = {
+  get: () => string | null;
+  set: (id: string) => void;
 };
 
 export function createDiagramStorage(
   store: EditorStore,
   repository: DiagramRepository,
-  options: { persistent?: Promise<boolean>; schedule?: Schedule } = {},
+  options: {
+    persistent?: Promise<boolean>;
+    schedule?: Schedule;
+    lastOpened?: LastOpened;
+  } = {},
 ): DiagramStorage {
   const setView = store.getState().setView;
+  const lastOpened = options.lastOpened;
   const autosave = createAutosave<Diagram>({
-    save: (diagram) => repository.save(diagram),
+    save: async (diagram) => {
+      await repository.save(diagram);
+      lastOpened?.set(diagram.id);
+    },
     onStatus: (saveStatus) => setView({ saveStatus }),
     schedule: options.schedule,
   });
   // What the editor starts with (the example) is not saved until it changes.
   autosave.reset(selectDiagram(store.getState()), false);
+
+  const open = async (diagram: Diagram, stored: boolean) => {
+    await autosave.flush();
+    store.getState().load(diagram);
+    autosave.reset(diagram, stored);
+    if (stored) lastOpened?.set(diagram.id);
+  };
 
   return {
     start() {
@@ -49,10 +75,15 @@ export function createDiagramStorage(
       };
     },
     flush: autosave.flush,
-    async open(diagram, stored) {
-      await autosave.flush();
-      store.getState().load(diagram);
-      autosave.reset(diagram, stored);
+    open,
+    async restore() {
+      const lastId = lastOpened?.get() ?? null;
+      let diagram = lastId === null ? null : await repository.load(lastId);
+      if (!diagram) {
+        const [recent] = await repository.list();
+        if (recent) diagram = await repository.load(recent.id);
+      }
+      if (diagram) await open(diagram, true);
     },
   };
 }

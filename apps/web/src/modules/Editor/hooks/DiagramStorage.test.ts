@@ -40,12 +40,22 @@ export function memoryRepository(initial: Diagram[] = []) {
 /** Runs scheduled saves only when the test asks. */
 const never: Schedule = () => () => {};
 
-function setup(initial: Diagram[] = []) {
+function setup(initial: Diagram[] = [], last: string | null = null) {
   const store = createEditorStore();
   const { repository, saves } = memoryRepository(initial);
-  const storage = createDiagramStorage(store, repository, { schedule: never });
+  const lastOpened = {
+    id: last,
+    get: () => lastOpened.id,
+    set: (id: string) => {
+      lastOpened.id = id;
+    },
+  };
+  const storage = createDiagramStorage(store, repository, {
+    schedule: never,
+    lastOpened,
+  });
   const stop = storage.start();
-  return { store, repository, saves, storage, stop };
+  return { store, repository, saves, storage, stop, lastOpened };
 }
 
 describe("DiagramStorage", () => {
@@ -85,5 +95,36 @@ describe("DiagramStorage", () => {
     store.getState().dispatch({ type: "diagram.update", patch: { name: "Nada" } });
     await storage.flush();
     expect(saves).toEqual([]);
+  });
+
+  test("restores the diagram open last time", async () => {
+    const first = createDiagram({ name: "Primero" });
+    const second = createDiagram({ name: "Segundo" });
+    const { store, storage } = setup([first, second], first.id);
+    await storage.restore();
+    expect(selectDiagram(store.getState()).name).toBe("Primero");
+    expect(store.getState().view.saveStatus).toBe("saved");
+  });
+
+  test("without a last one, restores the most recent", async () => {
+    const first = createDiagram({ name: "Primero" });
+    const second = createDiagram({ name: "Segundo" });
+    const { store, storage } = setup([first, second], "gone");
+    await storage.restore();
+    expect(selectDiagram(store.getState()).name).toBe("Segundo");
+  });
+
+  test("with nothing saved, keeps the example", async () => {
+    const { store, storage } = setup();
+    const example = selectDiagram(store.getState());
+    await storage.restore();
+    expect(selectDiagram(store.getState())).toBe(example);
+  });
+
+  test("a save remembers the diagram as the last one", async () => {
+    const { store, storage, lastOpened } = setup();
+    store.getState().dispatch({ type: "diagram.update", patch: { name: "Mío" } });
+    await storage.flush();
+    expect(lastOpened.id).toBe(selectDiagram(store.getState()).id);
   });
 });
