@@ -11,3 +11,8 @@ export const TABLE_NOTE_LETTERS = 54;
 
 export const MIN_ZOOM = 0.2;
 export const MAX_ZOOM = 2;
+
+/** The side of a square of the canvas grid, in diagram pixels. */
+export const GRID_MINOR = 20;
+/** Every how many squares the grid draws a bolder line. */
+export const GRID_MAJOR_EVERY = 5;

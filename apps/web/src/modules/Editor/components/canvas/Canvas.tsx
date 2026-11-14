@@ -20,7 +20,12 @@ import {
   useState,
   type MouseEvent as ReactMouseEvent,
 } from "react";
-import { MAX_ZOOM, MIN_ZOOM } from "../../constants/canvas";
+import {
+  GRID_MAJOR_EVERY,
+  GRID_MINOR,
+  MAX_ZOOM,
+  MIN_ZOOM,
+} from "../../constants/canvas";
 import { selectDiagram } from "../../hooks/EditorStore";
 import { editorStore, useEditorStore } from "../../hooks/useEditorStore";
 import {
@@ -423,11 +428,20 @@ export function Canvas() {
       fitViewOptions={FIT}
       ariaLabelConfig={ARIA_LABELS}
     >
+      {/* Drawing paper: a fine grid and a bolder one every five squares. Both scale with the zoom. */}
       <Background
-        variant={BackgroundVariant.Dots}
-        gap={24}
-        size={1.6}
+        id="grid-minor"
+        variant={BackgroundVariant.Lines}
+        gap={GRID_MINOR}
+        lineWidth={1}
         color="var(--color-grid)"
+      />
+      <Background
+        id="grid-major"
+        variant={BackgroundVariant.Lines}
+        gap={GRID_MINOR * GRID_MAJOR_EVERY}
+        lineWidth={1}
+        color="var(--color-grid-major)"
       />
       <EmptyCanvas onAddTable={addTable} />
       <ChangesPanel />
