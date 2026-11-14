@@ -338,7 +338,7 @@ export function tableNodes(
     const shown = shownColumns(table, references, columns);
     const data: TableNodeData = {
       table,
-      strip: stripColors(layout?.color ?? group?.color),
+      strip: stripColors(layout?.color ?? group?.color, group?.intensity),
       references,
       columns: shown,
       faces: columnFaces(diagram, table),
