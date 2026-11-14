@@ -38,9 +38,17 @@ describe("SqliteDiagramRepository", () => {
     const repository = createSqliteDiagramRepository(memoryRunner());
     const diagram = createDiagram({ name: "Uno" });
     await repository.save(diagram, "2026-11-14T10:00:00.000Z");
-    await repository.save({ ...diagram, name: "Dos" }, "2026-11-14T11:00:00.000Z");
+    await repository.save(
+      { ...diagram, name: "Dos" },
+      "2026-11-14T11:00:00.000Z",
+    );
     expect(await repository.list()).toEqual([
-      { id: diagram.id, name: "Dos", tableCount: 0, updatedAt: "2026-11-14T11:00:00.000Z" },
+      {
+        id: diagram.id,
+        name: "Dos",
+        tableCount: 0,
+        updatedAt: "2026-11-14T11:00:00.000Z",
+      },
     ]);
   });
 

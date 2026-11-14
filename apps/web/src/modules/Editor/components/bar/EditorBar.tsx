@@ -1,4 +1,4 @@
-import { createDiagram, diffDiagram } from "@design-db/core";
+import { diffDiagram } from "@design-db/core";
 import { Code, FilePlus, Import, LayoutGrid, Plus } from "lucide-react";
 import { ThemeSelect } from "../../../shared";
 import { selectDiagram } from "../../hooks/EditorStore";
@@ -11,6 +11,7 @@ import { BarButton } from "./BarButton";
 import { BarSegment } from "./BarSegment";
 import { BaseButton } from "./BaseButton";
 import { DiagramName } from "./DiagramName";
+import { DiagramsMenu, startNewDiagram } from "./DiagramsMenu";
 import { SaveState } from "./SaveState";
 import { TableSearch } from "./TableSearch";
 
@@ -33,26 +34,19 @@ export function EditorBar() {
   const addTable = useAddTable();
   const { tools, more, measure } = useOverflowEnd();
 
-  /** Starts an empty diagram. It is one step, so undoing brings the old one back. */
-  const startNew = () => {
-    const { replace, notify } = editorStore.getState();
-    const { dialect } = selectDiagram(editorStore.getState());
-    replace(createDiagram({ name: "Sin título", dialect }));
-    notify("Empezaste un diagrama nuevo.");
-  };
-
   return (
     <header className="flex h-12 items-center gap-2 border-b border-frame-deep bg-frame px-4 text-frame-ink max-[560px]:px-2">
       <span className="mr-1 flex-none font-display text-lg font-bold tracking-[0.14em] whitespace-nowrap uppercase max-[560px]:hidden">
         Design DB
       </span>
       <DiagramName />
+      <DiagramsMenu />
       <SaveState />
       <BarButton
         compact
         icon={<FilePlus {...ICON} />}
         title="Empezar un diagrama vacío"
-        onClick={startNew}
+        onClick={() => void startNewDiagram()}
       >
         Nuevo
       </BarButton>

@@ -21,7 +21,8 @@ const reply = (message: SqlReply) => postMessage(message);
 
 opening.then(
   ({ persistent }) => reply({ type: "ready", persistent }),
-  (error: unknown) => reply({ type: "ready", persistent: false, error: String(error) }),
+  (error: unknown) =>
+    reply({ type: "ready", persistent: false, error: String(error) }),
 );
 
 addEventListener("message", async (event: MessageEvent<SqlRequest>) => {

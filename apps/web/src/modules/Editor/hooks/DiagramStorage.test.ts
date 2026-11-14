@@ -13,8 +13,10 @@ import { createEditorStore, selectDiagram } from "./EditorStore";
 export function memoryRepository(initial: Diagram[] = []) {
   const rows = new Map<string, { diagram: Diagram; updatedAt: string }>();
   let clock = 0;
-  const stamp = () => new Date(Date.UTC(2026, 10, 14, 0, 0, clock++)).toISOString();
-  for (const diagram of initial) rows.set(diagram.id, { diagram, updatedAt: stamp() });
+  const stamp = () =>
+    new Date(Date.UTC(2026, 10, 14, 0, 0, clock++)).toISOString();
+  for (const diagram of initial)
+    rows.set(diagram.id, { diagram, updatedAt: stamp() });
   const saves: Diagram[] = [];
   const repository: DiagramRepository = {
     async list() {
@@ -65,7 +67,9 @@ describe("DiagramStorage", () => {
     expect(saves).toEqual([]);
     expect(store.getState().view.saveStatus).toBe("idle");
 
-    store.getState().dispatch({ type: "diagram.update", patch: { name: "Tienda" } });
+    store
+      .getState()
+      .dispatch({ type: "diagram.update", patch: { name: "Tienda" } });
     expect(store.getState().view.saveStatus).toBe("pending");
     await storage.flush();
     expect(saves.map((d) => d.name)).toEqual(["Tienda"]);
@@ -84,7 +88,9 @@ describe("DiagramStorage", () => {
 
   test("opening another diagram first saves the changes waiting", async () => {
     const { store, saves, storage } = setup();
-    store.getState().dispatch({ type: "diagram.update", patch: { name: "Primero" } });
+    store
+      .getState()
+      .dispatch({ type: "diagram.update", patch: { name: "Primero" } });
     await storage.open(createDiagram({ name: "Segundo" }), true);
     expect(saves.map((d) => d.name)).toEqual(["Primero"]);
   });
@@ -92,7 +98,9 @@ describe("DiagramStorage", () => {
   test("after stopping, changes are no longer saved", async () => {
     const { store, saves, storage, stop } = setup();
     stop();
-    store.getState().dispatch({ type: "diagram.update", patch: { name: "Nada" } });
+    store
+      .getState()
+      .dispatch({ type: "diagram.update", patch: { name: "Nada" } });
     await storage.flush();
     expect(saves).toEqual([]);
   });
@@ -123,8 +131,56 @@ describe("DiagramStorage", () => {
 
   test("a save remembers the diagram as the last one", async () => {
     const { store, storage, lastOpened } = setup();
-    store.getState().dispatch({ type: "diagram.update", patch: { name: "Mío" } });
+    store
+      .getState()
+      .dispatch({ type: "diagram.update", patch: { name: "Mío" } });
     await storage.flush();
     expect(lastOpened.id).toBe(selectDiagram(store.getState()).id);
+  });
+
+  test("lists, opens another and comes back", async () => {
+    const first = createDiagram({ name: "Primero" });
+    const second = createDiagram({ name: "Segundo" });
+    const { store, storage } = setup([first, second]);
+    expect((await storage.list()).map((d) => d.name)).toEqual([
+      "Segundo",
+      "Primero",
+    ]);
+    await storage.openSaved(first.id);
+    expect(selectDiagram(store.getState()).name).toBe("Primero");
+    await storage.openSaved(second.id);
+    expect(selectDiagram(store.getState()).name).toBe("Segundo");
+  });
+
+  test("a new diagram is empty and already in the list", async () => {
+    const { store, storage } = setup();
+    await storage.create();
+    const diagram = selectDiagram(store.getState());
+    expect(diagram.name).toBe("Sin título");
+    expect(diagram.tables).toEqual([]);
+    expect((await storage.list()).map((d) => d.id)).toEqual([diagram.id]);
+  });
+
+  test("duplicating opens a saved copy with a new id", async () => {
+    const original = createDiagram({ name: "Tienda" });
+    const { store, storage } = setup([original]);
+    await storage.openSaved(original.id);
+    await storage.duplicate();
+    const copy = selectDiagram(store.getState());
+    expect(copy.name).toBe("Tienda (copia)");
+    expect(copy.id).not.toBe(original.id);
+    expect((await storage.list()).length).toBe(2);
+  });
+
+  test("deleting opens the most recent left, or an empty one", async () => {
+    const first = createDiagram({ name: "Primero" });
+    const second = createDiagram({ name: "Segundo" });
+    const { store, storage } = setup([first, second]);
+    await storage.openSaved(second.id);
+    await storage.removeCurrent();
+    expect(selectDiagram(store.getState()).name).toBe("Primero");
+    await storage.removeCurrent();
+    expect(selectDiagram(store.getState()).name).toBe("Sin título");
+    expect((await storage.list()).map((d) => d.name)).toEqual(["Sin título"]);
   });
 });

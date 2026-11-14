@@ -46,7 +46,8 @@ export function createSqliteDiagramRepository(
         .get();
       if (!row) return null;
       const parsed = parseDiagram(JSON.parse(row.data));
-      if (!parsed.ok) throw new Error(`Saved diagram ${id} is invalid: ${parsed.error}`);
+      if (!parsed.ok)
+        throw new Error(`Saved diagram ${id} is invalid: ${parsed.error}`);
       return parsed.diagram;
     },
 

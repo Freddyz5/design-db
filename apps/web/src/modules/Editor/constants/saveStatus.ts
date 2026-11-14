@@ -11,7 +11,8 @@ export const SAVE_STATUS_TEXT: Record<SaveStatus, string> = {
 
 export const SAVE_STATUS_TITLE = {
   local: "Guardado solo en este navegador",
-  error: "No se pudo guardar. Tus cambios siguen aquí; se intentará otra vez con el próximo cambio.",
+  error:
+    "No se pudo guardar. Tus cambios siguen aquí; se intentará otra vez con el próximo cambio.",
   transient:
     "Este navegador no permite guardar aquí (¿ventana privada?). Descarga el proyecto para no perderlo.",
 } as const;
