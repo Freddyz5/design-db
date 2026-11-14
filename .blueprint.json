@@ -1,6 +1,9 @@
 {
   "preset": "ts-hexagonal",
-  "variants": [{ "name": "core", "path": "packages/core" }],
+  "variants": [
+    { "name": "core", "path": "packages/core" },
+    { "name": "web-astro", "path": "apps/web" }
+  ],
   "modules": [
     "Diagrams",
     "Tables",
@@ -8,7 +11,9 @@
     "Relations",
     "Groups",
     "Enums",
-    "Formats"
+    "Formats",
+    "Landing",
+    "Editor"
   ],
   "layout": "monorepo"
 }

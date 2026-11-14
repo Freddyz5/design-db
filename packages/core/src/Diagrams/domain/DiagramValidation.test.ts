@@ -157,6 +157,33 @@ describe("relation checks", () => {
     );
   });
 
+  test("a foreign key to an auto-numbered key is not a type mismatch", () => {
+    const pairs = [
+      ["serial", "integer"],
+      ["serial", "INT"],
+      ["bigserial", "bigint"],
+      ["smallserial", "smallint"],
+      ["int", "integer"],
+    ] as const;
+    for (const [key, foreignKey] of pairs) {
+      const doc = applyAll(blogDiagram(), [
+        {
+          type: "column.update",
+          tableId: "users",
+          columnId: "users.id",
+          patch: { type: key },
+        },
+        {
+          type: "column.update",
+          tableId: "posts",
+          columnId: "posts.user_id",
+          patch: { type: foreignKey },
+        },
+      ]);
+      expect(validate(doc)).toEqual([]);
+    }
+  });
+
   test("different types on both ends is a warning", () => {
     const doc = apply(blogDiagram(), {
       type: "column.update",

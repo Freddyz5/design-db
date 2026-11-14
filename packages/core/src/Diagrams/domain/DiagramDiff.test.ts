@@ -22,7 +22,38 @@ describe("base.set / base.clear", () => {
       relations: doc.relations,
       groups: [],
       enums: [],
+      positions: Object.fromEntries(
+        Object.entries(doc.layout.tables).map(([id, { x, y }]) => [
+          id,
+          { x, y },
+        ]),
+      ),
     });
+  });
+
+  test("base.set keeps where each table was, without its color", () => {
+    const doc = apply(blogDiagram(), {
+      type: "layout.place",
+      positions: { users: { x: 10, y: 20 } },
+    });
+    const colored = {
+      ...doc,
+      layout: {
+        ...doc.layout,
+        tables: {
+          ...doc.layout.tables,
+          users: { x: 10, y: 20, color: "red" },
+        },
+      },
+    };
+    const next = apply(colored, { type: "base.set", at: AT });
+    expect(next.base!.positions!["users"]).toEqual({ x: 10, y: 20 });
+    // Moving the table later leaves the base where it was.
+    const moved = apply(next, {
+      type: "layout.place",
+      positions: { users: { x: 99, y: 99 } },
+    });
+    expect(moved.base!.positions!["users"]).toEqual({ x: 10, y: 20 });
   });
 
   test("later changes do not touch the base", () => {

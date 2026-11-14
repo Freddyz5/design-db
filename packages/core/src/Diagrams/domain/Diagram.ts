@@ -3,10 +3,11 @@ import { EnumSchema, isEnumType, type Enum } from "../../Enums";
 import { GroupSchema, type Group } from "../../Groups";
 import { RelationSchema, type Relation } from "../../Relations";
 import {
-  createId,
   DialectSchema,
   IdSchema,
   OperationError,
+  applyPatch,
+  createId,
   type Dialect,
   type Id,
 } from "../../shared";
@@ -48,6 +49,8 @@ export const BaseSchema = z.object({
   relations: z.array(RelationSchema),
   groups: z.array(GroupSchema),
   enums: z.array(EnumSchema),
+  /** Where each placed table was, so a removed table can be drawn where it stood. Older bases have none. */
+  positions: z.record(IdSchema, PositionSchema).optional(),
 });
 export type Base = z.infer<typeof BaseSchema>;
 
@@ -93,6 +96,14 @@ export function createDiagram(
     enums: [],
     layout: { tables: {}, viewport: { x: 0, y: 0, zoom: 1 } },
   };
+}
+
+/** What can change in the diagram itself: its name and its dialect. */
+export type DiagramPatch = { name?: string; dialect?: Dialect };
+
+/** Returns a copy of the diagram with the patch applied. */
+export function patchDiagram(diagram: Diagram, patch: DiagramPatch): Diagram {
+  return applyPatch(diagram, patch, []);
 }
 
 export function getTable(diagram: Diagram, tableId: Id): Table {

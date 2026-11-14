@@ -1,4 +1,4 @@
-import type { Column } from "../../Columns";
+import { isSameColumnType, type Column } from "../../Columns";
 import type { Relation, RelationEnd } from "../../Relations";
 import type { Id } from "../../shared";
 import { isUniqueKey, type Table } from "../../Tables";
@@ -247,7 +247,7 @@ function checkRelation(doc: Diagram, relation: Relation): Issue[] {
 
   from.columns.forEach((source, i) => {
     const target = to.columns[i]!;
-    if (normalizeType(source.type) !== normalizeType(target.type)) {
+    if (!isSameColumnType(source.type, target.type)) {
       issues.push({
         ...ref,
         code: "relation-type-mismatch",
@@ -312,10 +312,6 @@ function duplicates<T extends { name: string }>(items: T[]): T[][] {
     byName.set(key, [...(byName.get(key) ?? []), item]);
   }
   return [...byName.values()].filter((group) => group.length > 1);
-}
-
-function normalizeType(type: string): string {
-  return type.trim().toLowerCase().replace(/\s+/g, " ");
 }
 
 function isBlank(name: string): boolean {

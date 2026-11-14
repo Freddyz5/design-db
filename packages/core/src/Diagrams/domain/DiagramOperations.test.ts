@@ -12,6 +12,29 @@ import { apply, applyAll } from "./DiagramOperations";
 const columnNames = (doc: Diagram, tableId: string) =>
   doc.tables.find((t) => t.id === tableId)!.columns.map((c) => c.name);
 
+describe("diagram.update", () => {
+  test("changes the name and the dialect, and nothing else", () => {
+    const doc = deepFreeze(blogDiagram());
+    const next = apply(doc, {
+      type: "diagram.update",
+      patch: { name: "Shop", dialect: "mysql" },
+    });
+    expect(next.name).toBe("Shop");
+    expect(next.dialect).toBe("mysql");
+    expect(next.tables).toBe(doc.tables);
+    expect(next.layout).toBe(doc.layout);
+  });
+
+  test("keeps the fields the patch leaves out", () => {
+    const next = apply(blogDiagram(), {
+      type: "diagram.update",
+      patch: { dialect: "postgres" },
+    });
+    expect(next.name).toBe("Blog");
+    expect(next.dialect).toBe("postgres");
+  });
+});
+
 describe("table.add", () => {
   test("adds the table at the end with its position", () => {
     const doc = deepFreeze(blogDiagram());

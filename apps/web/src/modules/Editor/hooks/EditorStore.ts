@@ -1,0 +1,226 @@
+import {
+  apply,
+  canRedo,
+  canUndo,
+  checkpoint,
+  createExampleDiagram,
+  createHistory,
+  push,
+  pushOp,
+  redo,
+  undo,
+  type Diagram,
+  type History,
+  type Id,
+  type Op,
+} from "@design-db/core";
+import { createStore, type StoreApi } from "zustand/vanilla";
+import type { ColumnsFilter, RelationsFilter } from "../utils/canvasElements";
+import { CODE_WIDTH, type CodeFormat } from "../utils/codeFormats";
+
+/** A table, or one of its columns, to show in the code. */
+export type CodeTarget = { tableId: Id; columnId: Id | null; focus: boolean };
+
+/** What the user is looking at. It is not part of the diagram, so it never enters the history. */
+export type EditorView = {
+  /** Ids of the selected tables. */
+  selection: Id[];
+  /** The table open in the edit panel, if any. */
+  editingTableId: Id | null;
+  /** The selected relation, if any. */
+  selectedRelationId: Id | null;
+  /** The table under the pointer: it and the tables related to it stand out. */
+  hoveredTableId: Id | null;
+  /** The table a click fixed the focus on. While set, it stands out instead of the hovered one. */
+  pinnedTableId: Id | null;
+  /** The table the cursor is in while the user is in the code. It stands out when nothing else does. */
+  codeTableId: Id | null;
+  /**
+   * A table to show in the code: its lines are marked and scrolled into view,
+   * with the cursor on the column, if any. `focus` moves the keyboard there.
+   * A new object asks again.
+   */
+  codeTarget: CodeTarget | null;
+  /** A table that just flashed to say "here it is", as when the search lands on it. A new key flashes again. */
+  flash: { tableId: Id; key: number } | null;
+  /** Which columns the tables show. */
+  columnsFilter: ColumnsFilter;
+  /** Which relations the canvas shows. */
+  relationsFilter: RelationsFilter;
+  /** Whether the code panel shows, in which format, and how wide. */
+  codeOpen: boolean;
+  codeFormat: CodeFormat;
+  codeWidth: number;
+  /** The help panel: the legend and the shortcuts. */
+  helpOpen: boolean;
+  /** Mark on the canvas what changed since the base, and list it. */
+  showChanges: boolean;
+  /** The text in the import dialog, or null while the dialog is closed. */
+  importText: string | null;
+  /** A short message about the last change, shown with a way to undo it. Gone on the next change. */
+  notice: string | null;
+};
+
+export type EditorState = {
+  /** The diagram with its undo and redo steps. Change it only through the actions below. */
+  history: History<Diagram>;
+  view: EditorView;
+
+  /**
+   * Applies one operation as one undo step. Throws `OperationError` if it
+   * points at something missing. Changes in a row with the same `mergeKey`
+   * are one step: typing a name is undone whole, not letter by letter.
+   */
+  dispatch: (op: Op, options?: { mergeKey?: string }) => void;
+  /** Makes `next` the diagram as one undo step: several operations at once, an import, a code edit. */
+  replace: (next: Diagram) => void;
+  /** Says what the last change was, so it can be undone from the message. Call it after the change. */
+  notify: (notice: string) => void;
+  /** Closes the current step, so the next change starts a new one even with the same `mergeKey`: a field lost focus. */
+  checkpoint: () => void;
+  undo: () => void;
+  redo: () => void;
+  /** Starts over with another diagram, an empty history and nothing selected. The filters and the code panel stay. */
+  load: (diagram: Diagram) => void;
+  setView: (patch: Partial<EditorView>) => void;
+};
+
+export type EditorStore = StoreApi<EditorState>;
+
+const EMPTY_VIEW: EditorView = {
+  selection: [],
+  editingTableId: null,
+  selectedRelationId: null,
+  hoveredTableId: null,
+  pinnedTableId: null,
+  codeTableId: null,
+  codeTarget: null,
+  flash: null,
+  columnsFilter: "all",
+  relationsFilter: "all",
+  codeOpen: true,
+  codeFormat: "sql",
+  codeWidth: CODE_WIDTH,
+  importText: null,
+  showChanges: false,
+  helpOpen: false,
+  notice: null,
+};
+
+/**
+ * The view after the diagram changed: without what no longer exists (a
+ * selected table that was undone) and without the notice about the change before.
+ */
+function viewFor(view: EditorView, diagram: Diagram): EditorView {
+  const exists = (id: Id) => diagram.tables.some((table) => table.id === id);
+  const selection = view.selection.filter(exists);
+  const editingTableId =
+    view.editingTableId !== null && exists(view.editingTableId)
+      ? view.editingTableId
+      : null;
+  const selectedRelationId =
+    view.selectedRelationId !== null &&
+    diagram.relations.some((r) => r.id === view.selectedRelationId)
+      ? view.selectedRelationId
+      : null;
+  const hoveredTableId =
+    view.hoveredTableId !== null && exists(view.hoveredTableId)
+      ? view.hoveredTableId
+      : null;
+  const pinnedTableId =
+    view.pinnedTableId !== null && exists(view.pinnedTableId)
+      ? view.pinnedTableId
+      : null;
+  const codeTableId =
+    view.codeTableId !== null && exists(view.codeTableId)
+      ? view.codeTableId
+      : null;
+  const codeTarget =
+    view.codeTarget !== null && exists(view.codeTarget.tableId)
+      ? view.codeTarget
+      : null;
+  const flash =
+    view.flash !== null && exists(view.flash.tableId) ? view.flash : null;
+  if (
+    selection.length === view.selection.length &&
+    editingTableId === view.editingTableId &&
+    selectedRelationId === view.selectedRelationId &&
+    hoveredTableId === view.hoveredTableId &&
+    pinnedTableId === view.pinnedTableId &&
+    codeTableId === view.codeTableId &&
+    codeTarget === view.codeTarget &&
+    flash === view.flash &&
+    view.notice === null
+  ) {
+    return view;
+  }
+  return {
+    ...view,
+    selection,
+    editingTableId,
+    selectedRelationId,
+    hoveredTableId,
+    pinnedTableId,
+    codeTableId,
+    codeTarget,
+    flash,
+    notice: null,
+  };
+}
+
+/** Creates the editor's store. It starts with the example diagram unless one is given. */
+export function createEditorStore(
+  diagram: Diagram = createExampleDiagram(),
+): EditorStore {
+  return createStore<EditorState>()((set) => {
+    /** Sets the history and keeps the view pointing at things that exist. */
+    const move = (change: (history: History<Diagram>) => History<Diagram>) =>
+      set((state) => {
+        const history = change(state.history);
+        if (history === state.history) return state;
+        return { history, view: viewFor(state.view, history.present) };
+      });
+
+    return {
+      history: createHistory(diagram),
+      view: EMPTY_VIEW,
+      dispatch: (op, options) =>
+        move((history) =>
+          options?.mergeKey === undefined
+            ? pushOp(history, op)
+            : push(history, apply(history.present, op), options),
+        ),
+      replace: (next) => move((history) => push(history, next)),
+      checkpoint: () => move(checkpoint),
+      undo: () => move(undo),
+      redo: () => move(redo),
+      // The filters and the code panel are how the user likes to work: they stay.
+      load: (next) =>
+        set((state) => ({
+          history: createHistory(next),
+          view: {
+            ...state.view,
+            selection: [],
+            editingTableId: null,
+            selectedRelationId: null,
+            hoveredTableId: null,
+            pinnedTableId: null,
+            codeTableId: null,
+            codeTarget: null,
+            flash: null,
+            notice: null,
+          },
+        })),
+      notify: (notice) => set((state) => ({ view: { ...state.view, notice } })),
+      setView: (patch) =>
+        set((state) => ({ view: { ...state.view, ...patch } })),
+    };
+  });
+}
+
+export const selectDiagram = (state: EditorState): Diagram =>
+  state.history.present;
+export const selectCanUndo = (state: EditorState): boolean =>
+  canUndo(state.history);
+export const selectCanRedo = (state: EditorState): boolean =>
+  canRedo(state.history);

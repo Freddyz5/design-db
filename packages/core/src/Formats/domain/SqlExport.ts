@@ -15,6 +15,11 @@ import type { Table } from "../../Tables";
  * | comments | COMMENT ON | COMMENT '...' | -- | -- |
  * | foreign keys | ALTER TABLE | ALTER TABLE | inside the table | ALTER TABLE |
  *
+ * Groups are written as comments before their tables, which go group by
+ * group: `-- @group: Name`, then `-- @color` and `-- @note` if it has them.
+ * The tables without a group go last, after `-- @group: -`. `readSql`
+ * reads them back.
+ *
  * Relations that point at missing tables or columns are skipped.
  */
 export function toSql(
@@ -26,12 +31,42 @@ export function toSql(
     ...(dialect === "postgres"
       ? diagram.enums.map((e) => sql.createType(e))
       : []),
-    ...diagram.tables.map((t) => sql.createTable(t)),
+    ...groupedTables(diagram, sql),
     ...(dialect === "sqlite"
       ? []
       : diagram.relations.flatMap((r) => sql.alterTableForeignKey(r))),
   ];
   return statements.length ? statements.join("\n\n") + "\n" : "";
+}
+
+/** The tables group by group, each group introduced by its comments. */
+function groupedTables(diagram: Diagram, sql: SqlWriter): string[] {
+  const known = new Set(diagram.groups.map((g) => g.id));
+  const groupOf = (table: Table) =>
+    table.groupId !== undefined && known.has(table.groupId)
+      ? table.groupId
+      : undefined;
+  const ordered = [
+    ...diagram.groups.flatMap((g) =>
+      diagram.tables.filter((t) => groupOf(t) === g.id),
+    ),
+    ...diagram.tables.filter((t) => groupOf(t) === undefined),
+  ];
+  let current: string | undefined;
+  return ordered.map((table) => {
+    const groupId = groupOf(table);
+    if (groupId === current) return sql.createTable(table);
+    current = groupId;
+    const group = diagram.groups.find((g) => g.id === groupId);
+    const head = group
+      ? [
+          `-- @group: ${oneLine(group.name)}`,
+          ...(group.color ? [`-- @color: ${oneLine(group.color)}`] : []),
+          ...(group.note ? [`-- @note: ${oneLine(group.note)}`] : []),
+        ]
+      : ["-- @group: -"];
+    return `${head.join("\n")}\n${sql.createTable(table)}`;
+  });
 }
 
 class SqlWriter {
