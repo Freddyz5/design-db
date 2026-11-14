@@ -1,7 +1,7 @@
 ---
 import site from "../../../content/site.json";
-import { ThemeSelect } from "../../shared";
-import { DemoBoard } from "./DemoBoard";
+import { BrandMark, ThemeSelect } from "../../shared";
+import { DemoPlan } from "./DemoPlan";
 
 const { landing, repository, name } = site;
 ---
@@ -11,8 +11,9 @@ const { landing, repository, name } = site;
     class="flex h-14 items-center gap-5 border-b border-bar-deep bg-bar px-10 text-bar-ink max-[720px]:gap-3 max-[720px]:px-4"
   >
     <span
-      class="font-display text-xl font-bold tracking-[0.14em] whitespace-nowrap uppercase"
+      class="flex items-center gap-2 font-display text-xl font-bold tracking-[0.14em] whitespace-nowrap uppercase"
     >
+      <BrandMark size={24} />
       {name}
     </span>
     <span class="flex-1"></span>
@@ -30,9 +31,9 @@ const { landing, repository, name } = site;
   </header>
 
   <main
-    class="flex flex-1 flex-col gap-6 bg-canvas bg-[radial-gradient(circle,var(--color-grid)_1.1px,transparent_1.4px)] bg-size-[24px_24px] px-10 pt-9 pb-20 max-[720px]:px-4 max-[720px]:pt-5"
+    class="flex flex-1 flex-col gap-6 bg-canvas px-10 pt-9 pb-20 max-[720px]:px-4 max-[720px]:pt-5"
   >
-    <DemoBoard
+    <DemoPlan
       client:load
       texts={{ ...landing, repository }}
     />

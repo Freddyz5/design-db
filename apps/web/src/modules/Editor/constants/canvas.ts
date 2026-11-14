@@ -1,4 +1,4 @@
-/** Every table has the same width and row height: fixed cells, like the flaps of a board. */
+/** Every table has the same width and row height: ruled rows, like a technical sheet. */
 export const TABLE_WIDTH = 360;
 export const TABLE_HEADER_HEIGHT = 30;
 export const TABLE_ROW_HEIGHT = 24;
