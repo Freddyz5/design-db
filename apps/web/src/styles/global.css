@@ -28,23 +28,26 @@
   --font-mono:
     "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
 
-  /* The drawing: the canvas, its grid and the panels around it. */
-  --color-canvas: light-dark(#edf3f2, #0e1a1c);
-  --color-grid: light-dark(#d2e6e6, #14292c);
-  --color-grid-major: light-dark(#a6cdd0, #1d4a50);
-  --color-panel: light-dark(#f6f9f9, #0f1f22);
-  --color-raised: light-dark(#ffffff, #132a2e);
-  --color-line: light-dark(#cfdedf, #1f4146);
-  --color-ink: light-dark(#123c42, #dcedef);
-  --color-ink-muted: light-dark(#4a6f74, #8db4b9);
+  /*
+   * The drawing: the canvas, its grid and the panels around it. Surfaces keep
+   * the petroleum hue with little chroma, so the cyan of what is on stands out.
+   */
+  --color-canvas: light-dark(#eff2f2, #101618);
+  --color-grid: light-dark(#e0e8e9, #161f21);
+  --color-grid-major: light-dark(#c4d5d7, #233236);
+  --color-panel: light-dark(#f7f9f9, #12191b);
+  --color-raised: light-dark(#ffffff, #172225);
+  --color-line: light-dark(#d5dfe0, #263437);
+  --color-ink: light-dark(#173a3f, #dde7e8);
+  --color-ink-muted: light-dark(#4f6b6f, #93a8ab);
 
-  /* The bar on top: petroleum, the same ink as the drawing. */
-  --color-bar: light-dark(#123c42, #0b2a2f);
-  --color-bar-deep: light-dark(#0c2e33, #071e22);
-  --color-bar-well: light-dark(#1b4a51, #12373d);
-  --color-bar-line: light-dark(#2d5f66, #1f4a50);
-  --color-bar-ink: light-dark(#edf3f2, #dcedef);
-  --color-bar-muted: light-dark(#a9c6c9, #8db4b9);
+  /* The bar on top: petroleum, the same ink as the drawing, toned down. */
+  --color-bar: light-dark(#1c3a3e, #131d20);
+  --color-bar-deep: light-dark(#142d31, #0c1416);
+  --color-bar-well: light-dark(#26464a, #1a272a);
+  --color-bar-line: light-dark(#3a585c, #2a393c);
+  --color-bar-ink: light-dark(#eff2f2, #dde7e8);
+  --color-bar-muted: light-dark(#adc0c2, #93a8ab);
   /* What is on in the bar (a pressed toggle, the chosen filter): the cyan of the grid. */
   --color-bar-active: light-dark(#7fe0e8, #4fd8e3);
   /* An error on the bar, readable on petroleum in both themes. */
@@ -52,22 +55,23 @@
 
   /* The pencil: primary action, selection and focus. Nothing else is orange. */
   --color-accent: light-dark(#e8590c, #ff8a3d);
-  --color-on-accent: light-dark(#ffffff, #0b2a2f);
+  --color-on-accent: light-dark(#ffffff, #131d20);
   /* Orange as text or a thin line, dark enough to read on paper. */
   --color-accent-ink: light-dark(#c2410c, #ffa066);
 
   /* The sheets: the tables. */
-  --color-sheet: light-dark(#ffffff, #11272a);
-  --color-sheet-ink: light-dark(#123c42, #dcedef);
-  --color-sheet-muted: light-dark(#4a6f74, #8db4b9);
-  --color-sheet-rule: light-dark(#cfdedf, #1f4146);
-  --color-sheet-edge: light-dark(#123c42, #8fc9cf);
-  --color-sheet-head: light-dark(#e0eeee, #14434a);
-  --color-sheet-head-ink: light-dark(#123c42, #9fe7ee);
+  --color-sheet: light-dark(#ffffff, #151f21);
+  --color-sheet-ink: light-dark(#173a3f, #dde7e8);
+  --color-sheet-muted: light-dark(#4f6b6f, #93a8ab);
+  --color-sheet-rule: light-dark(#d5dfe0, #263437);
+  /* The ink border of a sheet: strong on paper, a soft light ink at night. */
+  --color-sheet-edge: light-dark(#173a3f, #7b9599);
+  --color-sheet-head: light-dark(#edf2f2, #1b2729);
+  --color-sheet-head-ink: light-dark(#173a3f, #c9d9db);
   /* The primary key: a highlighter stroke. */
-  --color-key: light-dark(#fdeeb0, #3a4030);
+  --color-key: light-dark(#fdeeb0, #363a2c);
   --color-key-ink: light-dark(#6b4f00, #f6d36a);
-  --color-relation: light-dark(#3c6a70, #8db4b9);
+  --color-relation: light-dark(#4a686c, #8aa1a4);
   /* A relation or table that stands out: the cyan of the grid, stronger. */
   --color-relation-focus: light-dark(#0e8c99, #4fd8e3);
 
@@ -85,14 +89,14 @@
   --color-group-6: light-dark(#946318, #e3b45f);
   --color-group-7: light-dark(#9c3f78, #e597c6);
   --color-group-8: light-dark(#4f6268, #a3b7bc);
-  --color-on-group: light-dark(#ffffff, #0e1a1c);
+  --color-on-group: light-dark(#ffffff, #101618);
 
   /* Code. Keywords in bold ink: orange stays the only pencil mark. */
-  --color-code-keyword: light-dark(#123c42, #dcedef);
+  --color-code-keyword: light-dark(#173a3f, #dde7e8);
   --color-code-type: light-dark(#0b6b74, #6fd3dc);
   --color-code-string: light-dark(#2f6f37, #8fd694);
   --color-code-number: light-dark(#6a3fb0, #c4a7f5);
-  --color-code-selection: light-dark(#cdeaec, #1d4a50);
+  --color-code-selection: light-dark(#d3e8ea, #213e42);
   --color-code-error: light-dark(#f9dedc, #4a1f1c);
 
   --radius-control: 3px;
