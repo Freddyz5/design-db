@@ -74,16 +74,16 @@
   --color-changed: light-dark(#a16207, #e8b84a);
   --color-removed: light-dark(#b3261e, #ff7b72);
 
-  /* Group strips. White text reads on all of them, in both themes. */
-  --color-group-1: #1f5fbf;
-  --color-group-2: #1b7f45;
-  --color-group-3: #a8341f;
-  --color-group-4: #7446b8;
-  --color-group-5: #0f7f86;
-  --color-group-6: #a85a0a;
-  --color-group-7: #b0307a;
-  --color-group-8: #55606e;
-  --color-on-group: #ffffff;
+  /* Group colors: muted inks of the same drawing, darker on paper, lighter at night. */
+  --color-group-1: light-dark(#2f5f98, #7fb0e6);
+  --color-group-2: light-dark(#2e7a4f, #78c99a);
+  --color-group-3: light-dark(#a34a3a, #ec9a88);
+  --color-group-4: light-dark(#6a4fa3, #b9a3ec);
+  --color-group-5: light-dark(#0f7a84, #5fd0da);
+  --color-group-6: light-dark(#946318, #e3b45f);
+  --color-group-7: light-dark(#9c3f78, #e597c6);
+  --color-group-8: light-dark(#4f6268, #a3b7bc);
+  --color-on-group: light-dark(#ffffff, #0e1a1c);
 
   /* Code. Keywords in bold ink: orange stays the only pencil mark. */
   --color-code-keyword: light-dark(#123c42, #dcedef);

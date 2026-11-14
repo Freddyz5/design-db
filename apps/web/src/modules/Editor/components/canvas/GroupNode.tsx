@@ -44,10 +44,11 @@ export const GroupNodeView = memo(function GroupNodeView({
 
   return (
     <div
-      className="size-full rounded-[4px] border"
+      className="size-full rounded-[2px] border-[1.5px] border-dashed"
       style={{
-        borderColor: `color-mix(in srgb, ${color} 60%, transparent)`,
-        backgroundColor: `color-mix(in srgb, ${color} 9%, transparent)`,
+        // A dashed outline in its color, as a zone on a plan; faint enough to keep the grid.
+        borderColor: `color-mix(in srgb, ${color} 75%, transparent)`,
+        backgroundColor: `color-mix(in srgb, ${color} 5%, transparent)`,
       }}
     >
       <div className="group-handle group/label pointer-events-auto relative flex cursor-grab items-start gap-3 px-4 pt-3 pb-1 active:cursor-grabbing">

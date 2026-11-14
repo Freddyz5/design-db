@@ -44,7 +44,8 @@ export const RelationEdgeView = memo(function RelationEdgeView({
   const many = data?.cardinality.kind !== "1:1";
   const ends = parentMarks(parent, data?.cardinality.optional ?? false);
 
-  // A relation of the table in focus is lit; with a table in focus, the rest fade.
+  // A relation of the table in focus is lit in cyan; with a table in focus, the rest fade.
+  // Only a selected relation takes the orange pencil.
   const lit = selected || data?.emphasis === "high";
   const stroke = selected
     ? "stroke-accent-ink"
@@ -53,7 +54,7 @@ export const RelationEdgeView = memo(function RelationEdgeView({
       : data?.change === "modified"
         ? "stroke-changed"
         : lit
-          ? "stroke-accent-ink"
+          ? "stroke-relation-focus"
           : "stroke-relation";
   const width = lit ? 2.2 : 1.4;
 
