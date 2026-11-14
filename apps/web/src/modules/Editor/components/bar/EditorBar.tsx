@@ -1,129 +1,80 @@
-import { diffDiagram } from "@design-db/core";
-import { Code, FilePlus, Import, LayoutGrid, Plus } from "lucide-react";
+import { Code, Import, LayoutGrid, Plus } from "lucide-react";
 import { BrandMark, ThemeSelect } from "../../../shared";
 import { selectDiagram } from "../../hooks/EditorStore";
 import { useAddTable } from "../../hooks/useAddTable";
 import { useAutoLayout } from "../../hooks/useAutoLayout";
 import { editorStore, useEditorStore } from "../../hooks/useEditorStore";
-import { COLUMNS_FILTERS, RELATIONS_FILTERS } from "../../constants/filters";
-import { useOverflowEnd } from "../../hooks/useOverflowEnd";
 import { BarButton } from "./BarButton";
-import { BarSegment } from "./BarSegment";
-import { BaseButton } from "./BaseButton";
+import { ChangesMenu } from "./ChangesMenu";
 import { DiagramName } from "./DiagramName";
-import { DiagramsMenu, startNewDiagram } from "./DiagramsMenu";
+import { DiagramsMenu } from "./DiagramsMenu";
 import { SaveState } from "./SaveState";
 import { TableSearch } from "./TableSearch";
+import { ViewMenu } from "./ViewMenu";
 
 const ICON = { size: 15, strokeWidth: 1.75, "aria-hidden": true } as const;
 
-/** The frame bar: the name of the product and of the diagram, and the tools. */
+const Divider = () => (
+  <span className="mx-0.5 h-5 w-px flex-none bg-bar-line max-[640px]:hidden" />
+);
+
+/**
+ * The frame bar, in three parts: the diagram (its name, «Mis diagramas» and
+ * whether it is saved), the work on it (import, add, arrange) and how it is
+ * seen (view, changes), then search, code and theme on the right. Everything
+ * fits without scrolling: as the window narrows, labels give way to icons.
+ */
 export function EditorBar() {
-  const columnsFilter = useEditorStore((state) => state.view.columnsFilter);
-  const relationsFilter = useEditorStore((state) => state.view.relationsFilter);
   const codeOpen = useEditorStore((state) => state.view.codeOpen);
   const hasTables = useEditorStore(
     (state) => selectDiagram(state).tables.length > 0,
   );
-  const baseAt = useEditorStore((state) => selectDiagram(state).base?.at);
-  const showChanges = useEditorStore((state) => state.view.showChanges);
-  const changeCount = useEditorStore(
-    (state) => diffDiagram(selectDiagram(state))?.length ?? 0,
-  );
   const { arrange, busy } = useAutoLayout();
   const addTable = useAddTable();
-  const { tools, more, measure } = useOverflowEnd();
 
   return (
-    <header className="flex h-12 items-center gap-2 border-b border-bar-deep bg-bar px-4 text-bar-ink max-[560px]:px-2">
+    <header className="flex h-12 items-center gap-2 border-b border-bar-deep bg-bar px-4 text-bar-ink max-[640px]:gap-1.5 max-[640px]:px-2">
       <span className="mr-1 flex flex-none items-center gap-2 font-display text-lg font-bold tracking-[0.14em] whitespace-nowrap uppercase">
         <BrandMark />
-        <span className="max-[560px]:hidden">Design DB</span>
+        <span className="max-[1279px]:sr-only">Design DB</span>
       </span>
-      <DiagramName />
-      <DiagramsMenu />
+      <div className="flex min-w-0 items-center gap-1">
+        <DiagramName />
+        <DiagramsMenu />
+      </div>
       <SaveState />
+      <Divider />
+      <BarButton
+        primary
+        icon={<Import {...ICON} />}
+        title="Pegar o abrir SQL, DBML, Drizzle o JSON"
+        onClick={() => editorStore.getState().setView({ importText: "" })}
+        className="max-[640px]:px-[7px]"
+      >
+        <span className="max-[640px]:sr-only">Importar</span>
+      </BarButton>
       <BarButton
         compact
-        icon={<FilePlus {...ICON} />}
-        title="Empezar un diagrama vacío"
-        onClick={() => void startNewDiagram()}
+        icon={<Plus {...ICON} />}
+        title="Nueva tabla"
+        onClick={addTable}
       >
-        Nuevo
+        Nueva tabla
       </BarButton>
-      {/* The tools scroll sideways when the window is too narrow for them; a fade says there is more. */}
-      <div
-        ref={tools}
-        onScroll={measure}
-        className={`relative flex min-w-0 flex-1 items-center gap-2 overflow-x-auto [scrollbar-width:none] ${more ? "[mask-image:linear-gradient(to_right,black_calc(100%-40px),transparent)]" : ""}`}
+      <BarButton
+        compact
+        icon={<LayoutGrid {...ICON} />}
+        title="Ordenar automáticamente todas las tablas"
+        disabled={!hasTables || busy}
+        aria-busy={busy}
+        onClick={() => void arrange()}
       >
-        <span className="mx-1 h-5 w-px flex-none bg-bar-line" />
-        <BarButton
-          primary
-          icon={<Import {...ICON} />}
-          title="Pegar o abrir SQL, DBML, Drizzle o JSON"
-          onClick={() => editorStore.getState().setView({ importText: "" })}
-        >
-          Importar
-        </BarButton>
-        <BarButton
-          compact
-          icon={<Plus {...ICON} />}
-          title="Nueva tabla"
-          onClick={addTable}
-        >
-          Nueva tabla
-        </BarButton>
-        <BarButton
-          compact
-          icon={<LayoutGrid {...ICON} />}
-          title="Ordenar automáticamente todas las tablas"
-          disabled={!hasTables || busy}
-          aria-busy={busy}
-          onClick={() => void arrange()}
-        >
-          {busy ? "Ordenando…" : "Ordenar"}
-        </BarButton>
-        <span className="mx-1 h-5 w-px flex-none bg-bar-line" />
-        <BarSegment
-          legend="Columnas visibles"
-          options={COLUMNS_FILTERS}
-          value={columnsFilter}
-          onChange={(value) =>
-            editorStore.getState().setView({ columnsFilter: value })
-          }
-        />
-        <BarSegment
-          legend="Relaciones visibles"
-          options={RELATIONS_FILTERS}
-          value={relationsFilter}
-          onChange={(value) =>
-            editorStore.getState().setView({ relationsFilter: value })
-          }
-        />
-        <span className="mx-1 h-5 w-px flex-none bg-bar-line" />
-        <BaseButton at={baseAt} />
-        <BarButton
-          aria-pressed={showChanges}
-          disabled={baseAt === undefined}
-          title={
-            baseAt === undefined
-              ? "Fija una base para ver qué cambió desde entonces"
-              : "Marcar lo nuevo, lo que cambió y lo eliminado desde la base"
-          }
-          className="aria-pressed:border-bar-deep aria-pressed:bg-bar-deep aria-pressed:text-bar-active"
-          onClick={() =>
-            editorStore.getState().setView({ showChanges: !showChanges })
-          }
-        >
-          Cambios
-          {baseAt !== undefined && (
-            <span className="font-mono text-[11.5px] opacity-80">
-              {changeCount}
-            </span>
-          )}
-        </BarButton>
-      </div>
+        {busy ? "Ordenando…" : "Ordenar"}
+      </BarButton>
+      <Divider />
+      <ViewMenu />
+      <ChangesMenu />
+      <span className="flex-1" />
       <TableSearch />
       <BarButton
         compact
@@ -135,7 +86,9 @@ export function EditorBar() {
       >
         Código
       </BarButton>
-      <ThemeSelect />
+      <div className="flex-none max-[640px]:hidden">
+        <ThemeSelect />
+      </div>
     </header>
   );
 }
