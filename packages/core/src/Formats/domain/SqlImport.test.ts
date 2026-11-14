@@ -38,6 +38,20 @@ describe("readSql", () => {
     expect(groupOf("tag")).toBe(group);
   });
 
+  test("@intensity sets how strong the group's color is", () => {
+    const { diagram } = read(`
+      -- @group: A
+      -- @color: #2c5f8e
+      -- @intensity: 1.4
+      CREATE TABLE a (id int);
+
+      -- @group: B
+      -- @intensity: strong
+      CREATE TABLE b (id int);
+    `);
+    expect(diagram.groups.map((g) => g.intensity)).toEqual([1.4, undefined]);
+  });
+
   test("without group comments there are no groups", () => {
     const { diagram } = read("-- just a comment\nCREATE TABLE t (id int);");
     expect(diagram.groups).toEqual([]);

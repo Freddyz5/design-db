@@ -104,7 +104,7 @@ export function diffDiagram(diagram: Diagram): DiagramChange[] | null {
     const group = (after ?? before)!;
     const fields =
       kind === "modified"
-        ? changedFields(before!, after!, ["name", "color", "note"])
+        ? changedFields(before!, after!, ["name", "color", "intensity", "note"])
         : [];
     if (kind !== "modified" || fields.length) {
       changes.push({

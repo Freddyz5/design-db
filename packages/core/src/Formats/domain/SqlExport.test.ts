@@ -168,4 +168,15 @@ CREATE TABLE posts (
   test("an empty diagram gives an empty string", () => {
     expect(toSql(createDiagram())).toBe("");
   });
+
+  test("writes the group's intensity when it is not the default", () => {
+    const doc = sampleDiagram();
+    doc.groups = doc.groups.map((g, i) => ({
+      ...g,
+      intensity: i === 0 ? 1.4 : 1,
+    }));
+    const sql = toSql(doc, "postgresql");
+    expect(sql).toContain("-- @color: #2c5f8e\n-- @intensity: 1.4\n");
+    expect(sql.match(/@intensity/g)).toHaveLength(1);
+  });
 });

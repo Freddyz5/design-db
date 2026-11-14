@@ -46,8 +46,15 @@ function replaceDiagram(current: Diagram, imported: Diagram): Diagram {
         const old = findByName(current.groups, g.name);
         const id = old?.id ?? g.id;
         groupIds.set(g.id, id);
+        // Formats that cannot say the color or its intensity keep the ones it had.
         const color = g.color ?? old?.color;
-        return { ...g, id, ...(color !== undefined ? { color } : {}) };
+        const intensity = g.intensity ?? old?.intensity;
+        return {
+          ...g,
+          id,
+          ...(color !== undefined ? { color } : {}),
+          ...(intensity !== undefined ? { intensity } : {}),
+        };
       });
 
   const enums: Enum[] = imported.enums.map((e) => {
