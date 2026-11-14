@@ -18,8 +18,8 @@ import {
  *
  * Groups come from comments, as `toSql` writes them: a table is in the
  * group of the last `-- @group: Name` above it, and `-- @group: -` leaves
- * the tables below without one. `-- @color` and `-- @note` belong to the
- * group above them.
+ * the tables below without one. `-- @color`, `-- @intensity` and `-- @note`
+ * belong to the group above them.
  */
 export function readSql(text: string): {
   draft?: SchemaDraft;
@@ -45,14 +45,14 @@ export function readSql(text: string): {
   return { draft, errors, warnings: reader.warnings };
 }
 
-/** A `-- @group`, `-- @color` or `-- @note` comment. */
+/** A `-- @group`, `-- @color`, `-- @intensity` or `-- @note` comment. */
 type Directive = {
-  kind: "group" | "color" | "note";
+  kind: "group" | "color" | "intensity" | "note";
   value: string;
   line: number;
 };
 
-const DIRECTIVE = /^(?:--|#)\s*@(group|color|note)\b\s*:?\s*(.*)$/i;
+const DIRECTIVE = /^(?:--|#)\s*@(group|color|intensity|note)\b\s*:?\s*(.*)$/i;
 
 /** The groups the comments describe, with the tables under each. */
 function groupsOf(
@@ -80,6 +80,15 @@ function groupsOf(
       const key = value.toLowerCase();
       current = byName.get(key) ?? { name: value, tables: [], line };
       byName.set(key, current);
+    } else if (kind === "intensity") {
+      const intensity = Number(value);
+      if (
+        current &&
+        value !== "" &&
+        Number.isFinite(intensity) &&
+        intensity > 0
+      )
+        current.intensity = intensity;
     } else if (current && value !== "") {
       current[kind] = value;
     }

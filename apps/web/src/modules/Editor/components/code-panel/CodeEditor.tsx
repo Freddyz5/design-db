@@ -136,6 +136,8 @@ export function CodeEditor({
         doc: value,
         extensions: [
           basicSetup,
+          // Long lines wrap: the panel is narrow and a cut line hides what matters at its end.
+          EditorView.lineWrapping,
           lintGutter(),
           codeTheme,
           markedLines,

@@ -123,6 +123,17 @@ describe("mergeDiagram replace", () => {
     const next = mergeDiagram(current, imported, "replace");
     expect(next.groups).toEqual([{ id: "g", name: "Content", color: "teal" }]);
     expect(byName(next, "tags").groupId).toBe("g");
+  });
+
+  test("an imported group without intensity keeps the one it had", () => {
+    const current: Diagram = {
+      ...blogDiagram(),
+      groups: [createGroup({ id: "g", name: "Content", intensity: 1.5 })],
+    };
+    const imported = edited();
+    imported.groups = [createGroup({ name: "Content" })];
+    const next = mergeDiagram(current, imported, "replace");
+    expect(next.groups[0]!.intensity).toBe(1.5);
     expect(byName(next, "posts").groupId).toBeUndefined();
   });
 

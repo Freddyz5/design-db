@@ -1,10 +1,10 @@
 import type { NodeProps } from "@xyflow/react";
 import { memo, useState } from "react";
-import { GROUP_COLOR_NAMES } from "../../constants/groupColors";
 import { editorStore } from "../../hooks/useEditorStore";
 import type { GroupNode } from "../../utils/canvasElements";
-import { GROUP_COLOR_KEYS, groupColor } from "../../utils/groupColor";
+import { zoneColors } from "../../utils/groupColor";
 import { groupStep } from "../../utils/groupStep";
+import { GroupColorPicker } from "./GroupColorPicker";
 
 const ACTION =
   "h-6 cursor-pointer rounded-[2px] border border-line bg-raised px-2 text-[11.5px] hover:border-ink-muted";
@@ -23,6 +23,7 @@ export const GroupNodeView = memo(function GroupNodeView({
   const { group, color } = data;
   const [draft, setDraft] = useState<string | null>(null);
   const step = groupStep(group.name);
+  const zone = zoneColors(color, group.intensity);
 
   const rename = () => {
     const name = draft?.trim();
@@ -47,8 +48,8 @@ export const GroupNodeView = memo(function GroupNodeView({
       className="size-full rounded-[2px] border-[1.5px] border-dashed"
       style={{
         // A dashed outline in its color, as a zone on a plan; faint enough to keep the grid.
-        borderColor: `color-mix(in srgb, ${color} 75%, transparent)`,
-        backgroundColor: `color-mix(in srgb, ${color} 5%, transparent)`,
+        borderColor: zone.border,
+        backgroundColor: zone.fill,
       }}
     >
       <div className="group-handle group/label pointer-events-auto relative flex cursor-grab items-start gap-3 px-4 pt-3 pb-1 active:cursor-grabbing">
@@ -99,31 +100,8 @@ export const GroupNodeView = memo(function GroupNodeView({
           )}
         </div>
         {/* The actions sit just above the region, so they never cover its name. */}
-        <div className="nodrag absolute right-0 bottom-full flex cursor-default items-center gap-1 pb-1 whitespace-nowrap opacity-0 transition-opacity duration-100 group-hover/label:opacity-100 focus-within:opacity-100">
-          <div
-            className="mr-1 flex gap-0.5"
-            role="group"
-            aria-label="Color del grupo"
-          >
-            {GROUP_COLOR_KEYS.map((key) => (
-              <button
-                key={key}
-                type="button"
-                className="size-4 cursor-pointer rounded-[2px] border border-sheet-edge aria-pressed:outline-2 aria-pressed:outline-offset-1 aria-pressed:outline-ink"
-                style={{ backgroundColor: groupColor(key) }}
-                aria-label={`Color ${GROUP_COLOR_NAMES[key]}`}
-                title={`Color ${GROUP_COLOR_NAMES[key]}`}
-                aria-pressed={group.color === key}
-                onClick={() =>
-                  editorStore.getState().dispatch({
-                    type: "group.update",
-                    groupId: group.id,
-                    patch: { color: key },
-                  })
-                }
-              />
-            ))}
-          </div>
+        <div className="nodrag absolute right-0 bottom-full flex cursor-default items-center gap-1 pb-1 whitespace-nowrap opacity-0 transition-opacity duration-100 group-hover/label:opacity-100 focus-within:opacity-100 has-[[aria-expanded=true]]:opacity-100">
+          <GroupColorPicker group={group} className={ACTION} />
           <button
             type="button"
             className={ACTION}

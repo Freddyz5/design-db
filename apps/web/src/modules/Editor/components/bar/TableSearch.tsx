@@ -104,7 +104,7 @@ export function TableSearch() {
         title="Buscar tabla (/)"
         autoComplete="off"
         spellCheck={false}
-        className="h-[30px] w-40 rounded-control border border-bar-line bg-bar-well pr-2 pl-7 text-[13px] text-bar-ink placeholder:text-bar-muted max-[1599px]:w-32 max-[1439px]:w-28 [&::-webkit-search-cancel-button]:appearance-none"
+        className="h-[30px] w-44 rounded-control border border-bar-line bg-bar-well pr-2 pl-7 text-[13px] text-bar-ink placeholder:text-bar-muted max-[1279px]:w-32 [&::-webkit-search-cancel-button]:appearance-none"
         value={query}
         onChange={(event) => {
           setQuery(event.target.value);

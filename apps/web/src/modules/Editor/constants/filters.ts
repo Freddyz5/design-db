@@ -32,3 +32,18 @@ export const RELATIONS_FILTERS: readonly {
     title: "Solo las relaciones de las tablas seleccionadas",
   },
 ];
+
+/** The themes, as the «Vista» panel offers them on a narrow screen. */
+export const THEME_OPTIONS: readonly {
+  value: "light" | "dark" | "system";
+  label: string;
+  title: string;
+}[] = [
+  { value: "light", label: "Claro", title: "Tinta sobre papel" },
+  {
+    value: "dark",
+    label: "Oscuro",
+    title: "La misma tinta sobre una hoja oscura",
+  },
+  { value: "system", label: "Del sistema", title: "Como lo tenga el sistema" },
+];

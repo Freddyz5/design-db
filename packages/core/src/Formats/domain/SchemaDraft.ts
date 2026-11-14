@@ -67,6 +67,7 @@ export type DraftGroup = {
   name: string;
   tables: string[];
   color?: string;
+  intensity?: number;
   note?: string;
   line: number;
 };
@@ -118,6 +119,7 @@ export function buildDiagram(draft: SchemaDraft): {
     const group = createGroup({
       name: item.name,
       ...(item.color ? { color: item.color } : {}),
+      ...(item.intensity !== undefined ? { intensity: item.intensity } : {}),
       ...(item.note ? { note: item.note } : {}),
     });
     groups.push(group);

@@ -16,7 +16,8 @@ import type { Table } from "../../Tables";
  * | foreign keys | ALTER TABLE | ALTER TABLE | inside the table | ALTER TABLE |
  *
  * Groups are written as comments before their tables, which go group by
- * group: `-- @group: Name`, then `-- @color` and `-- @note` if it has them.
+ * group: `-- @group: Name`, then `-- @color`, `-- @intensity` and `-- @note`
+ * if it has them.
  * The tables without a group go last, after `-- @group: -`. `readSql`
  * reads them back.
  *
@@ -62,6 +63,9 @@ function groupedTables(diagram: Diagram, sql: SqlWriter): string[] {
       ? [
           `-- @group: ${oneLine(group.name)}`,
           ...(group.color ? [`-- @color: ${oneLine(group.color)}`] : []),
+          ...(group.intensity !== undefined && group.intensity !== 1
+            ? [`-- @intensity: ${group.intensity}`]
+            : []),
           ...(group.note ? [`-- @note: ${oneLine(group.note)}`] : []),
         ]
       : ["-- @group: -"];
